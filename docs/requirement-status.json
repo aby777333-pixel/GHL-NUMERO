@@ -1,0 +1,2168 @@
+{
+ "1": {
+  "status": "IMPLEMENTED",
+  "evidence": "org_unit_types, org_units, RLS · Genesis › Structure",
+  "notes": "Hierarchy levels are data; new levels need no code.",
+  "phase": 1
+ },
+ "2": {
+  "status": "PARTIAL",
+  "evidence": "Companies, Team, PeriodClose, Genesis",
+  "notes": "Built: create/archive/clone companies, units, access grants, period lock/reopen, approve/reject, consolidated view, drill-down. Not built: custom-role editor, impersonation, integration/AI/export controls.",
+  "phase": 1
+ },
+ "3": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Companies.tsx wizard · create_company",
+  "notes": "Recommendation is labelled; nothing is created before confirmation.",
+  "phase": 1
+ },
+ "4": {
+  "status": "PARTIAL",
+  "evidence": "custom_field_defs · Genesis › Custom fields",
+  "notes": "27 field types can be defined and versioned. Not built: rendering in transaction forms, drag-and-drop form builder, conditional rules.",
+  "phase": 1
+ },
+ "6": {
+  "status": "PARTIAL",
+  "evidence": "tests/sql/engine_invariants.sql · tests/engine.test.ts",
+  "notes": "Built and tested: double entry, journals, contra, receipts, payments, purchases, sales, notes, cash/bank book, day book, TB, P&L, BS, cash flow, control accounts, advances, loans, intercompany, suspense. Not built: fund flow, automated depreciation/accrual/prepayment schedules.",
+  "phase": 1
+ },
+ "7": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts › learned preferences · src/engine/templates.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "8": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Entry.tsx",
+  "notes": "19 transaction types plus free-text entry.",
+  "phase": 1
+ },
+ "9": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/Banking.tsx · import_bank_transactions, suggest_bank_matches",
+  "notes": "Built: CSV import with validation preview, matching on amount/date/reference, six statuses. Not built: bank feed APIs, Excel import, party/historical-pattern matching.",
+  "phase": 1
+ },
+ "10": {
+  "status": "PARTIAL",
+  "evidence": "cash ledgers, cash book report",
+  "notes": "Not built: physical cash count, daily cash reconciliation, employee advance register.",
+  "phase": 1
+ },
+ "11": {
+  "status": "PARTIAL",
+  "evidence": "Documents, DocumentEditor, Owed, ReportView › Ageing",
+  "notes": "Built: customer master, invoices, partial payments, credit terms, ageing, overdue. Not built: recurring invoices, payment schedules, reminders, promise-to-pay.",
+  "phase": 1
+ },
+ "12": {
+  "status": "PARTIAL",
+  "evidence": "Documents, DocumentEditor, Payments",
+  "notes": "Built: bills, terms, partial payments, advances, duplicate-bill detection. Not built: purchase orders, goods receipt, three-way match, price-change detection.",
+  "phase": 1
+ },
+ "13": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/Entry.tsx",
+  "notes": "Built: guided expense entry with approval. Not built: employee submission, receipt photo, OCR, email ingestion.",
+  "phase": 1
+ },
+ "15": {
+  "status": "PARTIAL",
+  "evidence": "Documents, DocumentEditor",
+  "notes": "Built: invoice → receipt, credit notes. Not built: quotation, proforma, sales order, recurring/milestone billing.",
+  "phase": 1
+ },
+ "16": {
+  "status": "PARTIAL",
+  "evidence": "tax_codes, tax_code_components · Genesis › Tax codes · ReportView › Registers",
+  "notes": "Built: CGST/SGST/IGST codes with effective dates, HSN/SAC, sales and purchase registers. Not built: TDS/TCS, reverse charge, ITC reconciliation, return workflows.",
+  "phase": 1
+ },
+ "17": {
+  "status": "PARTIAL",
+  "evidence": "tests/engine.test.ts · approve_payment",
+  "notes": "Built: transaction currency, rate, base value, exchange difference on settlement. Not built: period-end revaluation, rate providers.",
+  "phase": 1
+ },
+ "18": {
+  "status": "PARTIAL",
+  "evidence": "intercompany ledgers · ReportView › Consolidation",
+  "notes": "Built: due-to/due-from ledgers, mismatch detection, balance elimination. Not built: automatic mirror entry in the other company, shared-cost allocation.",
+  "phase": 1
+ },
+ "19": {
+  "status": "PARTIAL",
+  "evidence": "ReportView › Consolidation",
+  "notes": "Not built: ownership %, non-controlling interests, currency translation, elimination of intercompany income/expense.",
+  "phase": 1
+ },
+ "20": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/Budgets.tsx",
+  "notes": "Built: budget by company, account and month; variance; versions. Not built: rolling forecast, budgets by branch/project in the editor.",
+  "phase": 1
+ },
+ "21": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/Forward.tsx",
+  "notes": "Built: expected receipts and payments from recorded documents over six horizons. Not built: payroll, EMI, tax, contract and statistical forecasts.",
+  "phase": 1
+ },
+ "35": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/numi/engine.ts · verified in browser",
+  "notes": "All 14 example questions are answered from recorded data. Deterministic engine; no external model.",
+  "phase": 1
+ },
+ "36": {
+  "status": "PARTIAL",
+  "evidence": "src/engine/nlp.ts · Sentinel",
+  "notes": "Built: classification, ledger and journal suggestions, duplicate and anomaly detection, variance explanation. Not built: invoice/receipt extraction, forecasting, missing-document detection.",
+  "phase": 1
+ },
+ "37": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts · Genesis › Learned rules",
+  "notes": "",
+  "phase": 1
+ },
+ "38": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts › language understanding",
+  "notes": "",
+  "phase": 1
+ },
+ "39": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/voice · tests/commands.test.ts",
+  "notes": "Command interpretation is tested. Microphone capture could not be exercised in the build environment: verify in Chrome or Edge.",
+  "phase": 1
+ },
+ "40": {
+  "status": "PARTIAL",
+  "evidence": "run_sentinel · src/pages/Sentinel.tsx",
+  "notes": "8 rules, run on demand. Not built: continuous evaluation, expense-spike, revenue-decline and unusual-vendor rules.",
+  "phase": 1
+ },
+ "41": {
+  "status": "PARTIAL",
+  "evidence": "tests/sql/engine_invariants.sql T03 T22 T10",
+  "notes": "Built: maker-checker, bank-change verification, backdating alert, immutable history, audit export. Not built: multi-approval rules for payments.",
+  "phase": 1
+ },
+ "42": {
+  "status": "PARTIAL",
+  "evidence": "approval_rules · Approvals",
+  "notes": "Built: multi-step rules by company and amount. Not built: visual builder; rules on account, department, vendor, risk score.",
+  "phase": 1
+ },
+ "43": {
+  "status": "PARTIAL",
+  "evidence": "tests/sql/engine_invariants.sql T11-T13",
+  "notes": "Built: group, company and module level. Not built: branch, department, account and field level.",
+  "phase": 1
+ },
+ "44": {
+  "status": "PARTIAL",
+  "evidence": "auditor role",
+  "notes": "Read-only access exists. Not built: sampling tools, query mechanism.",
+  "phase": 1
+ },
+ "45": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T10d",
+  "notes": "Device and session metadata are not recorded.",
+  "phase": 1
+ },
+ "46": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Home.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "47": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/MoneyMap.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "49": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/Forward.tsx",
+  "notes": "Shows invoice and bill due dates only.",
+  "phase": 1
+ },
+ "51": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/ReportView.tsx",
+  "notes": "17 of 23 listed reports. Not built: asset register, inventory valuation, project profitability, cost-centre report, tax returns, fund flow.",
+  "phase": 1
+ },
+ "53": {
+  "status": "IMPLEMENTED",
+  "evidence": "ReportView › Financial Health",
+  "notes": "Company-specific metric definitions are not built.",
+  "phase": 1
+ },
+ "55": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T14 · src/pages/PeriodClose.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "56": {
+  "status": "PARTIAL",
+  "evidence": "suspense ledger · PeriodClose checklist",
+  "notes": "No dedicated suspense dashboard yet.",
+  "phase": 1
+ },
+ "57": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/Owed.tsx · Party360",
+  "notes": "Documents and advances per party. Deposits register not built.",
+  "phase": 1
+ },
+ "58": {
+  "status": "PARTIAL",
+  "evidence": "Banking › Import",
+  "notes": "Bank statement CSV only.",
+  "phase": 1
+ },
+ "62": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/ui/CommandPalette.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "63": {
+  "status": "TESTED",
+  "evidence": "tests/commands.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "65": {
+  "status": "PARTIAL",
+  "evidence": "Row Level Security, roles, numero_private schema",
+  "notes": "Not configured: MFA, passkeys, IP restriction, rate limiting, backup testing.",
+  "phase": 1
+ },
+ "66": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T03 T19a · tests/sql/document_posting.sql T25",
+  "notes": "",
+  "phase": 1
+ },
+ "67": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T10 T15 · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "68": {
+  "status": "IMPLEMENTED",
+  "evidence": "supabase/migrations",
+  "notes": "",
+  "phase": 1
+ },
+ "69": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T16d T17b",
+  "notes": "",
+  "phase": 1
+ },
+ "70": {
+  "status": "IMPLEMENTED",
+  "evidence": "Explain this · JournalDetail › why engine",
+  "notes": "",
+  "phase": 1
+ },
+ "72": {
+  "status": "PARTIAL",
+  "evidence": "JournalEditor validation · PeriodClose",
+  "notes": "No data-quality dashboard yet.",
+  "phase": 1
+ },
+ "73": {
+  "status": "IMPLEMENTED",
+  "evidence": "ledgerLink drill-down on every report line",
+  "notes": "",
+  "phase": 1
+ },
+ "74": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/styles/index.css · src/ui",
+  "notes": "",
+  "phase": 1
+ },
+ "75": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Cockpit.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "76": {
+  "status": "PARTIAL",
+  "evidence": "DataTable dense mode, shortcuts, filters",
+  "notes": "Not built: bulk actions, saved views, split-screen documents, spreadsheet-style entry.",
+  "phase": 1
+ },
+ "77": {
+  "status": "IMPLEMENTED",
+  "evidence": "privacy mode · verified in browser: 56 of 56 figures masked",
+  "notes": "",
+  "phase": 1
+ },
+ "78": {
+  "status": "PARTIAL",
+  "evidence": "currency and number formats, voice languages",
+  "notes": "Interface text is English only.",
+  "phase": 1
+ },
+ "80": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T11c T11d T19b",
+  "notes": "",
+  "phase": 1
+ },
+ "81": {
+  "status": "IMPLEMENTED",
+  "evidence": "Entry › suggestion reasons",
+  "notes": "",
+  "phase": 1
+ },
+ "82": {
+  "status": "TESTED",
+  "evidence": "tests/commands.test.ts › sensitive commands",
+  "notes": "",
+  "phase": 1
+ },
+ "83": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts › templates",
+  "notes": "12 templates.",
+  "phase": 1
+ },
+ "86": {
+  "status": "PARTIAL",
+  "evidence": "src/numi/engine.ts",
+  "notes": "Decision support from recorded figures only.",
+  "phase": 1
+ },
+ "87": {
+  "status": "IMPLEMENTED",
+  "evidence": "Shell › Ask NUMI · contextualPrompts",
+  "notes": "",
+  "phase": 1
+ },
+ "88": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T21 · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "90": {
+  "status": "IMPLEMENTED",
+  "evidence": "Truth chip on every figure class",
+  "notes": "",
+  "phase": 1
+ },
+ "91": {
+  "status": "IMPLEMENTED",
+  "evidence": "decimal.js, numeric(20,4), FOR UPDATE, idempotency keys",
+  "notes": "",
+  "phase": 1
+ },
+ "92": {
+  "status": "PARTIAL",
+  "evidence": "docs/NUMERO_TEST_MATRIX.md",
+  "notes": "Not covered: depreciation, currency translation.",
+  "phase": 1
+ },
+ "93": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Home.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "95": {
+  "status": "IMPLEMENTED",
+  "evidence": "party_types · Parties",
+  "notes": "27 system types; custom types without code.",
+  "phase": 1
+ },
+ "96": {
+  "status": "IMPLEMENTED",
+  "evidence": "party_roles",
+  "notes": "",
+  "phase": 1
+ },
+ "97": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T16a",
+  "notes": "",
+  "phase": 1
+ },
+ "98": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/Party360.tsx",
+  "notes": "Not built: contracts, projects, tasks, communication.",
+  "phase": 1
+ },
+ "106": {
+  "status": "PARTIAL",
+  "evidence": "Parties",
+  "notes": "Not built: contracts, pricing, certifications per vendor.",
+  "phase": 1
+ },
+ "107": {
+  "status": "PARTIAL",
+  "evidence": "Party360",
+  "notes": "Not built: open POs, disputes, price history.",
+  "phase": 1
+ },
+ "109": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T22 T23 · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "120": {
+  "status": "PARTIAL",
+  "evidence": "Party360",
+  "notes": "Not built: orders, projects, contracts.",
+  "phase": 1
+ },
+ "126": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/MoneyMap.tsx",
+  "notes": "Group-wide flows. Selecting a single party as the centre is not built.",
+  "phase": 1
+ },
+ "127": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/Owed.tsx",
+  "notes": "Built from supplier bills. Employees, government and refunds are not included.",
+  "phase": 1
+ },
+ "128": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/Owed.tsx",
+  "notes": "Built from customer invoices.",
+  "phase": 1
+ },
+ "129": {
+  "status": "PARTIAL",
+  "evidence": "advance ledgers · Payments",
+  "notes": "No advances command centre yet.",
+  "phase": 1
+ },
+ "138": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T16b · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "139": {
+  "status": "PARTIAL",
+  "evidence": "Sentinel duplicate invoice",
+  "notes": "Shared bank account and shared tax identifier checks not built.",
+  "phase": 1
+ },
+ "156": {
+  "status": "IMPLEMENTED",
+  "evidence": "Genesis › Party types",
+  "notes": "",
+  "phase": 1
+ },
+ "158": {
+  "status": "PARTIAL",
+  "evidence": "custom_field_defs scope_key",
+  "notes": "Definitions only.",
+  "phase": 1
+ },
+ "162": {
+  "status": "IMPLEMENTED",
+  "evidence": "journal_line_dims + party on every line · migration 0005",
+  "notes": "",
+  "phase": 1
+ },
+ "163": {
+  "status": "IMPLEMENTED",
+  "evidence": "JournalDetail › why engine",
+  "notes": "",
+  "phase": 1
+ },
+ "164": {
+  "status": "IMPLEMENTED",
+  "evidence": "Party360 tiles",
+  "notes": "Each figure kept separate.",
+  "phase": 1
+ },
+ "165": {
+  "status": "PARTIAL",
+  "evidence": "Forward › concentration",
+  "notes": "Receivables and payables only.",
+  "phase": 1
+ },
+ "166": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "167": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "One block covers all new documents and payments; per-activity blocks not built.",
+  "phase": 1
+ },
+ "169": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Parties.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "171": {
+  "status": "PARTIAL",
+  "evidence": "JournalDetail › responsibility chain",
+  "notes": "Created, submitted, approved, posted. Requested-by and received-by not recorded.",
+  "phase": 1
+ },
+ "172": {
+  "status": "IMPLEMENTED",
+  "evidence": "parties RLS through party_roles",
+  "notes": "",
+  "phase": 1
+ },
+ "175": {
+  "status": "PARTIAL",
+  "evidence": "Party360 note",
+  "notes": "Both balances shown separately. Netting workflow not built.",
+  "phase": 1
+ },
+ "176": {
+  "status": "IMPLEMENTED",
+  "evidence": "Party360 › Download statement",
+  "notes": "CSV.",
+  "phase": 1
+ },
+ "178": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts › which Rajesh",
+  "notes": "",
+  "phase": 1
+ },
+ "179": {
+  "status": "IMPLEMENTED",
+  "evidence": "CommandPalette",
+  "notes": "",
+  "phase": 1
+ },
+ "240": {
+  "status": "PARTIAL",
+  "evidence": "Entry › Deposit paid",
+  "notes": "No deposit register.",
+  "phase": 1
+ },
+ "258": {
+  "status": "PARTIAL",
+  "evidence": "multi-line journals with tags",
+  "notes": "No percentage-split helper.",
+  "phase": 1
+ },
+ "272": {
+  "status": "IMPLEMENTED",
+  "evidence": "ReportView › money-went",
+  "notes": "",
+  "phase": 1
+ },
+ "273": {
+  "status": "IMPLEMENTED",
+  "evidence": "ReportView › money-came",
+  "notes": "",
+  "phase": 1
+ },
+ "274": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/Entry.tsx",
+  "notes": "No receipt upload.",
+  "phase": 1
+ },
+ "275": {
+  "status": "PARTIAL",
+  "evidence": "JournalDetail",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "288": {
+  "status": "PARTIAL",
+  "evidence": "Accounts",
+  "notes": "Accounting mapping per category not built.",
+  "phase": 1
+ },
+ "325": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Vault.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "326": {
+  "status": "PARTIAL",
+  "evidence": "vault_grants",
+  "notes": "Grants table and enforcement exist. No screen to issue grants yet.",
+  "phase": 1
+ },
+ "327": {
+  "status": "IMPLEMENTED",
+  "evidence": "five confidentiality levels",
+  "notes": "",
+  "phase": 1
+ },
+ "329": {
+  "status": "PARTIAL",
+  "evidence": "vault_access_log",
+  "notes": "Logged in the live database. The demo engine does not log access.",
+  "phase": 1
+ },
+ "330": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T19b · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "331": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T19b · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "333": {
+  "status": "PARTIAL",
+  "evidence": "org_units.confidentiality",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "347": {
+  "status": "PARTIAL",
+  "evidence": "Budgets",
+  "notes": "By account. Department budgets need the dimension editor.",
+  "phase": 1
+ },
+ "348": {
+  "status": "PARTIAL",
+  "evidence": "Budgets › overrun alerts",
+  "notes": "Actual only; committed spending not tracked.",
+  "phase": 1
+ },
+ "349": {
+  "status": "PARTIAL",
+  "evidence": "budgets.limit_mode",
+  "notes": "Stored and shown. Hard limits are not enforced on posting.",
+  "phase": 1
+ },
+ "350": {
+  "status": "PARTIAL",
+  "evidence": "Vault",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "352": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T19b",
+  "notes": "",
+  "phase": 1
+ },
+ "353": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T11 T19",
+  "notes": "",
+  "phase": 1
+ },
+ "356": {
+  "status": "PARTIAL",
+  "evidence": "memberships valid_from / valid_to",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "358": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T19b",
+  "notes": "",
+  "phase": 1
+ },
+ "359": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T10",
+  "notes": "",
+  "phase": 1
+ },
+ "360": {
+  "status": "IMPLEMENTED",
+  "evidence": "architecture",
+  "notes": "",
+  "phase": 1
+ },
+ "362": {
+  "status": "PARTIAL",
+  "evidence": "Entry › I don't know what this is",
+  "notes": "Parks the item in suspense. AI suggestions for it not built.",
+  "phase": 1
+ },
+ "366": {
+  "status": "IMPLEMENTED",
+  "evidence": "Home › Cost DNA",
+  "notes": "",
+  "phase": 1
+ },
+ "369": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "370": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Accounts.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "371": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "372": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Ledger.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "373": {
+  "status": "PARTIAL",
+  "evidence": "tests/engine.test.ts",
+  "notes": "Party subledger only.",
+  "phase": 1
+ },
+ "374": {
+  "status": "IMPLEMENTED",
+  "evidence": "21 voucher types",
+  "notes": "",
+  "phase": 1
+ },
+ "375": {
+  "status": "IMPLEMENTED",
+  "evidence": "voucher_types, voucher_sequences",
+  "notes": "",
+  "phase": 1
+ },
+ "376": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T18 · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "377": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T07",
+  "notes": "",
+  "phase": 1
+ },
+ "378": {
+  "status": "IMPLEMENTED",
+  "evidence": "ReportView › P&L",
+  "notes": "",
+  "phase": 1
+ },
+ "379": {
+  "status": "PARTIAL",
+  "evidence": "ReportView › P&L",
+  "notes": "Previous period only. Budget and forecast comparison not built.",
+  "phase": 1
+ },
+ "380": {
+  "status": "IMPLEMENTED",
+  "evidence": "Statement drill-down",
+  "notes": "",
+  "phase": 1
+ },
+ "381": {
+  "status": "IMPLEMENTED",
+  "evidence": "ReportView › Balance Sheet",
+  "notes": "",
+  "phase": 1
+ },
+ "382": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "383": {
+  "status": "IMPLEMENTED",
+  "evidence": "Statement drill-down",
+  "notes": "",
+  "phase": 1
+ },
+ "384": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "Indirect method.",
+  "phase": 1
+ },
+ "385": {
+  "status": "PARTIAL",
+  "evidence": "ReportView › Cash book",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "388": {
+  "status": "PARTIAL",
+  "evidence": "reports.ts",
+  "notes": "Presented correctly. Closing entries are manual.",
+  "phase": 1
+ },
+ "389": {
+  "status": "PARTIAL",
+  "evidence": "Banking",
+  "notes": "Bank only.",
+  "phase": 1
+ },
+ "390": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Banking.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "391": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "392": {
+  "status": "IMPLEMENTED",
+  "evidence": "Banking header",
+  "notes": "Always displayed.",
+  "phase": 1
+ },
+ "393": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "396": {
+  "status": "PARTIAL",
+  "evidence": "tests/engine.test.ts",
+  "notes": "Tested. No screen yet.",
+  "phase": 1
+ },
+ "397": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/PeriodClose.tsx",
+  "notes": "12 computed checks of 17 listed.",
+  "phase": 1
+ },
+ "398": {
+  "status": "IMPLEMENTED",
+  "evidence": "PeriodClose gauge",
+  "notes": "",
+  "phase": 1
+ },
+ "399": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T14",
+  "notes": "",
+  "phase": 1
+ },
+ "401": {
+  "status": "IMPLEMENTED",
+  "evidence": "PROVISIONAL label",
+  "notes": "",
+  "phase": 1
+ },
+ "402": {
+  "status": "IMPLEMENTED",
+  "evidence": "FINAL label",
+  "notes": "",
+  "phase": 1
+ },
+ "407": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Audit.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "412": {
+  "status": "IMPLEMENTED",
+  "evidence": "Team › Segregation of duties",
+  "notes": "",
+  "phase": 1
+ },
+ "413": {
+  "status": "PARTIAL",
+  "evidence": "Sentinel",
+  "notes": "Year-end rule not built.",
+  "phase": 1
+ },
+ "420": {
+  "status": "PARTIAL",
+  "evidence": "Forward › shortfall warning",
+  "notes": "From recorded documents only.",
+  "phase": 1
+ },
+ "422": {
+  "status": "PARTIAL",
+  "evidence": "Forward",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "431": {
+  "status": "IMPLEMENTED",
+  "evidence": "ReportView › ratios",
+  "notes": "",
+  "phase": 1
+ },
+ "432": {
+  "status": "IMPLEMENTED",
+  "evidence": "ReportView › ratios",
+  "notes": "Formula and inputs always shown.",
+  "phase": 1
+ },
+ "436": {
+  "status": "IMPLEMENTED",
+  "evidence": "Home › Simple",
+  "notes": "",
+  "phase": 1
+ },
+ "437": {
+  "status": "IMPLEMENTED",
+  "evidence": "NUMI balance sheet",
+  "notes": "",
+  "phase": 1
+ },
+ "438": {
+  "status": "PARTIAL",
+  "evidence": "NUMI compare",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "439": {
+  "status": "PARTIAL",
+  "evidence": "NUMI budget",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "441": {
+  "status": "PARTIAL",
+  "evidence": "Budgets",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "442": {
+  "status": "IMPLEMENTED",
+  "evidence": "Budgets › start from zero",
+  "notes": "",
+  "phase": 1
+ },
+ "443": {
+  "status": "IMPLEMENTED",
+  "evidence": "guard_budget · Budgets",
+  "notes": "",
+  "phase": 1
+ },
+ "444": {
+  "status": "PARTIAL",
+  "evidence": "Budgets",
+  "notes": "Committed and forecast columns not built.",
+  "phase": 1
+ },
+ "445": {
+  "status": "PARTIAL",
+  "evidence": "budgets.kind",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "457": {
+  "status": "PARTIAL",
+  "evidence": "approve_payment",
+  "notes": "Settlement difference only.",
+  "phase": 1
+ },
+ "460": {
+  "status": "PARTIAL",
+  "evidence": "ReportView › Ageing",
+  "notes": "Buckets are fixed.",
+  "phase": 1
+ },
+ "466": {
+  "status": "PARTIAL",
+  "evidence": "ReportView › Consolidation",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "467": {
+  "status": "PARTIAL",
+  "evidence": "reports.ts intercompanyEliminations",
+  "notes": "Balances only.",
+  "phase": 1
+ },
+ "477": {
+  "status": "IMPLEMENTED",
+  "evidence": "common-size toggle",
+  "notes": "",
+  "phase": 1
+ },
+ "480": {
+  "status": "PARTIAL",
+  "evidence": "ratios › runway",
+  "notes": "Run-rate based.",
+  "phase": 1
+ },
+ "491": {
+  "status": "PARTIAL",
+  "evidence": "DataTable CSV · print",
+  "notes": "Excel and PDF files not built.",
+  "phase": 1
+ },
+ "497": {
+  "status": "IMPLEMENTED",
+  "evidence": "ReportView › ratios",
+  "notes": "",
+  "phase": 1
+ },
+ "498": {
+  "status": "PARTIAL",
+  "evidence": "NUMI",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "501": {
+  "status": "IMPLEMENTED",
+  "evidence": "Explain component",
+  "notes": "",
+  "phase": 1
+ },
+ "502": {
+  "status": "PARTIAL",
+  "evidence": "Home",
+  "notes": "Home screen only.",
+  "phase": 1
+ },
+ "503": {
+  "status": "PARTIAL",
+  "evidence": "Home, Cockpit, NUMI integrity",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "504": {
+  "status": "IMPLEMENTED",
+  "evidence": "Home, Cockpit",
+  "notes": "",
+  "phase": 1
+ },
+ "505": {
+  "status": "PARTIAL",
+  "evidence": "time machine",
+  "notes": "Comparing two dates side by side not built.",
+  "phase": 1
+ },
+ "510": {
+  "status": "IMPLEMENTED",
+  "evidence": "answer structure",
+  "notes": "",
+  "phase": 1
+ },
+ "511": {
+  "status": "IMPLEMENTED",
+  "evidence": "no posting path without human approval",
+  "notes": "",
+  "phase": 1
+ },
+ "512": {
+  "status": "PARTIAL",
+  "evidence": "drill-down",
+  "notes": "Bank-event link exists only through reconciliation.",
+  "phase": 1
+ },
+ "540": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T22 · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "542": {
+  "status": "IMPLEMENTED",
+  "evidence": "no code path",
+  "notes": "",
+  "phase": 1
+ },
+ "589": {
+  "status": "IMPLEMENTED",
+  "evidence": "memberships validity",
+  "notes": "",
+  "phase": 1
+ },
+ "595": {
+  "status": "PARTIAL",
+  "evidence": "privacy mode, masked account numbers",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "609": {
+  "status": "IMPLEMENTED",
+  "evidence": "CommandPalette",
+  "notes": "",
+  "phase": 1
+ },
+ "624": {
+  "status": "PARTIAL",
+  "evidence": "Forward",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "625": {
+  "status": "PARTIAL",
+  "evidence": "Forward",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "627": {
+  "status": "IMPLEMENTED",
+  "evidence": "CommandPalette",
+  "notes": "",
+  "phase": 1
+ },
+ "632": {
+  "status": "IMPLEMENTED",
+  "evidence": "journals.origin",
+  "notes": "",
+  "phase": 1
+ },
+ "633": {
+  "status": "PARTIAL",
+  "evidence": "tax codes, budgets, custom fields",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "653": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "654": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "655": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ },
+ "656": {
+  "status": "IMPLEMENTED",
+  "evidence": "Truth chips",
+  "notes": "",
+  "phase": 1
+ },
+ "657": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ },
+ "658": {
+  "status": "TESTED",
+  "evidence": "tests/commands.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "659": {
+  "status": "IMPLEMENTED",
+  "evidence": "engine first",
+  "notes": "",
+  "phase": 1
+ },
+ "664": {
+  "status": "PARTIAL",
+  "evidence": "src/pages/Forward.tsx",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "703": {
+  "status": "IMPLEMENTED",
+  "evidence": "Forward › waterfall",
+  "notes": "",
+  "phase": 1
+ },
+ "708": {
+  "status": "IMPLEMENTED",
+  "evidence": "Forward › shortfall warning",
+  "notes": "From recorded documents.",
+  "phase": 1
+ },
+ "716": {
+  "status": "PARTIAL",
+  "evidence": "Forward",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "717": {
+  "status": "PARTIAL",
+  "evidence": "Forward",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "721": {
+  "status": "PARTIAL",
+  "evidence": "Forward",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "724": {
+  "status": "PARTIAL",
+  "evidence": "Sentinel",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "726": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "727": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "730": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T20 · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "731": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "732": {
+  "status": "IMPLEMENTED",
+  "evidence": "run_sentinel",
+  "notes": "",
+  "phase": 1
+ },
+ "733": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "734": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T23 · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "750": {
+  "status": "IMPLEMENTED",
+  "evidence": "run_sentinel",
+  "notes": "",
+  "phase": 1
+ },
+ "751": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T14a",
+  "notes": "",
+  "phase": 1
+ },
+ "770": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T03",
+  "notes": "",
+  "phase": 1
+ },
+ "774": {
+  "status": "IMPLEMENTED",
+  "evidence": "run_sentinel",
+  "notes": "",
+  "phase": 1
+ },
+ "777": {
+  "status": "IMPLEMENTED",
+  "evidence": "alerts.attention",
+  "notes": "",
+  "phase": 1
+ },
+ "778": {
+  "status": "PARTIAL",
+  "evidence": "review statuses",
+  "notes": "No investigation workspace.",
+  "phase": 1
+ },
+ "795": {
+  "status": "IMPLEMENTED",
+  "evidence": "alerts never block posting",
+  "notes": "",
+  "phase": 1
+ },
+ "801": {
+  "status": "IMPLEMENTED",
+  "evidence": "Sentinel drawer",
+  "notes": "",
+  "phase": 1
+ },
+ "803": {
+  "status": "PARTIAL",
+  "evidence": "Genesis › Controls",
+  "notes": "Thresholds only.",
+  "phase": 1
+ },
+ "805": {
+  "status": "IMPLEMENTED",
+  "evidence": "false_positive status",
+  "notes": "",
+  "phase": 1
+ },
+ "821": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "829": {
+  "status": "IMPLEMENTED",
+  "evidence": "CommandPalette",
+  "notes": "",
+  "phase": 1
+ },
+ "830": {
+  "status": "PARTIAL",
+  "evidence": "src/numi/engine.ts",
+  "notes": "16 intents.",
+  "phase": 1
+ },
+ "831": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "835": {
+  "status": "IMPLEMENTED",
+  "evidence": "NUMI",
+  "notes": "",
+  "phase": 1
+ },
+ "836": {
+  "status": "IMPLEMENTED",
+  "evidence": "NUMI",
+  "notes": "",
+  "phase": 1
+ },
+ "855": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T20 · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "903": {
+  "status": "IMPLEMENTED",
+  "evidence": "numi_learn",
+  "notes": "",
+  "phase": 1
+ },
+ "907": {
+  "status": "IMPLEMENTED",
+  "evidence": "Genesis › Learned rules",
+  "notes": "",
+  "phase": 1
+ },
+ "913": {
+  "status": "IMPLEMENTED",
+  "evidence": "evidence links",
+  "notes": "",
+  "phase": 1
+ },
+ "915": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "916": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T11",
+  "notes": "",
+  "phase": 1
+ },
+ "917": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T19",
+  "notes": "",
+  "phase": 1
+ },
+ "920": {
+  "status": "IMPLEMENTED",
+  "evidence": "Entry › proposed double entry",
+  "notes": "",
+  "phase": 1
+ },
+ "921": {
+  "status": "IMPLEMENTED",
+  "evidence": "no code path",
+  "notes": "",
+  "phase": 1
+ },
+ "923": {
+  "status": "PARTIAL",
+  "evidence": "tests/commands.test.ts",
+  "notes": "No document ingestion exists yet, so nothing is read from documents.",
+  "phase": 1
+ },
+ "938": {
+  "status": "IMPLEMENTED",
+  "evidence": "NUMI calculate",
+  "notes": "",
+  "phase": 1
+ },
+ "942": {
+  "status": "IMPLEMENTED",
+  "evidence": "VoiceOrb",
+  "notes": "",
+  "phase": 1
+ },
+ "944": {
+  "status": "PARTIAL",
+  "evidence": "voice languages",
+  "notes": "Recognition language can be chosen; commands are understood in English.",
+  "phase": 1
+ },
+ "956": {
+  "status": "IMPLEMENTED",
+  "evidence": "honest fallback",
+  "notes": "",
+  "phase": 1
+ },
+ "958": {
+  "status": "IMPLEMENTED",
+  "evidence": "architecture",
+  "notes": "",
+  "phase": 1
+ },
+ "959": {
+  "status": "IMPLEMENTED",
+  "evidence": "architecture",
+  "notes": "",
+  "phase": 1
+ },
+ "991": {
+  "status": "IMPLEMENTED",
+  "evidence": "NumiAnswer",
+  "notes": "",
+  "phase": 1
+ },
+ "992": {
+  "status": "IMPLEMENTED",
+  "evidence": "Shell",
+  "notes": "",
+  "phase": 1
+ },
+ "1081": {
+  "status": "IMPLEMENTED",
+  "evidence": "basis chip",
+  "notes": "",
+  "phase": 1
+ },
+ "1134": {
+  "status": "IMPLEMENTED",
+  "evidence": "no write path",
+  "notes": "",
+  "phase": 1
+ },
+ "1163": {
+  "status": "IMPLEMENTED",
+  "evidence": "assumptions",
+  "notes": "",
+  "phase": 1
+ },
+ "1164": {
+  "status": "IMPLEMENTED",
+  "evidence": "scope line",
+  "notes": "",
+  "phase": 1
+ },
+ "1165": {
+  "status": "IMPLEMENTED",
+  "evidence": "deterministic engine",
+  "notes": "",
+  "phase": 1
+ },
+ "1191": {
+  "status": "IMPLEMENTED",
+  "evidence": "Home, Cockpit",
+  "notes": "",
+  "phase": 1
+ },
+ "1192": {
+  "status": "IMPLEMENTED",
+  "evidence": "drill-down",
+  "notes": "",
+  "phase": 1
+ },
+ "1194": {
+  "status": "IMPLEMENTED",
+  "evidence": "Truth chips",
+  "notes": "",
+  "phase": 1
+ },
+ "1267": {
+  "status": "PARTIAL",
+  "evidence": "Team › Segregation of duties",
+  "notes": "Role-level detection.",
+  "phase": 1
+ },
+ "1276": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ },
+ "1290": {
+  "status": "PARTIAL",
+  "evidence": "Approvals",
+  "notes": "Journals only.",
+  "phase": 1
+ },
+ "1291": {
+  "status": "PARTIAL",
+  "evidence": "Sentinel",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1304": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ },
+ "1305": {
+  "status": "IMPLEMENTED",
+  "evidence": "Companies",
+  "notes": "",
+  "phase": 1
+ },
+ "1306": {
+  "status": "IMPLEMENTED",
+  "evidence": "architecture",
+  "notes": "",
+  "phase": 1
+ },
+ "1307": {
+  "status": "IMPLEMENTED",
+  "evidence": "templates",
+  "notes": "",
+  "phase": 1
+ },
+ "1308": {
+  "status": "IMPLEMENTED",
+  "evidence": "Companies wizard",
+  "notes": "",
+  "phase": 1
+ },
+ "1309": {
+  "status": "PARTIAL",
+  "evidence": "recommendTemplate",
+  "notes": "Keyword recommendation.",
+  "phase": 1
+ },
+ "1310": {
+  "status": "IMPLEMENTED",
+  "evidence": "templates",
+  "notes": "",
+  "phase": 1
+ },
+ "1311": {
+  "status": "IMPLEMENTED",
+  "evidence": "custom template",
+  "notes": "",
+  "phase": 1
+ },
+ "1312": {
+  "status": "PARTIAL",
+  "evidence": "Companies › Clone",
+  "notes": "Chart and units. Account map and tax codes come from the standard set.",
+  "phase": 1
+ },
+ "1313": {
+  "status": "IMPLEMENTED",
+  "evidence": "per-company chart, tax, units",
+  "notes": "",
+  "phase": 1
+ },
+ "1316": {
+  "status": "IMPLEMENTED",
+  "evidence": "Shell › CompanySwitcher",
+  "notes": "",
+  "phase": 1
+ },
+ "1317": {
+  "status": "IMPLEMENTED",
+  "evidence": "CommandPalette",
+  "notes": "",
+  "phase": 1
+ },
+ "1318": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T11",
+  "notes": "",
+  "phase": 1
+ },
+ "1319": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T11",
+  "notes": "",
+  "phase": 1
+ },
+ "1320": {
+  "status": "IMPLEMENTED",
+  "evidence": "profiles.is_group_super_admin",
+  "notes": "",
+  "phase": 1
+ },
+ "1322": {
+  "status": "IMPLEMENTED",
+  "evidence": "group_cfo role",
+  "notes": "",
+  "phase": 1
+ },
+ "1330": {
+  "status": "PARTIAL",
+  "evidence": "intercompany ledgers",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1331": {
+  "status": "IMPLEMENTED",
+  "evidence": "intercompany ledgers",
+  "notes": "",
+  "phase": 1
+ },
+ "1332": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "1333": {
+  "status": "TESTED",
+  "evidence": "tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "1336": {
+  "status": "PARTIAL",
+  "evidence": "balances only",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1337": {
+  "status": "PARTIAL",
+  "evidence": "ReportView › Consolidation",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1342": {
+  "status": "IMPLEMENTED",
+  "evidence": "Consolidation › P&L",
+  "notes": "",
+  "phase": 1
+ },
+ "1343": {
+  "status": "IMPLEMENTED",
+  "evidence": "Consolidation › Balance sheet",
+  "notes": "",
+  "phase": 1
+ },
+ "1344": {
+  "status": "PARTIAL",
+  "evidence": "Cash flow for all companies",
+  "notes": "No eliminations.",
+  "phase": 1
+ },
+ "1345": {
+  "status": "IMPLEMENTED",
+  "evidence": "Trial balance for all companies",
+  "notes": "",
+  "phase": 1
+ },
+ "1346": {
+  "status": "IMPLEMENTED",
+  "evidence": "Home cards, consolidation columns",
+  "notes": "",
+  "phase": 1
+ },
+ "1360": {
+  "status": "IMPLEMENTED",
+  "evidence": "Companies › Archive",
+  "notes": "",
+  "phase": 1
+ },
+ "1375": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T15",
+  "notes": "",
+  "phase": 1
+ },
+ "1435": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T10d",
+  "notes": "",
+  "phase": 1
+ },
+ "1436": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql T06 T16e",
+  "notes": "",
+  "phase": 1
+ },
+ "1440": {
+  "status": "IMPLEMENTED",
+  "evidence": "CommandPalette",
+  "notes": "",
+  "phase": 1
+ },
+ "1498": {
+  "status": "IMPLEMENTED",
+  "evidence": "migrations are additive",
+  "notes": "",
+  "phase": 1
+ },
+ "1500": {
+  "status": "IMPLEMENTED",
+  "evidence": "scripts/build_requirement_ledger.py",
+  "notes": "",
+  "phase": 1
+ },
+ "1501": {
+  "status": "IMPLEMENTED",
+  "evidence": "scripts/status_map.py",
+  "notes": "",
+  "phase": 1
+ },
+ "1502": {
+  "status": "PARTIAL",
+  "evidence": "docs/NUMERO_TEST_MATRIX.md",
+  "notes": "Requirement → test. Code and screen references are in the evidence column.",
+  "phase": 1
+ },
+ "1507": {
+  "status": "IMPLEMENTED",
+  "evidence": "docs/",
+  "notes": "",
+  "phase": 1
+ },
+ "1508": {
+  "status": "IMPLEMENTED",
+  "evidence": "docs/NUMERO_SPEC_INDEX.md",
+  "notes": "",
+  "phase": 1
+ },
+ "1512": {
+  "status": "IMPLEMENTED",
+  "evidence": "docs/NUMERO_IMPLEMENTATION_STATUS.md",
+  "notes": "",
+  "phase": 1
+ },
+ "1516": {
+  "status": "IMPLEMENTED",
+  "evidence": "DEMO banner, DEMO truth chip, -DEMO export suffix",
+  "notes": "",
+  "phase": 1
+ },
+ "1517": {
+  "status": "PARTIAL",
+  "evidence": "tests/",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1519": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ },
+ "1520": {
+  "status": "PARTIAL",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "Owner, accountant, outsider, anonymous. Auditor and restricted user not yet.",
+  "phase": 1
+ },
+ "1521": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql · tests/engine.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "1522": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ },
+ "1523": {
+  "status": "PARTIAL",
+  "evidence": "tests/commands.test.ts",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1524": {
+  "status": "IMPLEMENTED",
+  "evidence": "engine refusals are shown verbatim",
+  "notes": "",
+  "phase": 1
+ },
+ "1530": {
+  "status": "IMPLEMENTED",
+  "evidence": "build order",
+  "notes": "",
+  "phase": 1
+ },
+ "1532": {
+  "status": "IMPLEMENTED",
+  "evidence": "Shell mode switch",
+  "notes": "",
+  "phase": 1
+ },
+ "1534": {
+  "status": "PARTIAL",
+  "evidence": "labels, keyboard, focus rings, reduced motion",
+  "notes": "Not audited against WCAG.",
+  "phase": 1
+ },
+ "1536": {
+  "status": "IMPLEMENTED",
+  "evidence": "DataTable",
+  "notes": "",
+  "phase": 1
+ },
+ "1537": {
+  "status": "IMPLEMENTED",
+  "evidence": "DataTable export",
+  "notes": "",
+  "phase": 1
+ },
+ "1539": {
+  "status": "IMPLEMENTED",
+  "evidence": "docs/NUMERO_IMPLEMENTATION_STATUS.md",
+  "notes": "",
+  "phase": 1
+ },
+ "1544": {
+  "status": "IMPLEMENTED",
+  "evidence": "only the publishable key is in the client",
+  "notes": "",
+  "phase": 1
+ },
+ "1547": {
+  "status": "PARTIAL",
+  "evidence": "scripts/",
+  "notes": "Ledger generation only. No automatic code comparison.",
+  "phase": 1
+ },
+ "1559": {
+  "status": "IMPLEMENTED",
+  "evidence": "Entry › Advance · Payments",
+  "notes": "",
+  "phase": 1
+ },
+ "1570": {
+  "status": "IMPLEMENTED",
+  "evidence": "Entry › Transfer",
+  "notes": "",
+  "phase": 1
+ },
+ "1576": {
+  "status": "PARTIAL",
+  "evidence": "suspense ledger",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1579": {
+  "status": "IMPLEMENTED",
+  "evidence": "no such category exists",
+  "notes": "",
+  "phase": 1
+ },
+ "1600": {
+  "status": "PARTIAL",
+  "evidence": "src/voice",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1602": {
+  "status": "TESTED",
+  "evidence": "tests/commands.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "1605": {
+  "status": "IMPLEMENTED",
+  "evidence": "voice navigation to reports",
+  "notes": "",
+  "phase": 1
+ },
+ "1606": {
+  "status": "IMPLEMENTED",
+  "evidence": "voice → NUMI",
+  "notes": "",
+  "phase": 1
+ },
+ "1607": {
+  "status": "IMPLEMENTED",
+  "evidence": "voice → NUMI calculate",
+  "notes": "",
+  "phase": 1
+ },
+ "1608": {
+  "status": "PARTIAL",
+  "evidence": "VOICE_LANGUAGES",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1609": {
+  "status": "BLOCKED",
+  "evidence": "src/voice/gateway.ts SarvamProvider",
+  "notes": "Needs a Sarvam API key, stored as a server-side secret behind an authenticated function.",
+  "phase": 1
+ },
+ "1610": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/voice/gateway.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "1611": {
+  "status": "IMPLEMENTED",
+  "evidence": "resolveProvider",
+  "notes": "",
+  "phase": 1
+ },
+ "1612": {
+  "status": "PARTIAL",
+  "evidence": "voice_audit",
+  "notes": "Retention policy and consent prompts not built.",
+  "phase": 1
+ },
+ "1613": {
+  "status": "TESTED",
+  "evidence": "tests/commands.test.ts",
+  "notes": "",
+  "phase": 1
+ },
+ "1614": {
+  "status": "IMPLEMENTED",
+  "evidence": "no voice-only action exists",
+  "notes": "",
+  "phase": 1
+ },
+ "1615": {
+  "status": "IMPLEMENTED",
+  "evidence": "voice_audit",
+  "notes": "",
+  "phase": 1
+ },
+ "1616": {
+  "status": "PARTIAL",
+  "evidence": "Reports",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1620": {
+  "status": "PARTIAL",
+  "evidence": "ReportView",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1629": {
+  "status": "IMPLEMENTED",
+  "evidence": "Statement",
+  "notes": "",
+  "phase": 1
+ },
+ "1635": {
+  "status": "IMPLEMENTED",
+  "evidence": "src/pages/Calculators.tsx",
+  "notes": "",
+  "phase": 1
+ },
+ "1636": {
+  "status": "IMPLEMENTED",
+  "evidence": "Calculators",
+  "notes": "",
+  "phase": 1
+ },
+ "1637": {
+  "status": "IMPLEMENTED",
+  "evidence": "Calculators",
+  "notes": "",
+  "phase": 1
+ },
+ "1638": {
+  "status": "IMPLEMENTED",
+  "evidence": "Calculators",
+  "notes": "",
+  "phase": 1
+ },
+ "1640": {
+  "status": "IMPLEMENTED",
+  "evidence": "Calculators",
+  "notes": "",
+  "phase": 1
+ },
+ "1641": {
+  "status": "IMPLEMENTED",
+  "evidence": "Calculators",
+  "notes": "",
+  "phase": 1
+ },
+ "1644": {
+  "status": "IMPLEMENTED",
+  "evidence": "Calculators",
+  "notes": "",
+  "phase": 1
+ },
+ "1645": {
+  "status": "PARTIAL",
+  "evidence": "NUMI calculate",
+  "notes": "Percentage / tax only.",
+  "phase": 1
+ },
+ "1646": {
+  "status": "IMPLEMENTED",
+  "evidence": "formula and inputs shown",
+  "notes": "",
+  "phase": 1
+ },
+ "1647": {
+  "status": "PARTIAL",
+  "evidence": "CSV, print",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1716": {
+  "status": "IMPLEMENTED",
+  "evidence": "CommandPalette",
+  "notes": "",
+  "phase": 1
+ },
+ "1718": {
+  "status": "PARTIAL",
+  "evidence": "contextualPrompts",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1726": {
+  "status": "IMPLEMENTED",
+  "evidence": "engine is language independent",
+  "notes": "",
+  "phase": 1
+ },
+ "1727": {
+  "status": "IMPLEMENTED",
+  "evidence": "interpreter",
+  "notes": "",
+  "phase": 1
+ },
+ "1728": {
+  "status": "IMPLEMENTED",
+  "evidence": "draft shows the amount for confirmation",
+  "notes": "",
+  "phase": 1
+ },
+ "1738": {
+  "status": "IMPLEMENTED",
+  "evidence": "Genesis › Structure",
+  "notes": "",
+  "phase": 1
+ },
+ "1739": {
+  "status": "PARTIAL",
+  "evidence": "Genesis",
+  "notes": "Name, code, parent, confidentiality. Budget and rule steps not in the wizard.",
+  "phase": 1
+ },
+ "1740": {
+  "status": "IMPLEMENTED",
+  "evidence": "org_units.parent_id",
+  "notes": "",
+  "phase": 1
+ },
+ "1753": {
+  "status": "PARTIAL",
+  "evidence": "custom_field_defs",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1754": {
+  "status": "PARTIAL",
+  "evidence": "27 field types",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1830": {
+  "status": "PARTIAL",
+  "evidence": "version columns",
+  "notes": "Partly built: only what the named screen or function shows. The rest of this requirement is not built yet.",
+  "phase": 1
+ },
+ "1878": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ },
+ "1879": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ },
+ "1880": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ },
+ "1881": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ },
+ "1882": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ },
+ "1883": {
+  "status": "TESTED",
+  "evidence": "tests/sql/engine_invariants.sql",
+  "notes": "",
+  "phase": 1
+ }
+}
