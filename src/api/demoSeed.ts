@@ -3,6 +3,7 @@ import { addDays, addMonths, endOfMonth, fiscalYearOf, parseISO, startOfMonth, t
 import { buildCompanyPayload } from '@/engine/templates'
 import type { ID, JournalLineInput } from '@/engine/types'
 import { DemoEngine } from './demo'
+import { seedDemoOps } from './demoSeedOps'
 
 // =====================================================================
 // SAMPLE DATA for the demo universe. Everything generated here is
@@ -31,6 +32,8 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
   const START = startOfMonth(addMonths(TODAY, -11))
   const at = (date: string, time = '10:30:00') => `${date}T${time}`
   const MAKER = 'demo-accountant', CHECKER = 'demo-finance', OWNER = 'demo-owner'
+  // salaries of this month are posted through the payroll run, not by a direct journal
+  const payrollMonth = startOfMonth(addMonths(TODAY, -1))
 
   const as = async <T,>(actor: ID, date: string, fn: () => Promise<T>, time?: string): Promise<T> => {
     const prevA = e.actor, prevC = e.clock
@@ -102,7 +105,8 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
     const maker = o.maker ?? MAKER
     const id = await as(maker, date, () => e.saveJournalDraft({ company_id: C[co], journal_date: date, narration, purpose: o.purpose, voucher_type: o.vtype ?? 'journal', source: o.source ?? 'manual', confidentiality: o.conf, lines }), o.time)
     await as(maker, date, () => e.submitJournal(id), o.time)
-    const approvers = [CHECKER, OWNER, MAKER].filter((a) => a !== maker)
+    // a restricted entry can be approved only by someone cleared to read it
+    const approvers = o.conf === 'restricted' ? [OWNER, OWNER] : [CHECKER, OWNER, MAKER].filter((a) => a !== maker)
     for (let i = 0; i < 4 && e.journals.find((j) => j.id === id)!.status === 'submitted'; i++) {
       await as(approvers[i % 2], date, () => e.approveJournal(id, 'Reviewed against supporting document'), o.time)
     }
@@ -271,7 +275,7 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
     if (ok(day(m, 11))) await invoice('JB', 'purchase_bill', P.google, day(m, 11), [{ account: '6310', amount: between(260000, 470000) * growth, tax: 'IGST18', desc: 'Google Ads — search & display', dims: dim('JB', 'department', 'MKT') }], { reference: 'GADS-' + m.slice(0, 7), payAfter: 20 })
     if (ok(day(m, 16))) await invoice('JB', 'purchase_bill', P.survey, day(m, 16), [{ account: '5050', amount: between(900000, 2100000), tax: 'GST18', desc: 'Layout development & surveying', dims: dim('JB', 'project', 'PRJ-MONARCH') }], { reference: 'CLS/' + Math.floor(100 + rand() * 899), payAfter: 40 })
     if (mi % 2 === 0 && ok(day(m, 18))) await invoice('JB', 'purchase_bill', P.legal, day(m, 18), [{ account: '5060', amount: between(180000, 420000), tax: 'GST18', desc: 'Title verification and approvals', dims: dim('JB', 'project', 'PRJ-MONARCH') }], { reference: 'SLA/' + fiscalYearOf(m) + '/' + (100 + mi), payAfter: 30 })
-    await expense('JB', day(m, 28), '6110', 1420370 + mi * 15000, 'Salaries for the month', { dept: 'ADM' })
+    if (m !== payrollMonth) await expense('JB', day(m, 28), '6110', 1420370 + mi * 15000, 'Salaries for the month', { dept: 'ADM' })
     await expense('JB', day(m, 3), '6210', 210370, 'Office rent — Coimbatore', { dept: 'ADM' })
     await expense('JB', day(m, 7), '6220', between(28000, 61000), 'Electricity — Coimbatore office', { dept: 'ADM' })
     await expense('JB', day(m, 8), '6230', between(9000, 16000), 'Broadband and telephone', { dept: 'ADM' })
@@ -322,7 +326,7 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
     await expense('GMED', day(m, 28), '6110', 1240370 + mi * 10000, 'Salaries for the month', { dept: 'ADM' })
     await expense('GMED', day(m, 3), '6210', 142370, 'Office and warehouse rent', { dept: 'ADM' })
     await expense('GMED', day(m, 18), '6410', between(36000, 92000), 'Airfare — service engineer visits', { dept: 'SVC' })
-    if (ok(endOfMonth(m))) await post('GMED', endOfMonth(m), 'Depreciation for the month', [dr(acc('GMED', '7100'), 105370), cr(acc('GMED', '1390'), 105370)], { vtype: 'depreciation', source: 'system' })
+    // depreciation of GHL Medical Equipment comes from its asset register (see demoSeedOps)
 
     // ----- GHL Wellness
     for (const [cust, dd] of [[P.retail, 6], [P.healthkart, 17]] as const) {
@@ -432,6 +436,9 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
     { id: 'm-3', user_id: 'demo-finance', email: 'arun@demo.numero', full_name: 'Arun Mehta', company_id: C.JB, role_key: 'finance_head' },
     { id: 'm-4', user_id: 'demo-finance', email: 'arun@demo.numero', full_name: 'Arun Mehta', company_id: C.GMED, role_key: 'finance_head' },
   )
+
+  // ---------------------------------------------------------------- operations: assets, payroll, advances, purchasing, treasury, registers
+  await seedDemoOps({ e, C, P, START, TODAY, MAKER, CHECKER, OWNER, payrollMonth, rand, as, acc, bank, dim, party, tax })
 
   // ---------------------------------------------------------------- sentinel run + period close state
   for (const co of Object.keys(C)) await as(OWNER, TODAY, () => e.runSentinel(C[co]))

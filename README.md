@@ -4,7 +4,7 @@
 
 A multi-company accounting, finance and control platform built on a real double-entry ledger engine. Every posted entry balances, posted history is immutable, every sensitive action is attributed, companies are isolated at the database layer, and every figure drills down to the transaction behind it.
 
-> This is Phase 1 of a specification with 1,916 numbered requirements. What is built, what is partial and what is planned is tracked honestly in the requirement ledger. See [Implementation status](docs/NUMERO_IMPLEMENTATION_STATUS.md).
+> Phases 1 and 2 of a specification with 1,916 numbered requirements are built. What is built, what is partial and what is planned is tracked honestly in the requirement ledger. See [Implementation status](docs/NUMERO_IMPLEMENTATION_STATUS.md).
 
 ## Run it
 
@@ -23,7 +23,7 @@ To use your real books, create an account on the same screen. The first person t
 |---|---|
 | `npm run dev` | Development server on port 5177 |
 | `npm run build` | Type-check and production build into `dist/` |
-| `npm test` | Accounting invariants and command-interpreter tests |
+| `npm test` | Accounting engine, operations engine, Forward, NUMI and command-interpreter tests |
 | `npm run typecheck` | TypeScript only |
 | `npm run ledger` | Rebuild the requirement ledger from the master specification |
 
@@ -40,7 +40,22 @@ VITE_SUPABASE_PUBLISHABLE_KEY=...
 
 Migrations live in `supabase/migrations/` and are applied in order. They are non-destructive: nothing is dropped.
 
-Database invariants are tested by `tests/sql/engine_invariants.sql`. The script runs inside a transaction that **always rolls back**, so it can be run against the real database without leaving a single row behind. Results are returned in the error message; every line must start with `PASS`.
+Database rules are tested by the seven scripts in `tests/sql/`. Each runs inside a transaction that **always rolls back**, so it can be run against the real database without leaving a single row behind. Results are returned in the error message; every line must start with `PASS`.
+
+Files are stored in the private bucket `numero-documents`, created by migration 0006.
+
+## What it does
+
+| Area | Screens |
+|---|---|
+| **Command** | Command Centre · Cockpit · Money Map · Forward (what is agreed, committed, due and at risk) · Registers (subscriptions, insurance, rent, contracts, guarantees, legal matters, vehicles, incidents and more) |
+| **Transact** | Transaction Centre · Journals · Sales & Billing · Purchase Bills · Payments & Receipts · Banking |
+| **Operate** | Expenses & Advances · Purchasing (requisition to three-way comparison) · Cash & Transfers · Treasury (loans, deposits, facilities, currency exposure) · Fixed Assets · Payroll · People Cost |
+| **Books** | General Ledger · Chart of Accounts and account mapping · Reports · Budgets · Period Close |
+| **Control** | Approvals (journals, proposed entries, advances, claims, requisitions, orders) · Follow-ups · Document Inbox · Sentinel · Audit Trail · Black Vault |
+| **Build** | Companies · Genesis Builder · Team & Access · Calculators · Requirement Ledger · Settings |
+
+An operation never writes to the ledger. Releasing an advance, paying a reimbursement, running depreciation or payroll, paying a loan instalment: each **proposes** an accounting entry, which a second person approves before it reaches the books. NUMERO records that money moved. It never moves money.
 
 ## Using it
 
@@ -56,7 +71,7 @@ Database invariants are tested by `tests/sql/engine_invariants.sql`. The script 
 | **Command / Accounting mode** | switch in the top bar |
 | **Time machine** | period picker → choose a date |
 
-Voice can navigate, answer questions and prepare drafts. It can never approve, post or move money.
+Voice can navigate, answer questions and prepare drafts. It can never approve, post, release, pay or move money.
 
 ## Documentation
 
@@ -77,4 +92,9 @@ The master specification (`GHL NUMERO PROMPT.docx`, `docs/NUMERO_MASTER_SPEC.md`
 * AI may recommend. AI must not silently change the books.
 * Private is not the same as false: confidentiality controls who can see detail; it never removes anything from the ledgers.
 * ACTUAL, BUDGET, EXPECTED, FORECAST, ESTIMATE and SIMULATION are never mixed without a label.
+* Approval, fund transfer, expense, accounting classification and settlement are five different events.
+* An advance is money held by a person. It is not an expense.
+* A purchase order is a commitment. It is not a cost.
+* A flag informs a person. It never decides.
+* A screen never says "none" to a person who is simply not allowed to look.
 * Nothing is dropped silently. If something is not built, the ledger says so.

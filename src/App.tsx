@@ -1,11 +1,12 @@
 import { Component, lazy, Suspense, useEffect, type ReactNode } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import { useApp } from '@/store/app'
+import { Lock } from 'lucide-react'
+import { can, useApp } from '@/store/app'
 import { Background } from '@/ui/Background'
 import { Shell } from '@/ui/Shell'
 import { CommandPalette } from '@/ui/CommandPalette'
 import { NumiPanel } from '@/numi/NumiPanel'
-import { ErrorBox, Loading, Logo, Toasts } from '@/ui/kit'
+import { Empty, ErrorBox, Loading, Logo, PageHeader, Panel, Toasts } from '@/ui/kit'
 import Welcome from '@/pages/Welcome'
 import Onboarding from '@/pages/Onboarding'
 
@@ -40,6 +41,25 @@ const Team = lazy(() => import('@/pages/Team'))
 const Calculators = lazy(() => import('@/pages/Calculators'))
 const Requirements = lazy(() => import('@/pages/Requirements'))
 const Settings = lazy(() => import('@/pages/Settings'))
+// operations (Phase 2)
+const Registers = lazy(() => import('@/pages/Registers'))
+const Register360 = lazy(() => import('@/pages/Register360'))
+const Tasks = lazy(() => import('@/pages/Tasks'))
+const Inbox = lazy(() => import('@/pages/Inbox'))
+const Expenses = lazy(() => import('@/pages/Expenses'))
+const ClaimEditor = lazy(() => import('@/pages/ClaimEditor'))
+const Advance360 = lazy(() => import('@/pages/Advance360'))
+const Cash = lazy(() => import('@/pages/Cash'))
+const Assets = lazy(() => import('@/pages/Assets'))
+const Asset360 = lazy(() => import('@/pages/Asset360'))
+const Purchasing = lazy(() => import('@/pages/Purchasing'))
+const PurchaseEditor = lazy(() => import('@/pages/PurchaseEditor'))
+const PurchaseDetail = lazy(() => import('@/pages/PurchaseDetail'))
+const Treasury = lazy(() => import('@/pages/Treasury'))
+const Loan360 = lazy(() => import('@/pages/Loan360'))
+const Payroll = lazy(() => import('@/pages/Payroll'))
+const PayrollRun = lazy(() => import('@/pages/PayrollRun'))
+const PeopleCost = lazy(() => import('@/pages/PeopleCost'))
 
 class Boundary extends Component<{ children: ReactNode }, { error: string | null }> {
   state = { error: null as string | null }
@@ -48,6 +68,28 @@ class Boundary extends Component<{ children: ReactNode }, { error: string | null
     if (this.state.error) return <ErrorBox message={this.state.error} retry={() => this.setState({ error: null })} />
     return this.props.children
   }
+}
+
+/**
+ * A screen the person's role does not include. The database would simply return nothing,
+ * and an empty screen would read as "there are none" — so the screen says what is true instead.
+ * The permissions named on each route are the ones the database accepts for reading that data; a person who may
+ * only create (an employee entering a claim) reaches the screen and sees the records they entered themselves.
+ */
+function Need({ perm, what, children }: { perm: string | string[]; what: string; children: ReactNode }) {
+  useApp((s) => s.session)
+  useApp((s) => s.scope)
+  const perms = Array.isArray(perm) ? perm : [perm]
+  if (perms.some((p) => can(p))) return <>{children}</>
+  return (
+    <div>
+      <PageHeader eyebrow="Restricted" title={what} />
+      <Panel>
+        <Empty icon={<Lock size={20} />} title={`Your role does not include ${what.toLowerCase()}`}
+          body={<>This screen needs the <span className="num text-ink">{perms.join(' or ')}</span> permission in at least one of the selected companies. A Group Super Admin can grant it under Team &amp; Access. Records you cannot see still exist and are still part of the books.</>} />
+      </Panel>
+    </div>
+  )
 }
 
 function Boot({ label }: { label: string }) {
@@ -117,6 +159,27 @@ export default function App() {
             <Route path="/parties" element={<Parties />} />
             <Route path="/parties/owed" element={<Owed />} />
             <Route path="/parties/:id" element={<Party360 />} />
+            <Route path="/registers" element={<Need perm="register.view" what="Registers"><Registers /></Need>} />
+            <Route path="/registers/:id" element={<Need perm="register.view" what="Registers"><Register360 /></Need>} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/inbox" element={<Need perm={['document.view', 'document.upload']} what="The document inbox"><Inbox /></Need>} />
+            <Route path="/expenses" element={<Need perm={['expense.view', 'expense.approve', 'expense.create']} what="Expenses and advances"><Expenses /></Need>} />
+            <Route path="/expenses/claims/new" element={<Need perm={['expense.view', 'expense.approve', 'expense.create']} what="Expenses and advances"><ClaimEditor /></Need>} />
+            <Route path="/expenses/claims/:id" element={<Need perm={['expense.view', 'expense.approve', 'expense.create']} what="Expenses and advances"><ClaimEditor /></Need>} />
+            <Route path="/expenses/advances/:id" element={<Need perm={['expense.view', 'expense.approve', 'expense.create']} what="Expenses and advances"><Advance360 /></Need>} />
+            <Route path="/cash" element={<Need perm={['treasury.view', 'expense.approve']} what="Cash and fund transfers"><Cash /></Need>} />
+            <Route path="/assets" element={<Need perm="asset.view" what="Fixed assets"><Assets /></Need>} />
+            <Route path="/assets/:id" element={<Need perm="asset.view" what="Fixed assets"><Asset360 /></Need>} />
+            <Route path="/purchasing" element={<Need perm={['purchase.view', 'purchase.create']} what="Purchasing"><Purchasing /></Need>} />
+            <Route path="/purchasing/new" element={<Need perm={['purchase.view', 'purchase.create']} what="Purchasing"><PurchaseEditor /></Need>} />
+            <Route path="/purchasing/:id/edit" element={<Need perm={['purchase.view', 'purchase.create']} what="Purchasing"><PurchaseEditor /></Need>} />
+            <Route path="/purchasing/:id" element={<Need perm={['purchase.view', 'purchase.create']} what="Purchasing"><PurchaseDetail /></Need>} />
+            <Route path="/treasury" element={<Need perm="treasury.view" what="Treasury"><Treasury /></Need>} />
+            <Route path="/treasury/loans/:id" element={<Need perm="treasury.view" what="Treasury"><Loan360 /></Need>} />
+            <Route path="/payroll" element={<Need perm="payroll.view" what="Payroll"><Payroll /></Need>} />
+            <Route path="/payroll/runs/:id" element={<Need perm="payroll.view" what="Payroll"><PayrollRun /></Need>} />
+            <Route path="/payroll/people-cost" element={<Need perm="payroll.view" what="People cost"><PeopleCost /></Need>} />
+            <Route path="/people-cost" element={<Need perm="payroll.view" what="People cost"><PeopleCost /></Need>} />
             <Route path="/approvals" element={<Approvals />} />
             <Route path="/sentinel" element={<Sentinel />} />
             <Route path="/audit" element={<Audit />} />

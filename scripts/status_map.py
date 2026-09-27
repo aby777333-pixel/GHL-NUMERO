@@ -412,6 +412,38 @@ T(1881, DB)
 T(1882, DB)
 T(1883, DB)
 
+# ----------------------------------------------------------------- PHASE 2
+# Assessed requirement by requirement against the code; each part is checked by scripts/check_status_part.py.
+# A requirement listed under PLANNED in a part has no status here: it is not built, and it stays in the ledger.
+import importlib.util
+
+
+def _part(name):
+    f = ROOT / "scripts" / name
+    spec = importlib.util.spec_from_file_location(name[:-3], f)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
+# Phase 1 requirements whose status or note changed because of what phase 2 built
+_p1 = _part("status_phase1_updates.py")
+for status, no, evidence, notes in _p1.UPDATES:
+    assert str(no) in S, f"{no} has no phase 1 record to update"
+    S[str(no)] = {"status": status, "evidence": evidence, "notes": notes, "phase": 1}
+# a phase 1 claim that no longer holds is withdrawn: the requirement is PLANNED again, and stays in the ledger
+for no in getattr(_p1, "REVERT_TO_PLANNED", []):
+    S.pop(str(no), None)
+
+PLANNED_NOTES = {}
+for part in ("status_phase2_a.py", "status_phase2_b.py", "status_phase2_c.py"):
+    m = _part(part)
+    for status, no, evidence, notes in m.ENTRIES:
+        assert str(no) not in S, f"{no} is recorded twice"
+        S[str(no)] = {"status": status, "evidence": evidence, "notes": notes, "phase": 2}
+    PLANNED_NOTES.update({str(k): v for k, v in m.PLANNED.items()})
+(ROOT / "docs" / "requirement-planned-notes.json").write_text(json.dumps(dict(sorted(PLANNED_NOTES.items(), key=lambda kv: int(kv[0]))), indent=1, ensure_ascii=False), encoding="utf8")
+
 out = ROOT / "docs" / "requirement-status.json"
 out.write_text(json.dumps(dict(sorted(S.items(), key=lambda kv: int(kv[0]))), indent=1, ensure_ascii=False), encoding="utf8")
 counts = {}

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, CornerDownLeft, Link2, ShieldCheck, Sparkles, X } from 'lucide-react'
-import { useApp, useCurrency, usePeriod, useScopeIds } from '@/store/app'
+import { can, useApp, useCurrency, usePeriod, useScopeIds } from '@/store/app'
 import { fmtMoney } from '@/lib/money'
 import { cx, Money, Portal, Spinner, Truth } from '@/ui/kit'
 import { askNumi, contextualPrompts, type NumiAnswer } from './engine'
@@ -44,6 +44,7 @@ export function NumiPanel() {
       const answer = await askNumi(question, {
         api, companies, accounts, parties, scopeIds, period, screen: loc.pathname,
         money: (v, compact = true) => fmtMoney(v, { currency, compact, mask: privacy }),
+        can,
       })
       setTurns((t) => t.map((x) => (x.id === id ? { ...x, answer } : x)))
       void api.logNumi({ channel: 'text', question, intent: answer.intent, answer: answer.headline, evidence: answer.evidence, screen: loc.pathname }).catch(() => undefined)

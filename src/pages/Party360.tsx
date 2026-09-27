@@ -12,8 +12,9 @@ import { D, ZERO } from '@/lib/money'
 import { daysBetween, fmtDate, fmtDateTime, today } from '@/lib/dates'
 import { cx, Empty, ErrorBox, Explain, Field, Loading, Modal, Money, Note, PageHeader, Panel, ReasonDialog, Section, StatusChip, Tabs, Truth } from '@/ui/kit'
 import { DataTable, type Column } from '@/ui/DataTable'
+import { PartyOperations } from '@/ui/PartyOperations'
 
-type TabKey = 'overview' | 'documents' | 'payments' | 'ledger' | 'bank' | 'timeline'
+type TabKey = 'overview' | 'documents' | 'payments' | 'operations' | 'ledger' | 'bank' | 'timeline'
 const STATUSES: Party['status'][] = ['active', 'suspended', 'blocked', 'inactive', 'terminated']
 
 const docRoute = (i: Pick<Invoice, 'id' | 'doc_type'>) => (i.doc_type === 'sales_invoice' || i.doc_type === 'credit_note' ? '/invoices/' : '/bills/') + i.id
@@ -297,6 +298,7 @@ function PartyView({ party }: { party: Party }) {
     { key: 'overview', label: 'Overview' },
     { key: 'documents', label: 'Documents', count: d?.invoices.length },
     { key: 'payments', label: 'Payments', count: d?.payments.length },
+    { key: 'operations', label: 'Operations' },
     { key: 'ledger', label: 'Ledger', count: d?.ledger.total },
     { key: 'bank', label: 'Bank details', count: d?.banks.length },
     { key: 'timeline', label: 'Timeline', count: d ? auditRows.length : undefined },
@@ -407,6 +409,8 @@ function PartyView({ party }: { party: Party }) {
                 empty={{ title: 'No payments or receipts', body: 'No money has moved between this party and the selected companies.', icon: <Wallet size={20} /> }} />
             </Panel>
           )}
+
+          {tab === 'operations' && <PartyOperations party={party} companyIds={ids} />}
 
           {tab === 'ledger' && (
             <div className="space-y-3">

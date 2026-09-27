@@ -36,7 +36,9 @@ Seeded per group by `seed_roles`. Custom roles can be added; the role and permis
 | Tax Consultant | Read ledgers, documents and reports |
 | Department Head, Project Manager | Budgets and reports |
 | Purchase Manager, Sales Manager | Their own documents and parties |
-| Employee | Company visibility and NUMI |
+| Employee | Company visibility and NUMI. Phase 2: may enter their own advances and claims and upload documents; sees only what they entered |
+| Payroll Officer | Prepares employees, salaries and payroll runs. **Cannot approve a salary.** Not cleared for confidential journals unless granted |
+| HR Head | Payroll, including salary approval; approves expense claims |
 | Read Only | Every `*.view` permission |
 
 ## Permission strings
@@ -57,7 +59,50 @@ report.view   report.export   audit.view
 sentinel.view sentinel.review
 vault.view    numi.use
 tax.configure approval.configure field.configure
+
+# Phase 2
+register.view   register.manage
+document.view   document.upload
+asset.view      asset.manage
+purchase.view   purchase.create   purchase.approve
+expense.view    expense.create    expense.approve
+treasury.view   treasury.manage
+payroll.view    payroll.manage    payroll.approve
 ```
+
+### Who holds the Phase 2 permissions by default
+
+| Role | Registers | Documents | Assets | Purchasing | Expenses | Treasury | Payroll |
+|---|---|---|---|---|---|---|---|
+| Owner, Group CFO | all | all | all | all | all | all | **all** |
+| Finance Head | all | all | all | all | all | all | none |
+| Company Director | view | view | view | view, approve | view, create, approve | view | none |
+| Accountant | view, manage | view, upload | view, manage | view, create | view, create | view, manage | none |
+| Junior Accountant | view | view, upload | view | view | view, create | — | none |
+| Auditor, Read Only | view | view | view | view | view | view | none |
+| Tax Consultant | view | view | — | — | — | — | none |
+| Department Head | view | upload | — | view, create | create, approve | — | none |
+| Project Manager | view | upload | — | view, create | create | — | none |
+| Purchase Manager | view | view, upload | — | view, create | create | — | none |
+| Sales Manager | view, manage | upload | — | — | create | — | none |
+| Payroll Officer | — | upload | — | — | create | — | view, manage |
+| HR Head | — | upload | — | — | create, approve | — | view, manage, approve |
+| Employee | — | upload | — | — | create | — | none |
+
+**Salary data is restricted by default.** A Finance Head does not see employees, salaries or payroll runs unless the Owner grants a payroll role. The payroll journal is confidential: it is approved by a person who is cleared to read it (a Group Super Admin, or a person with a Black Vault grant for the confidential level).
+
+### What a person who may only create can see
+
+| Records | Readable with | Otherwise |
+|---|---|---|
+| Advances, expense claims | `expense.view` or `expense.approve` | the records the person entered themselves |
+| Purchasing documents | `purchase.view` | the documents the person prepared |
+| Documents | `document.view` | the files the person uploaded |
+| Cash boxes and counts | `treasury.view` or `expense.approve` | nothing |
+| Follow-ups | any access to the company, and clearance for the record the follow-up is linked to, as that record is classified now (a follow-up follows its record when the record is reclassified); a follow-up on payroll needs `payroll.view` | nothing |
+| Expense categories | any access to the company | — |
+
+The screens follow the same rules: a screen a role does not include says so instead of appearing empty.
 
 ## Controls that permissions alone do not grant
 
@@ -71,6 +116,15 @@ tax.configure approval.configure field.configure
 | Blocked party | No new documents or payments. History is untouched. |
 | Locked period | No posting by anyone. Reopening needs `period.reopen` and a reason. |
 | Confidentiality | A user can only create or see records at levels they are cleared for (`vault_grants`). `super_admin_only` cannot be granted. |
+| Nobody approves what they cannot read | `approve_journal` refuses an approver who is not cleared for the journal's confidentiality level. |
+| Proposed entries | An entry proposed by an operation is subject to maker-checker like any journal: the person who recorded the release, the payment or the run cannot approve its entry. It cannot be edited by hand. |
+| Entering and approving a salary | Different permissions (`payroll.manage`, `payroll.approve`), and the person who entered a salary cannot approve it. |
+| Vendor selection | Made by a person with `purchase.approve`, with a recorded reason. The record states whether the chosen quotation was the lowest. |
+| Policy flags | Inform the approver. They never reject a claim. Approving a flagged line requires a comment. |
+| Approved amount | An advance may be approved for less than requested, never more. Where several approvals are needed, a later approver may lower the amount an earlier approver authorised, not raise it. Release cannot exceed the approved amount; return cannot exceed the unsettled balance. |
+| Cash box limit | A single payment from a cash box above its limit is recorded and raised for review. It is not blocked. |
+| Approval rules | Added and edited by a Group Super Admin or a holder of `approval.configure`, on the Approvals screen. A rule is switched off, never deleted. |
+| Money ledgers | Release, return, reimbursement, transfer, loan, deposit and salary payments accept only a ledger whose control type is bank or cash. |
 
 ## Direct table writes
 
@@ -78,6 +132,10 @@ Clients can write directly only to configuration and draft-like tables, under pe
 
 Accounting records — journals, journal lines, invoices, payments, bank transactions, parties, alerts, audit — have **no** client write policy. They change only through workflow functions.
 
+The same is true of every operational table added in Phase 2. Files are written to the private storage bucket under the uploader's company path, with `document.upload`; the record of the file is created by `register_document`. A person reads every file with `document.view`, and otherwise the files they uploaded. A stored file can be removed only by its uploader and only if it never became a document.
+
 ## NUMI and voice
+
+NUMI checks the person's permission before it reads, because the database answers an unauthorised read with no rows rather than an error: without the permission NUMI says it is not authorised and does not say whether records exist. It gives payroll totals to people with `payroll.view` and never states what an individual is paid, to anyone.
 
 NUMI and voice hold no credentials of their own. They run as the signed-in person, through the same data layer, and are subject to exactly the same policies. Restricted totals are disclosed only in the form: “N entries totalling X relate to restricted transactions that your account is not authorised to view.”

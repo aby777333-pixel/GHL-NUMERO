@@ -1,7 +1,7 @@
 {
   "name": "ghl-numero",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "GHL NUMERO — The Financial Operating System",
   "type": "module",
   "scripts": {
@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "typecheck": "tsc -b --noEmit",
     "test": "vitest run",
-    "ledger": "python scripts/status_map.py && python scripts/build_requirement_ledger.py"
+    "ledger": "python scripts/status_map.py && python scripts/build_requirement_ledger.py && python scripts/write_status_report.py"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",

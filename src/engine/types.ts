@@ -141,6 +141,7 @@ export interface JournalInput {
   confidentiality?: Confidentiality
   origin?: 'human' | 'ai_suggested' | 'system' | 'import'
   source?: string
+  source_id?: ID | null
   idempotency_key?: string
   lines: JournalLineInput[]
 }
@@ -327,12 +328,14 @@ export interface Invoice {
   amount_settled: Num
   status: 'draft' | 'open' | 'partially_paid' | 'paid' | 'cancelled' | 'disputed'
   journal_id: ID | null
+  /** purchase order this bill is matched against (three-way match) */
+  po_id?: ID | null
   confidentiality: Confidentiality
   created_by: ID | null
   created_at: string
   approved_by?: ID | null
   approved_at?: string | null
-  lines?: (InvoiceLineInput & { id: ID; line_no: number; tax_amount: Num; amount: Num })[]
+  lines?: (InvoiceLineInput & { id: ID; line_no: number; tax_amount: Num; amount: Num; po_line_id?: ID | null })[]
 }
 
 export interface PaymentInput {

@@ -174,6 +174,12 @@ const STATUS_CLS: Record<string, string> = {
   locked: 'gold', soft_closed: 'warn', active: 'pos', inactive: '', blocked: 'neg', suspended: 'warn', terminated: '',
   pending_verification: 'warn', verified: 'pos', superseded: '', reviewing: 'cyan', false_positive: '', resolved: 'pos', revised: 'violet',
   info: '', review: 'warn', priority: 'neg', critical: 'neg',
+  // operations (phase 2)
+  requested: 'warn', released: 'cyan', partially_released: 'cyan', partially_settled: 'warn', settled: 'pos', return_due: 'warn', returned: 'pos', under_review: 'warn',
+  proposed: 'warn', part_posted: 'warn', voided: '', sent: 'cyan', received: 'cyan', selected: 'pos', not_selected: '', expired: '', ordered: 'pos',
+  partially_received: 'warn', fully_received: 'cyan', billed: 'pos', confirmed: 'pos', closed: '', ended: '', paused: 'warn',
+  classified: 'cyan', linked: 'pos', processed: 'pos', due: 'warn', disposed: '', written_off: 'neg', recorded: '', in_progress: 'cyan', done: 'pos',
+  kept: 'pos', partly_kept: 'warn', broken: 'neg', planned: '', notice: 'warn', exited: '',
 }
 export function StatusChip({ status, label }: { status: string; label?: string }) {
   return <span className={cx('chip', STATUS_CLS[status] ?? '')}>{label ?? status.replace(/_/g, ' ')}</span>

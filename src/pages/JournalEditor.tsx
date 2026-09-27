@@ -121,7 +121,7 @@ export default function JournalEditor() {
           <Field label="Date"><input type="date" className="field" value={date} onChange={(e) => setDate(e.target.value)} /></Field>
           <Field label="Voucher type">
             <select className="field" value={vtype} onChange={(e) => setVtype(e.target.value)}>
-              {(vt.data ?? [{ key: 'journal', name: 'Journal Voucher' }]).filter((v) => !['reversal', 'sales', 'purchase', 'opening'].includes(v.key) || v.key === vtype).map((v) => <option key={v.key} value={v.key}>{v.name}</option>)}
+              {(vt.data ?? [{ key: 'journal', name: 'Journal Voucher' }]).filter((v) => !['reversal', 'sales', 'purchase'].includes(v.key) || v.key === vtype).map((v) => <option key={v.key} value={v.key}>{v.name}</option>)}
             </select>
           </Field>
           <Field label="Confidentiality" hint={conf !== 'internal' ? 'Detail is hidden from uncleared users; totals still appear in every statement.' : undefined}>

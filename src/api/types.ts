@@ -4,6 +4,7 @@ import type {
   JournalDetail, JournalInput, JournalStatus, LedgerBalanceRow, LedgerFilter, LedgerLinesResult, LedgerMonthlyRow, Member, NumiRule,
   OrgUnit, Party, PartyBalanceRow, PartyBank, Payment, PaymentInput, Requirement, Role, SessionInfo, TaxCode, TypeDef,
 } from '@/engine/types'
+import type { OpsApi } from './opsApi'
 
 export type CreatePartyResult =
   | { status: 'created'; id: ID; party_no: string }
@@ -42,7 +43,7 @@ export interface JournalFilter {
  *   demo  – an in-browser ledger engine seeded with clearly-labelled sample data
  * Both enforce the same accounting invariants.
  */
-export interface NumeroApi {
+export interface CoreApi {
   readonly mode: 'live' | 'demo'
 
   // session
@@ -59,6 +60,8 @@ export interface NumeroApi {
   createCompany(payload: CompanyCreatePayload): Promise<ID>
   updateCompany(id: ID, patch: Partial<Company>): Promise<void>
   listAccounts(companyIds: ID[]): Promise<Account[]>
+  listAccountMap(companyIds: ID[]): Promise<{ company_id: ID; key: string; account_id: ID }[]>
+  setAccountMap(companyId: ID, key: string, accountId: ID): Promise<void>
   createAccount(a: Omit<Account, 'id' | 'is_active' | 'counterparty_company_id' | 'currency'> & Partial<Account>): Promise<ID>
   updateAccount(id: ID, patch: Partial<Account>): Promise<void>
   listOrgUnits(companyIds: ID[]): Promise<OrgUnit[]>
@@ -157,3 +160,6 @@ export interface NumeroApi {
   listRequirements(): Promise<{ requirements: Requirement[]; source: string }>
   syncRequirements(reqs: Requirement[]): Promise<number>
 }
+
+/** The complete contract: the accounting core plus the operations that surround it. */
+export interface NumeroApi extends CoreApi, OpsApi {}

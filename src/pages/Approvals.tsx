@@ -1,13 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { BadgeCheck, ChevronDown, ChevronRight, ExternalLink, Inbox, Send, ShieldCheck, X } from 'lucide-react'
+import { BadgeCheck, ChevronDown, ChevronRight, ExternalLink, Inbox, Plus, Send, ShieldCheck, X } from 'lucide-react'
 import type { ApprovalRequest, ApprovalRule, ID, JournalDetail, JournalLineView, Member } from '@/engine/types'
+import type { Advance, ExpenseClaim, PurchaseDoc } from '@/engine/opsTypes'
+import { advanceMemory, type MemoryFact } from '@/engine/ops'
+import { APPROVAL_ENTITIES, workflowSource } from '@/lib/workflow'
 import { can, useApp, useScopeIds } from '@/store/app'
 import { useAction, useAsync } from '@/hooks/useAsync'
 import { D, fmtMoney, ZERO } from '@/lib/money'
 import { daysBetween, fmtDate, fmtDateTime, today } from '@/lib/dates'
-import { cx, Drawer, ErrorBox, Loading, Money, Note, PageHeader, Panel, ReasonDialog, Section, StatusChip, Tabs } from '@/ui/kit'
+import { cx, Drawer, ErrorBox, Field, Loading, Money, Note, PageHeader, Panel, ReasonDialog, Section, StatusChip, Tabs } from '@/ui/kit'
 import { DataTable, type Column } from '@/ui/DataTable'
+import { ApprovalRuleEditor } from '@/ui/ApprovalRuleEditor'
 
 type TabKey = 'pending' | 'approved' | 'rejected' | 'all'
 
@@ -52,6 +56,8 @@ export default function Approvals() {
   const [tab, setTab] = useState<TabKey>('pending')
   const [selId, setSelId] = useState<ID | null>(null)
   const [rulesOpen, setRulesOpen] = useState(false)
+  const [editing, setEditing] = useState<ApprovalRule | 'new' | null>(null)
+  const mayConfigure = !!session?.isGroupAdmin || can('approval.configure')
 
   const main = useAsync(async () => {
     const [requests, rules, members] = await Promise.all([
@@ -81,7 +87,7 @@ export default function Approvals() {
 
   const columns: Column<ApprovalRequest>[] = [
     { key: 'company', header: 'Company', render: (r) => <span title={companyById.get(r.company_id)?.name}><span className="num rounded-md border border-gold/30 bg-goldsoft px-1.5 py-[1px] text-[10.5px] text-gold">{companyById.get(r.company_id)?.code ?? '—'}</span></span>, sort: (r) => companyById.get(r.company_id)?.name ?? '', csv: (r) => companyById.get(r.company_id)?.name ?? '' },
-    { key: 'entity', header: 'Record', render: (r) => <span className="chip">{humanise(r.entity)}</span>, sort: (r) => r.entity, csv: (r) => r.entity },
+    { key: 'entity', header: 'Record', render: (r) => <span className="chip">{APPROVAL_ENTITIES[r.entity]?.label ?? humanise(r.entity)}</span>, sort: (r) => r.entity, csv: (r) => APPROVAL_ENTITIES[r.entity]?.label ?? r.entity },
     { key: 'summary', header: 'Summary', render: (r) => <span className="text-ink">{r.summary || <span className="text-muted">No narration was entered</span>}</span>, csv: (r) => r.summary ?? '' },
     { key: 'amount', header: 'Amount', align: 'right', render: (r) => <Money value={r.amount} currency={companyById.get(r.company_id)?.base_currency} className="text-ink" />, sort: (r) => D(r.amount).toNumber(), csv: (r) => D(r.amount).toFixed(2) },
     {
@@ -97,7 +103,7 @@ export default function Approvals() {
 
   const ruleColumns: Column<ApprovalRule>[] = [
     { key: 'name', header: 'Rule', render: (r) => <span className="text-ink">{r.name}</span>, sort: (r) => r.name },
-    { key: 'entity', header: 'Applies to', render: (r) => <span className="chip">{humanise(r.entity)}</span>, sort: (r) => r.entity },
+    { key: 'entity', header: 'Applies to', render: (r) => <span className="chip">{r.entity === 'journal' ? 'journals and proposed entries' : APPROVAL_ENTITIES[r.entity]?.label.toLowerCase() ?? humanise(r.entity)}</span>, sort: (r) => r.entity },
     { key: 'company', header: 'Company', render: (r) => <span className="text-ink2">{r.company_id ? companyById.get(r.company_id)?.name ?? 'Company not shared with you' : 'All companies'}</span>, sort: (r) => (r.company_id ? companyById.get(r.company_id)?.name ?? '' : '') },
     {
       key: 'range', header: 'Amount range', align: 'right', sort: (r) => D(r.min_amount).toNumber(),
@@ -112,12 +118,12 @@ export default function Approvals() {
       <PageHeader
         eyebrow="Controls"
         title="Approvals"
-        subtitle={<>Everything waiting for a decision in the selected compan{ids.length === 1 ? 'y' : 'ies'}. Nothing reaches the books until it has been approved and posted.</>}
+        subtitle={<>Everything waiting for a decision in the selected compan{ids.length === 1 ? 'y' : 'ies'}: journals, entries proposed by operations, advances, expense claims, requisitions and purchase orders. Nothing reaches the books until it has been approved and posted.</>}
         actions={d && count('pending') > 0 ? <span className="chip warn"><span className="num">{count('pending')}</span> pending · <Money value={pendingTotal} compact /></span> : undefined}
       />
 
       <Note className="mb-4">
-        <strong className="text-ink">Maker-checker.</strong> The person who created an entry cannot approve it, unless the Owner has explicitly enabled Owner self-approval. The engine enforces this on every approval; a refused approval is explained on screen.
+        <strong className="text-ink">Maker-checker.</strong> The person who created an entry cannot approve it, unless the Owner has explicitly enabled Owner self-approval. The engine enforces this on every approval; a refused approval is explained on screen. Approving a request is a decision only: it moves no money.
         {session?.group && <> Current setting for {session.group.name}: <span className="text-ink">{selfApproval ? 'Owner self-approval is enabled, and each use is recorded in the audit trail' : 'strictly enforced'}</span>.</>}
       </Note>
 
@@ -152,10 +158,10 @@ export default function Approvals() {
           </Panel>
 
           <Section title="Configured approval rules"
-            right={<button className="btn sm ghost" onClick={() => setRulesOpen((o) => !o)} aria-expanded={rulesOpen}>{rulesOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />} {rulesOpen ? 'Hide' : 'Show'} {d.rules.length} rule{d.rules.length === 1 ? '' : 's'}</button>}>
+            right={<span className="flex items-center gap-2">{mayConfigure && <button className="btn sm" onClick={() => { setRulesOpen(true); setEditing('new') }}><Plus size={13} /> Add rule</button>}<button className="btn sm ghost" onClick={() => setRulesOpen((o) => !o)} aria-expanded={rulesOpen}>{rulesOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />} {rulesOpen ? 'Hide' : 'Show'} {d.rules.length} rule{d.rules.length === 1 ? '' : 's'}</button></span>}>
             {rulesOpen ? (
               <Panel lit={false}>
-                <DataTable columns={ruleColumns} rows={d.rules} rowKey={(r) => r.id} initialSort={{ key: 'range', dir: 'asc' }}
+                <DataTable columns={ruleColumns} rows={d.rules} rowKey={(r) => r.id} initialSort={{ key: 'range', dir: 'asc' }} onRow={mayConfigure ? (r) => setEditing(r) : undefined}
                   empty={{ title: 'No approval rule is configured', body: 'Without a rule, a submitted entry needs one approval from any authorised approver.', icon: <ShieldCheck size={20} /> }} />
               </Panel>
             ) : (
@@ -165,12 +171,32 @@ export default function Approvals() {
         </>
       )}
 
+      <ApprovalRuleEditor open={editing !== null} rule={editing && editing !== 'new' ? editing : null} onClose={() => setEditing(null)} />
       <RequestDrawer request={selected} onClose={() => setSelId(null)} who={who} onOpen={(to) => nav(to)} />
     </div>
   )
 }
 
 interface Check { ok: boolean; label: string; detail: string }
+
+type OtherRecord =
+  | { kind: 'advance'; advance: Advance; memory: MemoryFact[] }
+  | { kind: 'claim'; claim: ExpenseClaim }
+  | { kind: 'purchase'; doc: PurchaseDoc }
+  | { kind: 'hidden' }
+
+function Facts({ rows }: { rows: [string, ReactNode][] }) {
+  return (
+    <div className="rounded-xl border border-line px-3.5">
+      {rows.map(([l, v]) => (
+        <div key={l} className="flex items-start justify-between gap-4 border-b border-line py-2 text-[13px] last:border-0">
+          <span className="flex-none text-muted">{l}</span>
+          <span className="min-w-0 break-words text-right text-ink">{v}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
 
 function checklist(j: JournalDetail, currency: string, mask: boolean): Check[] {
   const debit = j.lines.reduce((s, l) => s.plus(D(l.debit)), ZERO)
@@ -210,34 +236,85 @@ function RequestDrawer({ request, onClose, who, onOpen }: { request: ApprovalReq
   const api = useApp((s) => s.api)!
   const privacy = useApp((s) => s.privacy)
   const companies = useApp((s) => s.companies)
+  const parties = useApp((s) => s.parties)
+  const accounts = useApp((s) => s.accounts)
   useApp((s) => s.session)
   const { act, busy } = useAction()
   const [dialog, setDialog] = useState<'approve' | 'reject' | null>(null)
   const [approvedNow, setApprovedNow] = useState<ID | null>(null)
+  const [amount, setAmount] = useState('')
 
   const isJournal = request?.entity === 'journal'
+  const other = request ? APPROVAL_ENTITIES[request.entity] : undefined
   const journalId = isJournal && request ? request.entity_id : null
   const detail = useAsync(async () => (journalId ? api.openJournal(journalId) : null), [api, journalId])
   const j = detail.data && detail.data.id === journalId ? detail.data : null
 
+  // an entry proposed by an operation posts on its final approval and then updates its source record
+  const wf = useAsync(async () => (journalId && request ? (await api.listWorkflowPostings({ companyIds: [request.company_id], journalId }))[0] ?? null : null), [api, journalId, request?.company_id])
+  const proposal = wf.data && wf.data.journal_id === journalId ? wf.data : null
+  const origin = proposal ? workflowSource(proposal) : null
+
+  // the record behind a request that is not a journal
+  const record = useAsync<OtherRecord | null>(async () => {
+    if (!request || !other) return null
+    const cid = request.company_id
+    if (request.entity === 'advance') {
+      const advances = await api.listAdvances({ companyIds: [cid] })
+      const advance = advances.find((a) => a.id === request.entity_id)
+      if (!advance) return { kind: 'hidden' }
+      const claims = await api.listClaims({ companyIds: [cid], partyId: advance.recipient_party_id }).catch(() => [] as ExpenseClaim[])
+      return { kind: 'advance', advance, memory: advanceMemory(advances, claims, advance.recipient_party_id, today(), advance.id) }
+    }
+    if (request.entity === 'expense_claim') return { kind: 'claim', claim: await api.getClaim(request.entity_id) }
+    return { kind: 'purchase', doc: await api.getPurchaseDoc(request.entity_id) }
+  }, [api, request?.id, request?.entity_id])
+  const rec = record.data ?? null
+
   const company = request ? companies.find((c) => c.id === request.company_id) : undefined
   const currency = company?.base_currency ?? 'INR'
-  const mayApprove = !!request && can('journal.approve', request.company_id)
-  const mayReject = !!request && can('journal.reject', request.company_id)
+  const mayApprove = !!request && can(other ? other.perm : 'journal.approve', request.company_id)
+  const mayReject = !!request && can(other ? other.perm : 'journal.reject', request.company_id)
   const mayPost = !!request && can('journal.post', request.company_id)
   const pending = request?.status === 'pending'
-  const readyToPost = !!journalId && (j ? j.status === 'approved' : approvedNow === journalId)
+  const decidable = isJournal || (!!other && !!rec && rec.kind !== 'hidden')
+  const readyToPost = !!journalId && !proposal && (j ? j.status === 'approved' : approvedNow === journalId)
+  const claimFlags = rec?.kind === 'claim' ? rec.claim.flagged_lines : 0
+  const partyName = (id: ID | null) => (id ? parties.find((x) => x.id === id)?.display_name ?? 'Unknown party' : '—')
+  const accountName = (id: ID | null) => { const a = id ? accounts.find((x) => x.id === id) : undefined; return a ? `${a.code} · ${a.name}` : '—' }
+
+  const openApprove = () => { setAmount(rec?.kind === 'advance' ? String(D(rec.advance.requested_amount)) : ''); setDialog('approve') }
+  const amountProblem = rec?.kind === 'advance' && dialog === 'approve'
+    ? (D(amount || 0).lte(0) ? 'Enter the amount approved.' : D(amount || 0).gt(D(rec.advance.requested_amount)) ? 'The approved amount cannot exceed the amount requested.' : null)
+    : null
 
   const approve = async (comment: string) => {
-    if (!journalId) return
+    if (!request) return
+    const id = request.entity_id
+    const note = comment || undefined
+    if (journalId) {
+      setDialog(null)
+      const r = await act(() => api.approveJournal(journalId, note), (v) => (v !== 'approved' ? 'Step approved — passed to the next approver' : proposal ? 'Approved and posted to the books' : 'Approved — the entry is ready to be posted'))
+      if (r === 'approved' && !proposal) setApprovedNow(journalId)
+      return
+    }
+    if (!rec || rec.kind === 'hidden') return
+    if (amountProblem) return
     setDialog(null)
-    const r = await act(() => api.approveJournal(journalId, comment || undefined), (v) => (v === 'approved' ? 'Approved — the entry is ready to be posted' : 'Step approved — passed to the next approver'))
-    if (r === 'approved') setApprovedNow(journalId)
+    const done = (what: string) => (v: 'approved' | 'pending') => (v === 'approved' ? what : 'Step approved — passed to the next approver')
+    if (rec.kind === 'advance') await act(() => api.approveAdvance(id, amount, note), done('Advance approved. No money has moved: the release is recorded separately.'))
+    else if (rec.kind === 'claim') await act(() => api.approveClaim(id, note), done('Claim approved as claimed. Its accounting entry now waits in this inbox.'))
+    else await act(() => api.approvePurchaseDoc(id, note), done(rec.doc.kind === 'purchase_order' ? 'Order approved. It is now a commitment, not a cost.' : 'Requisition approved'))
   }
   const reject = async (reason: string) => {
-    if (!journalId) return
+    if (!request) return
+    const id = request.entity_id
     setDialog(null)
-    await act(() => api.rejectJournal(journalId, reason), 'Entry rejected and returned to its maker')
+    if (journalId) { await act(() => api.rejectJournal(journalId, reason), proposal ? 'Entry rejected. Nothing was posted; the source record has been told.' : 'Entry rejected and returned to its maker'); return }
+    if (!rec || rec.kind === 'hidden') return
+    if (rec.kind === 'advance') await act(() => api.rejectAdvance(id, reason), 'Advance request rejected')
+    else if (rec.kind === 'claim') await act(() => api.rejectClaim(id, reason), 'Claim rejected and returned to its maker')
+    else await act(() => api.rejectPurchaseDoc(id, reason), 'Rejected and returned to its maker')
   }
   const post = async () => {
     if (!journalId) return
@@ -259,6 +336,7 @@ function RequestDrawer({ request, onClose, who, onOpen }: { request: ApprovalReq
           <div className="text-ink"><span className="num text-[11.5px] text-muted">{l.account_code}</span> {l.account_name}</div>
           {l.party_id && <button className="link text-[12px]" onClick={() => onOpen('/parties/' + l.party_id)}>{l.party_name ?? 'Party'}</button>}
           {l.description ? <div className="text-[12px] text-muted">{l.description}</div> : <div className="text-[12px] text-warn">No description</div>}
+          {Object.keys(l.dims).length > 0 && <div className="mt-1 flex flex-wrap gap-1">{Object.entries(l.dims).map(([t, u]) => <span key={t} className="chip" title={humanise(t)}>{u.name}</span>)}</div>}
         </div>
       ),
     },
@@ -266,8 +344,10 @@ function RequestDrawer({ request, onClose, who, onOpen }: { request: ApprovalReq
     { key: 'credit', header: 'Credit', align: 'right', render: (l) => (D(l.credit).isZero() ? <span className="text-muted">—</span> : <Money value={l.credit} currency={currency} />) },
   ]
 
-  const approveWhy = !isJournal ? 'This kind of record is approved from its own screen.' : !pending ? `This request is ${request?.status}.` : !mayApprove ? 'Your role does not include the permission to approve journals (journal.approve) in this company.' : 'Approve this step'
-  const rejectWhy = !isJournal ? 'This kind of record is decided from its own screen.' : !pending ? `This request is ${request?.status}.` : !mayReject ? 'Your role does not include the permission to reject journals (journal.reject) in this company.' : 'Reject and return to the maker'
+  const permText = other ? `${other.perm} (needed to decide a ${other.label.toLowerCase()})` : null
+  const approveWhy = !decidable ? 'This record cannot be decided from the inbox.' : !pending ? `This request is ${request?.status}.` : !mayApprove ? `Your role does not include the permission ${permText ?? 'to approve journals (journal.approve)'} in this company.` : 'Approve this step'
+  const rejectWhy = !decidable ? 'This record cannot be decided from the inbox.' : !pending ? `This request is ${request?.status}.` : !mayReject ? `Your role does not include the permission ${permText ?? 'to reject journals (journal.reject)'} in this company.` : 'Reject and return to the maker'
+  const noun = other ? other.label.toLowerCase() : 'entry'
 
   return (
     <>
@@ -276,12 +356,13 @@ function RequestDrawer({ request, onClose, who, onOpen }: { request: ApprovalReq
         subtitle={request && <span className="flex flex-wrap items-center gap-2"><span>{company?.name ?? 'Company'}</span><span>·</span><StatusChip status={request.status} /><span>·</span><span>{stepText(request)}</span></span>}
         footer={request && <>
           {journalId && <button className="btn ghost" onClick={() => onOpen('/journals/' + journalId)}><ExternalLink size={14} /> Open full record</button>}
+          {other && request && <button className="btn ghost" onClick={() => onOpen(other.to(request.entity_id))}><ExternalLink size={14} /> Open full record</button>}
           {readyToPost && (
             <button className="btn good" onClick={post} disabled={busy || !mayPost} title={mayPost ? 'Post this approved entry to the books' : 'Your role does not include the permission to post journals (journal.post) in this company.'}><Send size={14} /> Post now</button>
           )}
           {pending && <>
-            <button className="btn danger" onClick={() => setDialog('reject')} disabled={busy || !isJournal || !mayReject} title={rejectWhy}><X size={14} /> Reject</button>
-            <button className="btn primary" onClick={() => setDialog('approve')} disabled={busy || !isJournal || !mayApprove} title={approveWhy}><BadgeCheck size={14} /> Approve</button>
+            <button className="btn danger" onClick={() => setDialog('reject')} disabled={busy || !decidable || !mayReject} title={rejectWhy}><X size={14} /> Reject</button>
+            <button className="btn primary" onClick={openApprove} disabled={busy || !decidable || !mayApprove} title={approveWhy}><BadgeCheck size={14} /> Approve</button>
           </>}
         </>}>
         {request && (
@@ -321,7 +402,110 @@ function RequestDrawer({ request, onClose, who, onOpen }: { request: ApprovalReq
               <Note kind="good">This entry is fully approved. It does not affect the books until it is posted{mayPost ? ' — use “Post now” below.' : '. Posting needs the journal.post permission.'}</Note>
             )}
 
-            {!isJournal && <Note>The detail of a {humanise(request.entity)} request is shown on its own record. Approval from this inbox is available for journals.</Note>}
+            {!isJournal && !other && <Note>The detail of a {humanise(request.entity)} request is shown on its own record.</Note>}
+
+            {origin && proposal && (
+              <Note kind={proposal.status === 'pending' ? 'info' : 'good'}>
+                <strong className="text-ink">Proposed by an operation: {origin.label}.</strong> This entry was prepared from a source record, not typed by hand. On its final approval it is posted to the books immediately and {origin.onApproval}. Rejecting it posts nothing.
+                <span className="mt-1 block text-[12px] text-muted">Rule applied: {origin.rule}</span>
+                {origin.to && <button className="link mt-1 block text-[12.5px]" onClick={() => onOpen(origin.to!)}>Open the source record</button>}
+              </Note>
+            )}
+
+            {other && record.error && <ErrorBox message={record.error} retry={record.reload} />}
+            {other && !rec && !record.error && <Loading rows={4} label="Loading the record" />}
+            {rec?.kind === 'hidden' && <Note kind="warn">This record is restricted. Your account is not authorised to view its detail, so it cannot be decided from here.</Note>}
+
+            {rec?.kind === 'advance' && (
+              <>
+                <Facts rows={[
+                  ['Advance', <span key="a" className="num text-gold">{rec.advance.advance_no}</span>],
+                  ['Recipient', <button key="r" className="link" onClick={() => onOpen('/parties/' + rec.advance.recipient_party_id)}>{partyName(rec.advance.recipient_party_id)}</button>],
+                  ['Kind', humanise(rec.advance.recipient_type)],
+                  ['Purpose', rec.advance.purpose],
+                  ['Requested', <Money key="q" value={rec.advance.requested_amount} currency={rec.advance.currency} />],
+                  ['To be settled by', rec.advance.expected_settlement_date ? <span key="d" className="num">{fmtDate(rec.advance.expected_settlement_date)}</span> : <span key="d" className="text-warn">No settlement date was given</span>],
+                  ['Method', rec.advance.payment_method ?? '—'],
+                ]} />
+                <div>
+                  <div className="eyebrow mb-2">What is already on record for this person</div>
+                  <div className="rounded-xl border border-line">
+                    {rec.memory.map((f, i) => (
+                      <div key={i} className="flex items-start gap-3 border-b border-line px-3.5 py-2.5 text-[13px] last:border-0">
+                        <span className={cx('lamp mt-[6px]', f.kind === 'clean' || f.kind === 'none' ? 'pos' : 'warn')} />
+                        <div className="min-w-0 flex-1 text-ink2">{f.text}</div>
+                        {f.advance_id && <button className="link flex-none text-[12px]" onClick={() => onOpen('/expenses/advances/' + f.advance_id)}>View</button>}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-1.5 text-[11.5px] text-muted">These are facts from the records of the selected company. They inform the decision; they do not make it.</div>
+                </div>
+                <Note>An advance is money held by a person. It is not an expense. Approving it moves no money: the release is recorded separately and its entry is approved again before it reaches the books.</Note>
+              </>
+            )}
+
+            {rec?.kind === 'claim' && (
+              <>
+                <Facts rows={[
+                  ['Claim', <span key="c" className="num text-gold">{rec.claim.claim_no}</span>],
+                  ['Person', <button key="p" className="link" onClick={() => onOpen('/parties/' + rec.claim.claimant_party_id)}>{partyName(rec.claim.claimant_party_id)}</button>],
+                  ['Title', rec.claim.title],
+                  ['Purpose', rec.claim.purpose || <span key="u" className="text-muted">None recorded</span>],
+                  ['Claimed', <Money key="t" value={rec.claim.total} currency={rec.claim.currency} />],
+                  ['Settles an advance', rec.claim.advance_id ? <button key="a" className="link" onClick={() => onOpen('/expenses/advances/' + rec.claim.advance_id)}>Yes — open the advance{rec.claim.final_settlement ? ' (final settlement)' : ''}</button> : 'No'],
+                ]} />
+                {claimFlags > 0 && <Note kind="warn">{claimFlags} line{claimFlags === 1 ? ' is' : 's are'} flagged. Flags inform the approver; they never reject a claim. Approving a flagged line needs a comment.</Note>}
+                <div>
+                  <div className="eyebrow mb-2">Lines</div>
+                  <div className="rounded-xl border border-line">
+                    {(rec.claim.lines ?? []).map((l) => (
+                      <div key={l.id} className="border-b border-line px-3.5 py-2.5 text-[13px] last:border-0">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <div className="text-ink">{l.description}{l.merchant ? <span className="text-muted"> · {l.merchant}</span> : null}</div>
+                            <div className="text-[12px] text-muted"><span className="num">{fmtDate(l.expense_date)}</span> · {accountName(l.account_id)} · paid by {l.paid_by === 'company' ? 'the company' : 'the person'} · {l.has_receipt ? 'receipt attached' : 'no receipt'}</div>
+                          </div>
+                          <Money value={l.amount} currency={rec.claim.currency} className="flex-none text-ink" />
+                        </div>
+                        {l.flags.length > 0 && <div className="mt-1.5 flex flex-wrap gap-1">{l.flags.map((f) => <span key={f} className="chip warn">{f}</span>)}</div>}
+                      </div>
+                    ))}
+                    {!(rec.claim.lines ?? []).length && <div className="px-3.5 py-3 text-[12.5px] text-muted">This claim has no lines.</div>}
+                  </div>
+                  <div className="mt-1.5 text-[11.5px] text-muted">Approving from the inbox approves every line as claimed. To approve a lower amount on a line, open the full record.</div>
+                </div>
+              </>
+            )}
+
+            {rec?.kind === 'purchase' && (
+              <>
+                <Facts rows={[
+                  ['Document', <span key="n" className="num text-gold">{rec.doc.doc_no}</span>],
+                  ['Title', rec.doc.title || <span key="t" className="text-muted">None recorded</span>],
+                  ['Vendor', rec.doc.party_id ? <button key="v" className="link" onClick={() => onOpen('/parties/' + rec.doc.party_id)}>{partyName(rec.doc.party_id)}</button> : 'Not yet chosen'],
+                  ['Date', <span key="d" className="num">{fmtDate(rec.doc.doc_date)}</span>],
+                  ['Required by', rec.doc.required_date ? <span key="r" className="num">{fmtDate(rec.doc.required_date)}</span> : '—'],
+                  ['Reason', rec.doc.reason || <span key="e" className="text-muted">None recorded</span>],
+                  ['Total', <Money key="m" value={rec.doc.total} currency={rec.doc.currency} />],
+                ]} />
+                <div>
+                  <div className="eyebrow mb-2">Lines</div>
+                  <div className="rounded-xl border border-line">
+                    {(rec.doc.lines ?? []).map((l) => (
+                      <div key={l.id} className="flex items-start justify-between gap-3 border-b border-line px-3.5 py-2.5 text-[13px] last:border-0">
+                        <div className="min-w-0">
+                          <div className="text-ink">{l.description}</div>
+                          <div className="text-[12px] text-muted"><span className="num">{D(l.quantity).toString()}</span> {l.unit ?? ''} × <Money value={l.rate} currency={rec.doc.currency} />{l.account_id ? <> · {accountName(l.account_id)}</> : null}</div>
+                        </div>
+                        <Money value={D(l.amount).plus(l.tax_amount)} currency={rec.doc.currency} className="flex-none text-ink" />
+                      </div>
+                    ))}
+                    {!(rec.doc.lines ?? []).length && <div className="px-3.5 py-3 text-[12.5px] text-muted">This document has no lines.</div>}
+                  </div>
+                </div>
+                {rec.doc.kind === 'purchase_order' && <Note>An approved order is a commitment, not a cost. It reaches the books only through the vendor's bill.</Note>}
+              </>
+            )}
 
             {isJournal && detail.error && <ErrorBox message={detail.error} retry={detail.reload} />}
             {isJournal && !j && !detail.error && <Loading rows={5} label="Loading the entry" />}
@@ -364,6 +548,7 @@ function RequestDrawer({ request, onClose, who, onOpen }: { request: ApprovalReq
                       ['Narration', j.narration || <span key="n" className="text-muted">None recorded</span>],
                       ['Purpose', j.purpose || <span key="p" className="text-muted">None recorded</span>],
                       ['Origin', humanise(j.origin)],
+                      ['Confidentiality', j.confidentiality === 'internal' ? 'Internal' : <span key="x" className="chip gold">{humanise(j.confidentiality)}</span>],
                     ].map(([l, v]) => (
                       <div key={String(l)} className="flex items-start justify-between gap-4 border-b border-line py-2 text-[13px] last:border-0">
                         <span className="flex-none text-muted">{l}</span>
@@ -425,15 +610,23 @@ function RequestDrawer({ request, onClose, who, onOpen }: { request: ApprovalReq
         )}
       </Drawer>
 
-      <ReasonDialog open={dialog === 'approve'} title="Approve this entry" confirm="Approve" required={false}
+      <ReasonDialog open={dialog === 'approve'} title={`Approve this ${noun}`} confirm="Approve" required={claimFlags > 0}
         onCancel={() => setDialog(null)} onConfirm={approve}
+        extra={rec?.kind === 'advance' ? (
+          <Field label="Amount approved" hint={amountProblem ?? `Requested: ${fmtMoney(rec.advance.requested_amount, { currency: rec.advance.currency })}. A lower amount may be approved.`} className="mt-3">
+            <input className="field num" inputMode="decimal" value={amount} onChange={(e) => setAmount(e.target.value.replace(/[^\d.]/g, ''))} />
+          </Field>
+        ) : undefined}
         body={request && <>
-          You are approving {stepText(request).toLowerCase()}. {request.current_step >= request.steps.length ? 'This is the final step: once approved, the entry can be posted to the books.' : 'After this step the entry passes to the next approver.'}
+          You are approving {stepText(request).toLowerCase()}. {request.current_step < request.steps.length ? `After this step the ${noun} passes to the next approver.`
+            : other ? (rec?.kind === 'claim' ? 'This is the final step: the claim is approved as claimed and its accounting entry is proposed for approval.' : 'This is the final step. Approval is a decision only: it moves no money and posts nothing.')
+            : proposal ? 'This is the final step: once approved, the entry is posted to the books immediately.' : 'This is the final step: once approved, the entry can be posted to the books.'}
           {flagged > 0 && <span className="mt-2 block text-warn">The checklist raised {flagged} point{flagged === 1 ? '' : 's'} on this entry.</span>}
+          {claimFlags > 0 && <span className="mt-2 block text-warn">{claimFlags} line{claimFlags === 1 ? ' is' : 's are'} flagged. State why the claim is approved despite the flag{claimFlags === 1 ? '' : 's'}.</span>}
         </>} />
-      <ReasonDialog open={dialog === 'reject'} title="Reject this entry" confirm="Reject" danger
+      <ReasonDialog open={dialog === 'reject'} title={`Reject this ${noun}`} confirm="Reject" danger
         onCancel={() => setDialog(null)} onConfirm={reject}
-        body="The entry returns to its maker with your reason. Nothing is deleted: the rejection is kept in the entry's history." />
+        body={`The ${noun} returns to its maker with your reason. Nothing is deleted: the rejection is kept in its history.`} />
     </>
   )
 }

@@ -1,7 +1,6 @@
 import { create } from 'zustand'
 import type { NumeroApi } from '@/api/types'
 import { SupabaseApi, liveConfigured } from '@/api/supabase'
-import { getDemoEngine } from '@/api/demoSeed'
 import type { Account, Company, ID, OrgUnit, Party, SessionInfo } from '@/engine/types'
 import { resolvePeriod, today, type Period, type PeriodKey } from '@/lib/dates'
 
@@ -104,6 +103,8 @@ export const useApp = create<AppState>((set, get) => ({
 
   async enterDemo() {
     set({ status: 'boot', error: null })
+    // the demo engine and its sample data are loaded only when someone enters the demo
+    const { getDemoEngine } = await import('@/api/demoSeed')
     const api = await getDemoEngine()
     await api.signIn()
     unsub?.(); unsub = null

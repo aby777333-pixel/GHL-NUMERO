@@ -14,7 +14,10 @@ const slug = (s: string) => s.toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').r
 const nice = (s: string) => s.replace(/_/g, ' ')
 
 const CONFIDENTIALITY: Confidentiality[] = ['internal', 'confidential', 'highly_confidential', 'restricted', 'super_admin_only']
-const ENTITIES = ['party', 'journal', 'invoice', 'bill', 'payment', 'org_unit', 'company']
+/** Record types a field can be defined for, and the ones whose record screens show and save the values today. */
+const ENTITIES = ['invoices', 'register_items', 'fixed_assets', 'party', 'journal', 'payment', 'org_unit', 'company']
+const SHOWN_ON_SCREEN = ['invoices', 'register_items', 'fixed_assets', 'party']
+const ENTITY_LABEL: Record<string, string> = { invoices: 'invoices and bills', register_items: 'register items', fixed_assets: 'fixed assets', party: 'party', journal: 'journal', payment: 'payment', org_unit: 'organisation unit', company: 'company' }
 const FIELD_TYPES = [
   'text', 'number', 'currency', 'percentage', 'date', 'time', 'datetime', 'dropdown', 'multi_select', 'checkbox', 'radio', 'boolean', 'calculated', 'formula',
   'lookup', 'relationship', 'attachment', 'document', 'image', 'signature', 'url', 'email', 'phone', 'location', 'tax', 'reference', 'auto_number',
@@ -184,7 +187,7 @@ function StructureTab() {
 
 // ---------------------------------------------------------------- custom fields
 interface FieldForm { id?: ID; entity: string; scope_key: string; label: string; key: string; keyEdited: boolean; field_type: string; options: string[]; is_required: boolean; company_id: string; status: CustomFieldDef['status']; rules: Record<string, unknown> }
-const blankField = (): FieldForm => ({ entity: 'party', scope_key: '', label: '', key: '', keyEdited: false, field_type: 'text', options: [''], is_required: false, company_id: '', status: 'active', rules: {} })
+const blankField = (): FieldForm => ({ entity: 'invoices', scope_key: '', label: '', key: '', keyEdited: false, field_type: 'text', options: [''], is_required: false, company_id: '', status: 'active', rules: {} })
 
 function FieldsTab() {
   const api = useApp((s) => s.api)!
@@ -216,7 +219,7 @@ function FieldsTab() {
   }
 
   const cols: Column<CustomFieldDef>[] = [
-    { key: 'entity', header: 'Record type', render: (f) => <span className="text-ink">{nice(f.entity)}</span>, sort: (f) => f.entity, csv: (f) => f.entity },
+    { key: 'entity', header: 'Record type', render: (f) => <span className="text-ink">{ENTITY_LABEL[f.entity] ?? nice(f.entity)}{!SHOWN_ON_SCREEN.includes(f.entity) && <span className="ml-1.5 text-[11px] text-muted">not yet shown</span>}</span>, sort: (f) => f.entity, csv: (f) => f.entity },
     { key: 'scope', header: 'Applies to', render: (f) => <span className="text-ink2">{f.scope_key ? nice(f.scope_key) : 'All'}<span className="text-muted"> · {companyName(f.company_id)}</span></span>, sort: (f) => f.scope_key ?? '', csv: (f) => f.scope_key ?? 'all' },
     { key: 'key', header: 'Key', render: (f) => <span className="num text-[12.5px] text-gold">{f.key}</span>, sort: (f) => f.key, csv: (f) => f.key },
     { key: 'label', header: 'Label', render: (f) => f.label, sort: (f) => f.label, csv: (f) => f.label },
@@ -228,7 +231,7 @@ function FieldsTab() {
 
   return (
     <div>
-      <Note kind="warn" className="mb-3">Field definitions are saved and versioned now. Rendering these fields inside transaction forms is scheduled for the next phase and is tracked in the requirement ledger.</Note>
+      <Note kind="warn" className="mb-3">Fields defined for <strong className="text-ink">invoices and bills, register items, fixed assets and parties</strong> appear on those records under “Additional information” (for a party: on its Operations tab), where their values are entered and saved. Fields defined for the other record types are saved and versioned, but no screen shows them yet.</Note>
       {list.error && <ErrorBox message={list.error} retry={list.reload} />}
       {list.loading && !list.data && <Panel><Loading /></Panel>}
       {list.data && (
@@ -247,7 +250,7 @@ function FieldsTab() {
         footer={<><button className="btn ghost" onClick={() => setForm(null)}>Cancel</button><button className="btn primary" disabled={busy || !valid} onClick={() => void save()}>{form?.id ? 'Save new version' : 'Create field'}</button></>}>
         {form && (
           <div className="grid gap-3.5 sm:grid-cols-2">
-            <Field label="Record type"><select className="field" value={form.entity} disabled={Boolean(form.id)} onChange={(e) => setForm({ ...form, entity: e.target.value })}>{ENTITIES.map((x) => <option key={x} value={x}>{nice(x)}</option>)}</select></Field>
+            <Field label="Record type"><select className="field" value={form.entity} disabled={Boolean(form.id)} onChange={(e) => setForm({ ...form, entity: e.target.value })}>{[...new Set([...ENTITIES, form.entity])].map((x) => <option key={x} value={x}>{ENTITY_LABEL[x] ?? nice(x)}{SHOWN_ON_SCREEN.includes(x) ? '' : ' — not yet shown on its screen'}</option>)}</select></Field>
             <Field label="Applies to (optional)" hint="A sub-type key, for example a party type such as “broker”. Leave empty for all."><input className="field" value={form.scope_key} onChange={(e) => setForm({ ...form, scope_key: e.target.value })} /></Field>
             <Field label="Label"><input className="field" autoFocus value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value, key: form.keyEdited ? form.key : slug(e.target.value) })} placeholder="e.g. RERA registration number" /></Field>
             <Field label="Key" hint={form.id ? 'The key of an existing field cannot change' : 'Generated from the label; used in exports and rules'}><input className="field num" value={form.key} disabled={Boolean(form.id)} onChange={(e) => setForm({ ...form, key: e.target.value, keyEdited: true })} onBlur={() => setForm({ ...form, key: slug(form.key) })} /></Field>

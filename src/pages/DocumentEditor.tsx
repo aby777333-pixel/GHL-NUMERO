@@ -7,6 +7,8 @@ import type { DocType, ID, InvoiceInput } from '@/engine/types'
 import { D, fmtMoney, round2, sum, ZERO } from '@/lib/money'
 import { addDays, daysBetween, fmtDate, fmtDateTime, today } from '@/lib/dates'
 import { cx, ErrorBox, Field, Loading, Money, Note, PageHeader, Panel, Section, Spinner, StatusChip } from '@/ui/kit'
+import { Attachments, CustomFields } from '@/ui/ops'
+import { BillOrder, Promises } from '@/ui/records'
 
 interface Row { key: number; description: string; account_id: ID | ''; quantity: string; rate: string; tax_code_id: ID | ''; hsn_sac: string; project: ID | '' }
 let k = 0
@@ -49,6 +51,14 @@ export default function DocumentEditor({ kind }: { kind: 'sales' | 'purchase' })
     setCompanyId(d.company_id); setDocType(d.doc_type); setPartyId(d.party_id); setDate(d.doc_date); setDue(d.due_date ?? d.doc_date); setCurrency(d.currency); setFx(String(d.fx_rate)); setReference(d.reference ?? ''); setNarration(d.narration ?? '')
     setRows((d.lines ?? []).map((l) => ({ key: ++k, description: l.description ?? '', account_id: l.account_id, quantity: String(l.quantity ?? 1), rate: String(l.rate ?? l.amount), tax_code_id: l.tax_code_id ?? '', hsn_sac: l.hsn_sac ?? '', project: l.dims?.project ?? '' })))
   }, [doc.data])
+
+  // a link that knows only the record, not its kind (a follow-up, an attachment), may arrive on the wrong side
+  useEffect(() => {
+    const d = doc.data
+    if (!d) return
+    const isSales = d.doc_type === 'sales_invoice' || d.doc_type === 'credit_note'
+    if (isSales !== sales) nav((isSales ? '/invoices/' : '/bills/') + d.id, { replace: true })
+  }, [doc.data, sales, nav])
 
   const company = companies.find((c) => c.id === companyId)
   useEffect(() => { if (!id && company) { setCurrency(company.base_currency); setFx('1') } }, [company?.id]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -210,6 +220,11 @@ export default function DocumentEditor({ kind }: { kind: 'sales' | 'purchase' })
               </Panel>
             </Section>
           )}
+
+          {d && !sales && docType === 'purchase_bill' && <BillOrder bill={d} />}
+          {d && sales && docType === 'sales_invoice' && d.status !== 'draft' && d.status !== 'cancelled' && <Promises companyId={d.company_id} partyId={d.party_id} invoice={d} />}
+          {d && <Attachments companyId={d.company_id} entity="invoices" entityId={d.id} title={sales ? 'Documents attached to this invoice' : 'Documents attached to this bill'} />}
+          {d && <CustomFields companyId={d.company_id} entity="invoices" entityId={d.id} scopeKey={d.doc_type} />}
 
           {d && (audit.data?.length ?? 0) > 0 && (
             <Section title="History">

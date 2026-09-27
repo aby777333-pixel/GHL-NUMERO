@@ -1,7 +1,7 @@
 # NUMERO REQUIREMENT LEDGER
 
 Total indexed requirements: **1916**  
-Status counts: **BLOCKED** 1, **IMPLEMENTED** 159, **PARTIAL** 127, **PLANNED** 1555, **TESTED** 74
+Status counts: **BLOCKED** 1, **IMPLEMENTED** 182, **PARTIAL** 417, **PLANNED** 1205, **TESTED** 111
 
 Statuses: NOT STARTED · PLANNED · IN PROGRESS · PARTIAL · IMPLEMENTED · TESTED · BLOCKED · NEEDS CLARIFICATION · FUTURE PHASE. Nothing is ever dropped silently.
 
@@ -12,60 +12,60 @@ Section numbers absent from the source document itself: none
 | REQ-0001 | I | Multi-Company | CORE ARCHITECTURE | IMPLEMENTED | 1 | org_unit_types, org_units, RLS · Genesis › Structure |
 | REQ-0002 | I | Multi-Company | OWNER SUPER ADMIN | PARTIAL | 1 | Companies, Team, PeriodClose, Genesis |
 | REQ-0003 | I | Multi-Company | COMPANY CREATION WIZARD | IMPLEMENTED | 1 | src/pages/Companies.tsx wizard · create_company |
-| REQ-0004 | I | Genesis Builder | DYNAMIC FIELD ENGINE | PARTIAL | 1 | custom_field_defs · Genesis › Custom fields |
-| REQ-0005 | I | Genesis Builder | CUSTOM MODULE BUILDER | PLANNED | 2 |  |
-| REQ-0006 | I | Accounting | ACCOUNTING ENGINE | PARTIAL | 1 | tests/sql/engine_invariants.sql · tests/engine.test.ts |
+| REQ-0004 | I | Genesis Builder | DYNAMIC FIELD ENGINE | PARTIAL | 1 | custom_field_defs · src/pages/Genesis.tsx › Custom fields · src/ui/ops.tsx CustomFields · src/ui/PartyOperations.tsx · numero_private.save_custom_values · tests/sql/phase2_payroll.sql T127 T128 · tests/ops.test.ts › a task cannot be closed without its outcome; required custom fields are enforced · supabase/migrations/0013_review_corrections_2.sql record_scopes · tests/sql/phase2_corrections_2.sql T150 T151 T154 · tests/ops.test.ts › a required field of one sub-type does not block a record of another |
+| REQ-0005 | I | Genesis Builder | CUSTOM MODULE BUILDER | PARTIAL | 2 | src/pages/Registers.tsx (Register kinds) · supabase/migrations/0006_workflow_registers_documents.sql register_kinds, save_register_item · src/pages/Register360.tsx · tests/sql/phase2_flow.sql T70–T73 |
+| REQ-0006 | I | Accounting | ACCOUNTING ENGINE | PARTIAL | 1 | tests/sql/engine_invariants.sql · tests/engine.test.ts · tests/sql/phase2_flow.sql T30–T41 · tests/sql/phase2_treasury_purchasing.sql T84–T93 · tests/ops.test.ts · src/pages/Assets.tsx · src/pages/Treasury.tsx |
 | REQ-0007 | I | Accounting | SMART CHART OF ACCOUNTS | TESTED | 1 | tests/engine.test.ts › learned preferences · src/engine/templates.ts |
 | REQ-0008 | I | Consolidation | TRANSACTION COMMAND CENTRE | IMPLEMENTED | 1 | src/pages/Entry.tsx |
 | REQ-0009 | I | Reconciliation | BANKING & RECONCILIATION | PARTIAL | 1 | src/pages/Banking.tsx · import_bank_transactions, suggest_bank_matches |
-| REQ-0010 | I | Reconciliation | CASH MANAGEMENT | PARTIAL | 1 | cash ledgers, cash book report |
-| REQ-0011 | I | Accounts Receivable | ACCOUNTS RECEIVABLE | PARTIAL | 1 | Documents, DocumentEditor, Owed, ReportView › Ageing |
-| REQ-0012 | I | Accounts Payable | ACCOUNTS PAYABLE | PARTIAL | 1 | Documents, DocumentEditor, Payments |
-| REQ-0013 | I | Expenses | EXPENSE MANAGEMENT | PARTIAL | 1 | src/pages/Entry.tsx |
+| REQ-0010 | I | Reconciliation | CASH MANAGEMENT | PARTIAL | 1 | src/pages/Cash.tsx · src/pages/Expenses.tsx · tests/sql/phase2_flow.sql T42–T54 T62–T64 · tests/sql/phase2_corrections.sql T136 T137 · tests/ops.test.ts › a cash count records the difference and cannot be altered · cash ledgers, cash book report |
+| REQ-0011 | I | Accounts Receivable | ACCOUNTS RECEIVABLE | PARTIAL | 1 | Documents, DocumentEditor, Owed, ReportView › Ageing · src/ui/records.tsx Promises · src/pages/DocumentEditor.tsx · numero_private.save_promise · tests/forward.test.ts › early warnings state facts, rules and assumptions · tests/sql/phase2_flow.sql T74 |
+| REQ-0012 | I | Accounts Payable | ACCOUNTS PAYABLE | PARTIAL | 1 | Documents, DocumentEditor, Payments · src/pages/Purchasing.tsx · src/pages/PurchaseDetail.tsx · src/ui/records.tsx BillOrder · tests/sql/phase2_treasury_purchasing.sql T94–T106 · tests/ops.test.ts › requisition → order → receipt → bill, with a three-way comparison |
+| REQ-0013 | I | Expenses | EXPENSE MANAGEMENT | PARTIAL | 1 | src/pages/Entry.tsx · src/pages/ClaimEditor.tsx · src/pages/Expenses.tsx · src/ui/ops.tsx Attachments · src/ui/ApprovalRuleEditor.tsx · src/App.tsx · tests/sql/phase2_flow.sql T48–T60 · tests/ops.test.ts |
 | REQ-0014 | I | Accounts Payable | PURCHASE MANAGEMENT | PLANNED | 1 |  |
-| REQ-0015 | I | Accounts Receivable | SALES & BILLING | PARTIAL | 1 | Documents, DocumentEditor |
-| REQ-0016 | I | Tax | GST & INDIA TAX ARCHITECTURE | PARTIAL | 1 | tax_codes, tax_code_components · Genesis › Tax codes · ReportView › Registers |
+| REQ-0015 | I | Accounts Receivable | SALES & BILLING | PARTIAL | 1 | Documents, DocumentEditor · src/pages/Registers.tsx · src/engine/registerKinds.json |
+| REQ-0016 | I | Tax | GST & INDIA TAX ARCHITECTURE | PARTIAL | 1 | tax_codes, tax_code_components · Genesis › Tax codes · ReportView › Registers · src/ui/AccountMapping.tsx · tests/sql/phase2_treasury_purchasing.sql T93 · tests/sql/phase2_payroll.sql T115 |
 | REQ-0017 | I | Assets | MULTI-CURRENCY | PARTIAL | 1 | tests/engine.test.ts · approve_payment |
-| REQ-0018 | I | Consolidation | INTERCOMPANY ACCOUNTING | PARTIAL | 1 | intercompany ledgers · ReportView › Consolidation |
+| REQ-0018 | I | Consolidation | INTERCOMPANY ACCOUNTING | PARTIAL | 1 | intercompany ledgers · ReportView › Consolidation · src/pages/Cash.tsx · numero_private.propose_fund_transfer · tests/sql/phase2_flow.sql T65 · tests/ops.test.ts › an intercompany transfer has two entries; a one-sided outcome raises an alert |
 | REQ-0019 | I | Consolidation | GROUP CONSOLIDATION | PARTIAL | 1 | ReportView › Consolidation |
 | REQ-0020 | I | Budgeting | BUDGETING | PARTIAL | 1 | src/pages/Budgets.tsx |
-| REQ-0021 | I | Forward | CASH-FLOW FORECASTING | PARTIAL | 1 | src/pages/Forward.tsx |
-| REQ-0022 | I | Treasury | TREASURY MANAGEMENT | PLANNED | 2 |  |
-| REQ-0023 | I | Assets | FIXED ASSETS | PLANNED | 2 |  |
+| REQ-0021 | I | Forward | CASH-FLOW FORECASTING | PARTIAL | 1 | src/pages/Forward.tsx · src/engine/forward.ts · src/lib/forwardData.ts · tests/forward.test.ts |
+| REQ-0022 | I | Treasury | TREASURY MANAGEMENT | PARTIAL | 2 | src/pages/Treasury.tsx · src/pages/Loan360.tsx · supabase/migrations/0009_treasury_payroll.sql · tests/sql/phase2_treasury_purchasing.sql T84–T93 · tests/ops.test.ts 'loan schedule, disbursement and instalments in order' · tests/forward.test.ts 'loan position and debt ladder' |
+| REQ-0023 | I | Assets | FIXED ASSETS | PARTIAL | 2 | supabase/migrations/0007_assets_purchasing.sql fixed_assets, asset_categories, asset_events · src/pages/Assets.tsx · src/pages/Asset360.tsx · tests/sql/phase2_flow.sql T30–T41 · tests/ops.test.ts 'written-down value and part-month depreciation' |
 | REQ-0024 | I | Inventory | INVENTORY | PLANNED | 3 |  |
-| REQ-0025 | I | Projects | REAL ESTATE MODULE | PLANNED | 2 |  |
-| REQ-0026 | I | Projects | CONSTRUCTION ACCOUNTING | PLANNED | 2 |  |
+| REQ-0025 | I | Projects | REAL ESTATE MODULE | PARTIAL | 2 | src/engine/templates.ts · src/engine/registerKinds.json · src/pages/Register360.tsx · src/pages/Ledger.tsx · src/pages/DocumentEditor.tsx |
+| REQ-0026 | I | Projects | CONSTRUCTION ACCOUNTING | PARTIAL | 2 | src/engine/templates.ts · src/engine/registerKinds.json · src/pages/Purchasing.tsx · src/engine/forward.ts · tests/forward.test.ts |
 | REQ-0027 | I | Reports | IMPORT / EXPORT | PLANNED | 1 |  |
 | REQ-0028 | I | Inventory | MEDICAL MACHINERY | PLANNED | 3 |  |
 | REQ-0029 | I | Inventory | WELLNESS / MEDICINES | PLANNED | 3 |  |
 | REQ-0030 | I | Investments | INVESTMENT / AIF ACCOUNTING | PLANNED | 3 |  |
 | REQ-0031 | I | Parties | BROKERAGE / COMMISSION ENGINE | PLANNED | 1 |  |
-| REQ-0032 | I | Payroll | PAYROLL ACCOUNTING | PLANNED | 2 |  |
-| REQ-0033 | I | Treasury | LOANS & BORROWINGS | PLANNED | 2 |  |
+| REQ-0032 | I | Payroll | PAYROLL ACCOUNTING | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql · supabase/migrations/0011_review_corrections.sql apply_loan_recovery · src/pages/Payroll.tsx · src/pages/PayrollRun.tsx · tests/sql/phase2_payroll.sql T110–T124 · tests/sql/phase2_treasury_purchasing.sql T107–T109 · tests/sql/phase2_corrections.sql T130–T133 · tests/ops.test.ts 'a loan recovered through payroll reaches its instalment schedule and is never counted twice' |
+| REQ-0033 | I | Treasury | LOANS & BORROWINGS | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql loans, loan_schedule, disburse_loan, pay_loan_instalment · src/pages/Loan360.tsx · tests/sql/phase2_treasury_purchasing.sql T84–T90 · tests/ops.test.ts 'loan schedule, disbursement and instalments in order' |
 | REQ-0034 | I | Black Vault | DOCUMENT VAULT | PLANNED | 1 |  |
-| REQ-0035 | I | NUMI | GHL NUMERO AI | IMPLEMENTED | 1 | src/numi/engine.ts · verified in browser |
-| REQ-0036 | I | NUMI | AI ACCOUNTING COPILOT | PARTIAL | 1 | src/engine/nlp.ts · Sentinel |
+| REQ-0035 | I | NUMI | GHL NUMERO AI | IMPLEMENTED | 1 | src/numi/engine.ts · src/numi/NumiPanel.tsx · tests/numiOps.test.ts › cash, receivables and approvals answer as before |
+| REQ-0036 | I | NUMI | AI ACCOUNTING COPILOT | PARTIAL | 1 | src/engine/nlp.ts · Sentinel · src/numi/ops.ts · tests/numiOps.test.ts |
 | REQ-0037 | I | NUMI | NUMERO AI MEMORY | TESTED | 1 | tests/engine.test.ts · Genesis › Learned rules |
 | REQ-0038 | I | UI/UX | NATURAL LANGUAGE TRANSACTIONS | TESTED | 1 | tests/engine.test.ts › language understanding |
 | REQ-0039 | I | Voice | VOICE ACCOUNTING | IMPLEMENTED | 1 | src/voice · tests/commands.test.ts |
-| REQ-0040 | I | NUMI | AI FINANCIAL WATCHTOWER | PARTIAL | 1 | run_sentinel · src/pages/Sentinel.tsx |
+| REQ-0040 | I | NUMI | AI FINANCIAL WATCHTOWER | PARTIAL | 1 | run_sentinel · src/pages/Sentinel.tsx · tests/sql/phase2_flow.sql T63 T65 T74 · tests/sql/phase2_treasury_purchasing.sql T100 T102 · tests/sql/phase2_corrections.sql T136 · tests/forward.test.ts › dependence on one vendor is stated beside dependence on one customer · tests/ops.test.ts › a missing asset raises a factual alert and changes nothing in the books |
 | REQ-0041 | I | Sentinel | FRAUD-RISK CONTROLS | PARTIAL | 1 | tests/sql/engine_invariants.sql T03 T22 T10 |
-| REQ-0042 | I | Approvals | APPROVAL ENGINE | PARTIAL | 1 | approval_rules · Approvals |
-| REQ-0043 | I | Security | ROLE-BASED SECURITY | PARTIAL | 1 | tests/sql/engine_invariants.sql T11-T13 |
+| REQ-0042 | I | Approvals | APPROVAL ENGINE | PARTIAL | 1 | approval_rules · numero_private.open_request · src/pages/Approvals.tsx · src/ui/ApprovalRuleEditor.tsx · tests/sql/phase2_corrections.sql T139 T140 T141 · tests/ops.test.ts › in an approval of several steps a later approver may lower the amount, not raise it |
+| REQ-0043 | I | Security | ROLE-BASED SECURITY | PARTIAL | 1 | tests/sql/engine_invariants.sql T11-T13 · tests/sql/phase2_flow.sql T29 T59–T61 · tests/sql/phase2_payroll.sql T117–T119 |
 | REQ-0044 | I | Audit | AUDITOR PORTAL | PARTIAL | 1 | auditor role |
 | REQ-0045 | I | Audit | COMPLETE AUDIT TRAIL | TESTED | 1 | tests/sql/engine_invariants.sql T10d |
 | REQ-0046 | I | Consolidation | FINANCIAL CONTROL CENTRE | IMPLEMENTED | 1 | src/pages/Home.tsx |
 | REQ-0047 | I | Consolidation | FINANCIAL COMMAND MAP | IMPLEMENTED | 1 | src/pages/MoneyMap.tsx |
 | REQ-0048 | I | Accounts Receivable | PROFITABILITY INTELLIGENCE | PLANNED | 1 |  |
-| REQ-0049 | I | Forward | FINANCIAL CALENDAR | PARTIAL | 1 | src/pages/Forward.tsx |
+| REQ-0049 | I | Forward | FINANCIAL CALENDAR | PARTIAL | 1 | src/pages/Forward.tsx › Calendar · src/engine/forward.ts · tests/forward.test.ts |
 | REQ-0050 | I | Reports | REPORT BUILDER | PLANNED | 1 |  |
-| REQ-0051 | I | Reports | STANDARD REPORT LIBRARY | PARTIAL | 1 | src/pages/ReportView.tsx |
+| REQ-0051 | I | Reports | STANDARD REPORT LIBRARY | PARTIAL | 1 | src/pages/ReportView.tsx · src/pages/Assets.tsx |
 | REQ-0052 | I | NUMI | EXECUTIVE MORNING BRIEF | PLANNED | 1 |  |
 | REQ-0053 | I | System Health | FINANCIAL HEALTH INDICATORS | IMPLEMENTED | 1 | ReportView › Financial Health |
 | REQ-0054 | I | Digital Twin | SCENARIO LAB | PLANNED | 3 |  |
 | REQ-0055 | I | Period Close | PERIOD CLOSE | TESTED | 1 | tests/sql/engine_invariants.sql T14 · src/pages/PeriodClose.tsx |
 | REQ-0056 | I | Reconciliation | SUSPENSE COMMAND CENTRE | PARTIAL | 1 | suspense ledger · PeriodClose checklist |
-| REQ-0057 | I | Treasury | SUNDRIES & OUTSTANDING COMMAND CENTRE | PARTIAL | 1 | src/pages/Owed.tsx · Party360 |
+| REQ-0057 | I | Treasury | SUNDRIES & OUTSTANDING COMMAND CENTRE | PARTIAL | 1 | src/pages/Owed.tsx · Party360 · src/pages/Expenses.tsx · src/pages/Registers.tsx · tests/forward.test.ts › advance ageing and advance memory |
 | REQ-0058 | I | Reports | DATA IMPORT & MIGRATION | PARTIAL | 1 | Banking › Import |
 | REQ-0059 | I | Reports | INTEGRATION HUB | PLANNED | 1 |  |
 | REQ-0060 | I | Integrations | SMART EMAILER | PLANNED | 3 |  |
@@ -93,29 +93,29 @@ Section numbers absent from the source document itself: none
 | REQ-0082 | I | NUMI | NO AUTONOMOUS MONEY MOVEMENT | TESTED | 1 | tests/commands.test.ts › sensitive commands |
 | REQ-0083 | I | Multi-Company | COMPANY TEMPLATE MARKETPLACE | TESTED | 1 | tests/engine.test.ts › templates |
 | REQ-0084 | I | Genesis Builder | CUSTOM DASHBOARD BUILDER | PLANNED | 2 |  |
-| REQ-0085 | I | Forward | FUTURE MODULES | PLANNED | 2 |  |
+| REQ-0085 | I | Forward | FUTURE MODULES | IMPLEMENTED | 2 | supabase/migrations/0006_workflow_registers_documents.sql propose_posting, wf_dispatch, register_kinds · src/engine/registerKinds.json · src/pages/Registers.tsx |
 | REQ-0086 | I | NUMI | NUMERO AI CFO | PARTIAL | 1 | src/numi/engine.ts |
 | REQ-0087 | I | NUMI | ASK NUMERO FROM ANY SCREEN | IMPLEMENTED | 1 | Shell › Ask NUMI · contextualPrompts |
 | REQ-0088 | I | Reports | NUMERO TIME MACHINE | TESTED | 1 | tests/sql/engine_invariants.sql T21 · tests/engine.test.ts |
 | REQ-0089 | I | Digital Twin | FINANCIAL DIGITAL TWIN | PLANNED | 3 |  |
 | REQ-0090 | I | Truth | ZERO-AMBIGUITY PRINCIPLE | IMPLEMENTED | 1 | Truth chip on every figure class |
 | REQ-0091 | I | Engineering Governance | ENGINEERING PRINCIPLES | IMPLEMENTED | 1 | decimal.js, numeric(20,4), FOR UPDATE, idempotency keys |
-| REQ-0092 | I | UI/UX | TESTING REQUIREMENTS | PARTIAL | 1 | docs/NUMERO_TEST_MATRIX.md |
+| REQ-0092 | I | UI/UX | TESTING REQUIREMENTS | PARTIAL | 1 | docs/NUMERO_TEST_MATRIX.md · tests/sql/phase2_flow.sql T30–T38 · tests/ops.test.ts › written-down value and part-month depreciation |
 | REQ-0093 | I | UI/UX | HOME SCREEN | IMPLEMENTED | 1 | src/pages/Home.tsx |
 | REQ-0094 | I | Audit | THE ULTIMATE GOAL | PLANNED | 1 |  |
 | REQ-0095 | II | Parties | THE NUMERO PARTY UNIVERSE | IMPLEMENTED | 1 | party_types · Parties |
 | REQ-0096 | II | Parties | ONE PARTY, MANY ROLES | IMPLEMENTED | 1 | party_roles |
 | REQ-0097 | II | Parties | UNIVERSAL PARTY ID | TESTED | 1 | tests/sql/engine_invariants.sql T16a |
-| REQ-0098 | II | Parties | PARTY 360° | PARTIAL | 1 | src/pages/Party360.tsx |
+| REQ-0098 | II | Parties | PARTY 360° | PARTIAL | 1 | src/pages/Party360.tsx · src/ui/PartyOperations.tsx |
 | REQ-0099 | II | Reports | ORGANIZATION 360° | PLANNED | 1 |  |
 | REQ-0100 | II | Parties | CONTACT RELATIONSHIP GRAPH | PLANNED | 1 |  |
 | REQ-0101 | II | Accounts Receivable | OFFICE UNIVERSE | PLANNED | 1 |  |
 | REQ-0102 | II | Banking | OFFICE 360° | PLANNED | 1 |  |
-| REQ-0103 | II | Treasury | EMPLOYEE FINANCIAL 360° | PLANNED | 2 |  |
+| REQ-0103 | II | Treasury | EMPLOYEE FINANCIAL 360° | PARTIAL | 2 | src/ui/PartyOperations.tsx · src/pages/Party360.tsx · src/pages/PeopleCost.tsx · src/pages/Ledger.tsx |
 | REQ-0104 | II | Parties | FREELANCER MANAGEMENT | PLANNED | 1 |  |
 | REQ-0105 | II | Parties | CONSULTANT MANAGEMENT | PLANNED | 1 |  |
-| REQ-0106 | II | Accounts Payable | VENDOR MASTER | PARTIAL | 1 | Parties |
-| REQ-0107 | II | Accounts Payable | VENDOR 360° | PARTIAL | 1 | Party360 |
+| REQ-0106 | II | Accounts Payable | VENDOR MASTER | PARTIAL | 1 | Parties · src/ui/PartyOperations.tsx · src/pages/Registers.tsx · src/pages/Inbox.tsx |
+| REQ-0107 | II | Accounts Payable | VENDOR 360° | PARTIAL | 1 | Party360 · src/ui/PartyOperations.tsx |
 | REQ-0108 | II | Accounts Payable | VENDOR ONBOARDING | PLANNED | 1 |  |
 | REQ-0109 | II | Banking | VENDOR BANK CHANGE PROTECTION | TESTED | 1 | tests/sql/engine_invariants.sql T22 T23 · tests/engine.test.ts |
 | REQ-0110 | II | Parties | BROKER & AGENT UNIVERSE | PLANNED | 1 |  |
@@ -123,37 +123,37 @@ Section numbers absent from the source document itself: none
 | REQ-0112 | II | Accounts Payable | COMMISSION PAYABLE LEDGER | PLANNED | 1 |  |
 | REQ-0113 | II | Parties | REFERRAL TRACKING | PLANNED | 1 |  |
 | REQ-0114 | II | Parties | CONTRACTOR MANAGEMENT | PLANNED | 1 |  |
-| REQ-0115 | II | People Cost | LABOUR & WORKFORCE COSTING | PLANNED | 2 |  |
+| REQ-0115 | II | People Cost | LABOUR & WORKFORCE COSTING | PARTIAL | 2 | tests/sql/phase2_payroll.sql T114 · src/engine/ops.ts peopleCost · src/pages/PeopleCost.tsx · src/pages/Payroll.tsx |
 | REQ-0116 | II | Accounts Payable | HR VENDOR MANAGEMENT | PLANNED | 1 |  |
 | REQ-0117 | II | Forward | LOGISTICS UNIVERSE | PLANNED | 2 |  |
 | REQ-0118 | II | Black Vault | PROFESSIONAL SERVICE PROVIDERS | PLANNED | 1 |  |
 | REQ-0119 | II | Parties | LANDLORD & LEASE MANAGEMENT | PLANNED | 1 |  |
-| REQ-0120 | II | Accounts Receivable | CUSTOMER 360° | PARTIAL | 1 | Party360 |
+| REQ-0120 | II | Accounts Receivable | CUSTOMER 360° | PARTIAL | 1 | Party360 · src/ui/PartyOperations.tsx · src/ui/records.tsx Promises |
 | REQ-0121 | II | Parties | INVESTOR 360° | PLANNED | 1 |  |
 | REQ-0122 | II | Banking | BANK & FINANCIAL INSTITUTION 360° | PLANNED | 1 |  |
 | REQ-0123 | II | Tax | GOVERNMENT & REGULATORY PAYABLES | PLANNED | 1 |  |
 | REQ-0124 | II | Parties | RELATED-PARTY REGISTER | PLANNED | 1 |  |
-| REQ-0125 | II | Forward | CONTRACT UNIVERSE | PLANNED | 2 |  |
+| REQ-0125 | II | Forward | CONTRACT UNIVERSE | PARTIAL | 2 | src/engine/registerKinds.json contract_expense, contract_revenue · src/pages/Register360.tsx · src/engine/forward.ts earlyWarnings · tests/forward.test.ts 'early warnings state facts, rules and assumptions' |
 | REQ-0126 | II | Parties | MONEY RELATIONSHIP GRAPH | PARTIAL | 1 | src/pages/MoneyMap.tsx |
-| REQ-0127 | II | Banking | WHO DO WE OWE? | PARTIAL | 1 | src/pages/Owed.tsx |
-| REQ-0128 | II | Security | WHO OWES US? | PARTIAL | 1 | src/pages/Owed.tsx |
-| REQ-0129 | II | Expenses | ADVANCES COMMAND CENTRE | PARTIAL | 1 | advance ledgers · Payments |
+| REQ-0127 | II | Banking | WHO DO WE OWE? | PARTIAL | 1 | src/pages/Owed.tsx · src/pages/Forward.tsx · src/pages/Expenses.tsx · src/pages/Treasury.tsx |
+| REQ-0128 | II | Security | WHO OWES US? | PARTIAL | 1 | src/pages/Owed.tsx · src/pages/Expenses.tsx · src/pages/Treasury.tsx |
+| REQ-0129 | II | Expenses | ADVANCES COMMAND CENTRE | PARTIAL | 1 | src/pages/Expenses.tsx · src/pages/Advance360.tsx · tests/sql/phase2_flow.sql T42–T55 · tests/sql/phase2_payroll.sql T121 · tests/forward.test.ts › advance ageing and advance memory · tests/numiOps.test.ts |
 | REQ-0130 | II | Security | SECURITY DEPOSIT REGISTER | PLANNED | 1 |  |
-| REQ-0131 | II | Expenses | CORPORATE CARD MANAGEMENT | PLANNED | 2 |  |
-| REQ-0132 | II | Expenses | EMPLOYEE / PARTY REIMBURSEMENTS | PLANNED | 2 |  |
-| REQ-0133 | II | Expenses | TRAVEL EXPENSE MANAGEMENT | PLANNED | 2 |  |
-| REQ-0134 | II | Expenses | SUBSCRIPTIONS & RECURRING EXPENSES | PLANNED | 2 |  |
-| REQ-0135 | II | Assets | SERVICE & AMC CONTRACTS | PLANNED | 2 |  |
-| REQ-0136 | II | Expenses | INSURANCE REGISTER | PLANNED | 2 |  |
-| REQ-0137 | II | Forward | GUARANTEES & FINANCIAL COMMITMENTS | PLANNED | 2 |  |
+| REQ-0131 | II | Expenses | CORPORATE CARD MANAGEMENT | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/ClaimEditor.tsx |
+| REQ-0132 | II | Expenses | EMPLOYEE / PARTY REIMBURSEMENTS | TESTED | 2 | tests/sql/phase2_flow.sql T48 T50 T51 T52 T56 T57 T58 · tests/ops.test.ts 'excess expense becomes a reimbursement due, then paid' · src/pages/ClaimEditor.tsx · src/pages/Expenses.tsx · numero_private.save_claim, approve_claim, propose_claim_posting, pay_claim |
+| REQ-0133 | II | Expenses | TRAVEL EXPENSE MANAGEMENT | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/ClaimEditor.tsx · src/pages/Expenses.tsx · src/pages/Register360.tsx · supabase/migrations/0011_review_corrections.sql item_dims · tests/sql/phase2_corrections.sql T135 · tests/ops.test.ts 'a claim linked to a trip carries the trip into its entry' |
+| REQ-0134 | II | Expenses | SUBSCRIPTIONS & RECURRING EXPENSES | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Register360.tsx · src/engine/forward.ts · tests/forward.test.ts 'a monthly obligation falls due once a month' · tests/sql/phase2_flow.sql T72 |
+| REQ-0135 | II | Assets | SERVICE & AMC CONTRACTS | PARTIAL | 2 | src/engine/registerKinds.json (kind 'amc') · src/pages/Registers.tsx · src/engine/forward.ts earlyWarnings |
+| REQ-0136 | II | Expenses | INSURANCE REGISTER | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Register360.tsx · src/engine/forward.ts · tests/forward.test.ts 'early warnings state facts, rules and assumptions' |
+| REQ-0137 | II | Forward | GUARANTEES & FINANCIAL COMMITMENTS | TESTED | 2 | tests/sql/phase2_treasury_purchasing.sql T97 · tests/forward.test.ts 'an approved purchase order is COMMITTED for what has not been billed', 'contingent amounts are reported beside the projection, never inside it', 'early warnings state facts, rules and assumptions', 'a guarantee given is contingent: beside the projection, never inside it' · tests/sql/phase2_flow.sql T73 · src/pages/Registers.tsx · src/pages/Forward.tsx |
 | REQ-0138 | II | Sentinel | PARTY DUPLICATE DETECTION | TESTED | 1 | tests/sql/engine_invariants.sql T16b · tests/engine.test.ts |
 | REQ-0139 | II | Sentinel | CONFLICT / DUPLICATION INDICATORS | PARTIAL | 1 | Sentinel duplicate invoice |
 | REQ-0140 | II | Black Vault | PARTY DOCUMENT VAULT | PLANNED | 1 |  |
-| REQ-0141 | II | Documents | DOCUMENT EXPIRY ENGINE | PLANNED | 2 |  |
+| REQ-0141 | II | Documents | DOCUMENT EXPIRY ENGINE | PARTIAL | 2 | src/pages/Inbox.tsx · src/engine/forward.ts · tests/forward.test.ts 'early warnings state facts, rules and assumptions' · numero_private.classify_document |
 | REQ-0142 | II | Parties | PARTY NOTES & ACTIVITY TIMELINE | PLANNED | 1 |  |
 | REQ-0143 | II | Black Vault | COMMUNICATION HISTORY | PLANNED | 1 |  |
 | REQ-0144 | II | Approvals | RESPONSIBILITY MAPPING | PLANNED | 1 |  |
-| REQ-0145 | II | Forward | ACTION & FOLLOW-UP ENGINE | PLANNED | 2 |  |
+| REQ-0145 | II | Forward | ACTION & FOLLOW-UP ENGINE | PARTIAL | 2 | tests/sql/phase2_payroll.sql T126 · tests/ops.test.ts 'a task cannot be closed without its outcome; required custom fields are enforced' · src/pages/Tasks.tsx · src/pages/Register360.tsx · src/pages/Advance360.tsx · numero_private.save_task |
 | REQ-0146 | II | Approvals | ESCALATION ENGINE | PLANNED | 1 |  |
 | REQ-0147 | II | Parties | COUNTERPARTY EXPOSURE | PLANNED | 1 |  |
 | REQ-0148 | II | Parties | PARTY PROFITABILITY | PLANNED | 1 |  |
@@ -162,24 +162,24 @@ Section numbers absent from the source document itself: none
 | REQ-0151 | II | Accounts Payable | CENTRAL PROCUREMENT | PLANNED | 1 |  |
 | REQ-0152 | II | Reports | SHARED SERVICE CENTRE | PLANNED | 1 |  |
 | REQ-0153 | II | Inventory | MULTIPLE OFFICES PER COMPANY | PLANNED | 3 |  |
-| REQ-0154 | II | Expenses | OFFICE PETTY CASH | PLANNED | 2 |  |
+| REQ-0154 | II | Expenses | OFFICE PETTY CASH | PARTIAL | 2 | tests/sql/phase2_flow.sql T62 T63 · tests/ops.test.ts 'a cash count records the difference and cannot be altered' · src/pages/Cash.tsx · src/pages/Ledger.tsx · numero_private.save_cash_box, record_cash_count |
 | REQ-0155 | II | Parties | PROJECT PARTY ECOSYSTEM | PLANNED | 1 |  |
 | REQ-0156 | II | Genesis Builder | CUSTOM PARTY TYPES | IMPLEMENTED | 1 | Genesis › Party types |
-| REQ-0157 | II | Genesis Builder | CUSTOM RELATIONSHIP TYPES | PLANNED | 2 |  |
-| REQ-0158 | II | Genesis Builder | PARTY-SPECIFIC CUSTOM FIELDS | PARTIAL | 1 | custom_field_defs scope_key |
+| REQ-0157 | II | Genesis Builder | CUSTOM RELATIONSHIP TYPES | PARTIAL | 2 | src/pages/Genesis.tsx (Party types) · src/pages/Party360.tsx (Add relationship) |
+| REQ-0158 | II | Genesis Builder | PARTY-SPECIFIC CUSTOM FIELDS | PARTIAL | 1 | custom_field_defs scope_key · src/pages/Genesis.tsx › Custom fields · src/ui/PartyOperations.tsx · src/ui/ops.tsx CustomFields · supabase/migrations/0013_review_corrections_2.sql record_scopes · tests/sql/phase2_corrections_2.sql T154 · tests/ops.test.ts › a field required of one party type is asked of that type only |
 | REQ-0159 | II | NUMI | NUMERO AI + PARTY INTELLIGENCE | PLANNED | 1 |  |
 | REQ-0160 | II | Parties | NATURAL LANGUAGE PARTY CREATION | PLANNED | 1 |  |
 | REQ-0161 | II | Parties | BULK PARTY IMPORT | PLANNED | 1 |  |
 | REQ-0162 | II | Reports | UNIVERSAL TRANSACTION TAGGING | IMPLEMENTED | 1 | journal_line_dims + party on every line · migration 0005 |
 | REQ-0163 | II | Banking | THE NUMERO "WHY" ENGINE | IMPLEMENTED | 1 | JournalDetail › why engine |
 | REQ-0164 | II | Parties | TOTAL RELATIONSHIP VALUE | IMPLEMENTED | 1 | Party360 tiles |
-| REQ-0165 | II | Reports | COUNTERPARTY CONCENTRATION | PARTIAL | 1 | Forward › concentration |
+| REQ-0165 | II | Reports | COUNTERPARTY CONCENTRATION | PARTIAL | 1 | src/engine/forward.ts earlyWarnings · src/pages/Forward.tsx › Early warnings · tests/forward.test.ts › dependence on one vendor is stated beside dependence on one customer |
 | REQ-0166 | II | Parties | PARTY TERMINATION / DEACTIVATION | TESTED | 1 | tests/engine.test.ts |
 | REQ-0167 | II | Parties | BLOCKED PARTY CONTROL | TESTED | 1 | tests/engine.test.ts |
 | REQ-0168 | II | Banking | NUMERO NETWORK VIEW | PLANNED | 1 |  |
 | REQ-0169 | II | Banking | SUPER ADMIN "EVERYONE" CONSOLE | IMPLEMENTED | 1 | src/pages/Parties.tsx |
 | REQ-0170 | II | Parties | PARTY COMMAND CENTRE | PLANNED | 1 |  |
-| REQ-0171 | II | Audit | FINANCIAL RESPONSIBILITY CHAIN | PARTIAL | 1 | JournalDetail › responsibility chain |
+| REQ-0171 | II | Audit | FINANCIAL RESPONSIBILITY CHAIN | PARTIAL | 1 | JournalDetail › responsibility chain · src/pages/JournalDetail.tsx · src/pages/Approvals.tsx · src/ui/ops.tsx ApprovalTrail · numero_private.open_request |
 | REQ-0172 | II | Security | COUNTERPARTY DATA PRIVACY | IMPLEMENTED | 1 | parties RLS through party_roles |
 | REQ-0173 | II | Parties | THIRD-PARTY PORTAL | PLANNED | 1 |  |
 | REQ-0174 | II | Accounts Receivable | SELF-SERVICE DOCUMENT COLLECTION | PLANNED | 1 |  |
@@ -190,100 +190,100 @@ Section numbers absent from the source document itself: none
 | REQ-0179 | II | Parties | NUMERO GLOBAL PARTY SEARCH | IMPLEMENTED | 1 | CommandPalette |
 | REQ-0180 | II | Truth | ULTIMATE TRACEABILITY | PLANNED | 1 |  |
 | REQ-0181 | II | Engineering Governance | FINAL ADDITIVE DIRECTIVE | PLANNED | 1 |  |
-| REQ-0182 | III | Expenses | NUMERO EXPENSE UNIVERSE | PLANNED | 2 |  |
-| REQ-0183 | III | Expenses | EXPENSE 360° | PLANNED | 2 |  |
-| REQ-0184 | III | Expenses | VEHICLE UNIVERSE | PLANNED | 2 |  |
-| REQ-0185 | III | Expenses | VEHICLE MASTER | PLANNED | 2 |  |
-| REQ-0186 | III | Expenses | VEHICLE 360° | PLANNED | 2 |  |
+| REQ-0182 | III | Expenses | NUMERO EXPENSE UNIVERSE | PARTIAL | 2 | src/pages/Expenses.tsx · src/engine/templates.ts · tests/ops.test.ts 'policy flags inform the approver and never reject on their own' · numero_private.save_expense_category |
+| REQ-0183 | III | Expenses | EXPENSE 360° | PARTIAL | 2 | src/pages/ClaimEditor.tsx · supabase/migrations/0008_expenses_advances_cash.sql · src/engine/opsTypes.ts |
+| REQ-0184 | III | Expenses | VEHICLE UNIVERSE | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · tests/sql/phase2_flow.sql T70 T71 |
+| REQ-0185 | III | Expenses | VEHICLE MASTER | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Register360.tsx · tests/sql/phase2_flow.sql T70 T71 · tests/ops.test.ts 'register kinds enforce their required fields and create a cost dimension' |
+| REQ-0186 | III | Expenses | VEHICLE 360° | PARTIAL | 2 | src/pages/Register360.tsx · src/pages/JournalEditor.tsx · src/pages/Ledger.tsx · src/pages/ClaimEditor.tsx · src/pages/Expenses.tsx · supabase/migrations/0011_review_corrections.sql item_dims |
 | REQ-0187 | III | Expenses | FUEL MANAGEMENT | PLANNED | 2 |  |
 | REQ-0188 | III | Expenses | FUEL CARD MANAGEMENT | PLANNED | 2 |  |
 | REQ-0189 | III | Expenses | MILEAGE CLAIMS | PLANNED | 2 |  |
 | REQ-0190 | III | Expenses | FASTAG / TOLL MANAGEMENT | PLANNED | 2 |  |
-| REQ-0191 | III | Expenses | PARKING | PLANNED | 2 |  |
-| REQ-0192 | III | Expenses | VEHICLE SERVICE & MAINTENANCE | PLANNED | 2 |  |
-| REQ-0193 | III | Expenses | VEHICLE DOCUMENT ALERTS | PLANNED | 2 |  |
-| REQ-0194 | III | Expenses | DRIVER MANAGEMENT | PLANNED | 2 |  |
-| REQ-0195 | III | Expenses | TRAVEL UNIVERSE | PLANNED | 2 |  |
-| REQ-0196 | III | Expenses | TRAVEL REQUEST | PLANNED | 2 |  |
-| REQ-0197 | III | Expenses | TRIP ID | PLANNED | 2 |  |
-| REQ-0198 | III | Expenses | TRIP 360° | PLANNED | 2 |  |
-| REQ-0199 | III | Expenses | AIR TRAVEL | PLANNED | 2 |  |
+| REQ-0191 | III | Expenses | PARKING | PARTIAL | 2 | src/pages/ClaimEditor.tsx · src/engine/templates.ts |
+| REQ-0192 | III | Expenses | VEHICLE SERVICE & MAINTENANCE | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Register360.tsx · src/pages/Asset360.tsx |
+| REQ-0193 | III | Expenses | VEHICLE DOCUMENT ALERTS | PARTIAL | 2 | src/engine/registerKinds.json · src/engine/forward.ts · src/pages/Forward.tsx · src/pages/Registers.tsx · tests/forward.test.ts 'early warnings state facts, rules and assumptions' |
+| REQ-0194 | III | Expenses | DRIVER MANAGEMENT | PARTIAL | 2 | src/ui/PartyOperations.tsx · src/pages/Party360.tsx · src/engine/registerKinds.json |
+| REQ-0195 | III | Expenses | TRAVEL UNIVERSE | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Expenses.tsx · src/pages/ClaimEditor.tsx · src/pages/Advance360.tsx · src/pages/Register360.tsx · tests/sql/phase2_corrections.sql T135 |
+| REQ-0196 | III | Expenses | TRAVEL REQUEST | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Expenses.tsx · numero_private.submit_advance, approve_advance |
+| REQ-0197 | III | Expenses | TRIP ID | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/ClaimEditor.tsx · src/pages/Register360.tsx · numero_private.save_register_item, item_dims · tests/sql/phase2_corrections.sql T135 · tests/ops.test.ts 'a claim linked to a trip carries the trip into its entry' |
+| REQ-0198 | III | Expenses | TRIP 360° | PARTIAL | 2 | src/pages/Register360.tsx · src/engine/registerKinds.json · tests/sql/phase2_corrections.sql T135 |
+| REQ-0199 | III | Expenses | AIR TRAVEL | PARTIAL | 2 | src/pages/ClaimEditor.tsx · src/pages/DocumentEditor.tsx · src/engine/templates.ts |
 | REQ-0200 | III | General | TRAIN / BUS | PLANNED | 3 |  |
-| REQ-0201 | III | Expenses | TAXI / CAB / LOCAL TRANSPORT | PLANNED | 2 |  |
-| REQ-0202 | III | Expenses | HOTEL / ACCOMMODATION | PLANNED | 2 |  |
-| REQ-0203 | III | Projects | COMPANY GUEST HOUSE | PLANNED | 2 |  |
-| REQ-0204 | III | Expenses | FOOD & MEALS | PLANNED | 2 |  |
-| REQ-0205 | III | Expenses | CLIENT ENTERTAINMENT | PLANNED | 2 |  |
+| REQ-0201 | III | Expenses | TAXI / CAB / LOCAL TRANSPORT | PARTIAL | 2 | src/pages/ClaimEditor.tsx · src/engine/templates.ts |
+| REQ-0202 | III | Expenses | HOTEL / ACCOMMODATION | PARTIAL | 2 | src/pages/ClaimEditor.tsx · src/engine/templates.ts |
+| REQ-0203 | III | Projects | COMPANY GUEST HOUSE | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Register360.tsx · src/pages/JournalEditor.tsx |
+| REQ-0204 | III | Expenses | FOOD & MEALS | PARTIAL | 2 | src/pages/ClaimEditor.tsx · src/pages/Expenses.tsx · src/engine/templates.ts |
+| REQ-0205 | III | Expenses | CLIENT ENTERTAINMENT | PARTIAL | 2 | src/pages/ClaimEditor.tsx · src/pages/Expenses.tsx · src/engine/templates.ts · tests/sql/phase2_flow.sql T49 T50 |
 | REQ-0206 | III | Expenses | DAILY ALLOWANCE / PER DIEM | PLANNED | 2 |  |
-| REQ-0207 | III | Expenses | TRAVEL ADVANCES | PLANNED | 2 |  |
+| REQ-0207 | III | Expenses | TRAVEL ADVANCES | TESTED | 2 | tests/sql/phase2_flow.sql T42 T43 T44 T46 T47 T51 T52 T53 T54 T56 · tests/ops.test.ts 'partial settlement leaves a balance that is RETURN DUE, and the return settles it' · src/pages/Advance360.tsx · numero_private.release_advance, return_advance, refresh_advance_status |
 | REQ-0208 | III | Expenses | FOREIGN TRAVEL | PLANNED | 2 |  |
-| REQ-0209 | III | Expenses | TRAVEL POLICY ENGINE | PLANNED | 2 |  |
-| REQ-0210 | III | Expenses | OUT-OF-POLICY EXPENSES | PLANNED | 2 |  |
-| REQ-0211 | III | Expenses | PETTY CASH UNIVERSE | PLANNED | 2 |  |
-| REQ-0212 | III | Expenses | PETTY CASH VOUCHER | PLANNED | 2 |  |
-| REQ-0213 | III | Expenses | PETTY CASH TOP-UP | PLANNED | 2 |  |
+| REQ-0209 | III | Expenses | TRAVEL POLICY ENGINE | PARTIAL | 2 | src/pages/Expenses.tsx · tests/ops.test.ts 'policy flags inform the approver and never reject on their own' · numero_private.save_expense_category |
+| REQ-0210 | III | Expenses | OUT-OF-POLICY EXPENSES | TESTED | 2 | tests/sql/phase2_flow.sql T48 T49 T50 · tests/ops.test.ts 'policy flags inform the approver and never reject on their own' · src/pages/ClaimEditor.tsx · numero_private.save_claim, approve_claim |
+| REQ-0211 | III | Expenses | PETTY CASH UNIVERSE | PARTIAL | 2 | tests/sql/phase2_flow.sql T62 T63 T64 · src/pages/Cash.tsx · numero_private.save_cash_box, record_cash_count |
+| REQ-0212 | III | Expenses | PETTY CASH VOUCHER | PARTIAL | 2 | src/pages/ClaimEditor.tsx · src/pages/Entry.tsx · src/pages/Cash.tsx · supabase/migrations/0011_review_corrections.sql check_cash_box_limit · tests/sql/phase2_corrections.sql T136 T137 · tests/ops.test.ts 'a payment from a cash box above its limit is raised for review and still recorded' |
+| REQ-0213 | III | Expenses | PETTY CASH TOP-UP | PARTIAL | 2 | src/pages/Cash.tsx · tests/sql/phase2_flow.sql T64 · numero_private.propose_fund_transfer |
 | REQ-0214 | III | UI/UX | CASH COUNT | PLANNED | 1 |  |
-| REQ-0215 | III | Expenses | CASH ADVANCES | PLANNED | 2 |  |
-| REQ-0216 | III | Projects | SITE CASH | PLANNED | 2 |  |
-| REQ-0217 | III | Expenses | EMPLOYEE EXPENSE WALLET | PLANNED | 2 |  |
+| REQ-0215 | III | Expenses | CASH ADVANCES | IMPLEMENTED | 2 | src/pages/Expenses.tsx · src/pages/Advance360.tsx · tests/sql/phase2_flow.sql T46 T52 T54 · tests/sql/phase2_corrections.sql T134 T138 · tests/ops.test.ts 'an advance to a vendor sits in the vendor advances ledger' · tests/numiOps.test.ts 'advances: the total agrees with the ageing engine and is not called an expense' · supabase/migrations/0008_expenses_advances_cash.sql · supabase/migrations/0011_review_corrections.sql advance_account |
+| REQ-0216 | III | Projects | SITE CASH | PARTIAL | 2 | src/pages/Cash.tsx · tests/sql/phase2_flow.sql T62 T64 · numero_private.save_cash_box |
+| REQ-0217 | III | Expenses | EMPLOYEE EXPENSE WALLET | PARTIAL | 2 | src/ui/PartyOperations.tsx · src/pages/Party360.tsx · src/pages/Expenses.tsx · tests/sql/phase2_flow.sql T59 |
 | REQ-0218 | III | Expenses | MOBILE RECEIPT CAPTURE | PLANNED | 2 |  |
 | REQ-0219 | III | Approvals | MISSING RECEIPT WORKFLOW | PLANNED | 1 |  |
-| REQ-0220 | III | Expenses | CORPORATE CREDIT CARDS | PLANNED | 2 |  |
+| REQ-0220 | III | Expenses | CORPORATE CREDIT CARDS | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/ClaimEditor.tsx |
 | REQ-0221 | III | Expenses | UNEXPLAINED CARD TRANSACTIONS | PLANNED | 2 |  |
 | REQ-0222 | III | Expenses | PERSONAL EXPENSE ON COMPANY CARD | PLANNED | 2 |  |
-| REQ-0223 | III | Expenses | MOBILE / TELEPHONE EXPENSES | PLANNED | 2 |  |
-| REQ-0224 | III | Expenses | INTERNET | PLANNED | 2 |  |
-| REQ-0225 | III | Expenses | UTILITIES | PLANNED | 2 |  |
-| REQ-0226 | III | Expenses | OFFICE SUPPLIES | PLANNED | 2 |  |
-| REQ-0227 | III | Expenses | OFFICE PANTRY | PLANNED | 2 |  |
-| REQ-0228 | III | Expenses | COURIER & POSTAGE | PLANNED | 2 |  |
-| REQ-0229 | III | Expenses | PRINTING & STATIONERY | PLANNED | 2 |  |
+| REQ-0223 | III | Expenses | MOBILE / TELEPHONE EXPENSES | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/ClaimEditor.tsx · src/engine/templates.ts |
+| REQ-0224 | III | Expenses | INTERNET | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/ClaimEditor.tsx · src/engine/templates.ts |
+| REQ-0225 | III | Expenses | UTILITIES | PARTIAL | 2 | src/engine/templates.ts · src/engine/registerKinds.json · src/pages/JournalEditor.tsx · src/pages/Ledger.tsx |
+| REQ-0226 | III | Expenses | OFFICE SUPPLIES | PARTIAL | 2 | src/engine/templates.ts · src/pages/Expenses.tsx · src/pages/ClaimEditor.tsx |
+| REQ-0227 | III | Expenses | OFFICE PANTRY | PARTIAL | 2 | src/engine/templates.ts · src/pages/Expenses.tsx · src/pages/Ledger.tsx |
+| REQ-0228 | III | Expenses | COURIER & POSTAGE | PARTIAL | 2 | src/engine/templates.ts · src/pages/ClaimEditor.tsx |
+| REQ-0229 | III | Expenses | PRINTING & STATIONERY | PARTIAL | 2 | src/engine/templates.ts · src/pages/ClaimEditor.tsx · src/pages/DocumentEditor.tsx |
 | REQ-0230 | III | Reports | MARKETING EXPENSE OPERATIONS | PLANNED | 1 |  |
-| REQ-0231 | III | Expenses | EVENT EXPENSES | PLANNED | 2 |  |
-| REQ-0232 | III | Expenses | GIFTS & BUSINESS COURTESIES | PLANNED | 2 |  |
+| REQ-0231 | III | Expenses | EVENT EXPENSES | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Register360.tsx · src/pages/ClaimEditor.tsx · tests/ops.test.ts 'register kinds enforce their required fields and create a cost dimension' · tests/sql/phase2_corrections.sql T135 |
+| REQ-0232 | III | Expenses | GIFTS & BUSINESS COURTESIES | PARTIAL | 2 | src/pages/Expenses.tsx · src/pages/ClaimEditor.tsx · numero_private.save_claim |
 | REQ-0233 | III | Assets | UNIFORMS & EMPLOYEE EQUIPMENT | PLANNED | 2 |  |
-| REQ-0234 | III | Assets | IT EQUIPMENT | PLANNED | 2 |  |
-| REQ-0235 | III | Expenses | SOFTWARE & DIGITAL SUBSCRIPTIONS | PLANNED | 2 |  |
-| REQ-0236 | III | Forward | DOMAIN & HOSTING REGISTER | PLANNED | 2 |  |
-| REQ-0237 | III | Assets | REPAIRS & MAINTENANCE | PLANNED | 2 |  |
+| REQ-0234 | III | Assets | IT EQUIPMENT | IMPLEMENTED | 2 | src/pages/Assets.tsx · src/pages/Asset360.tsx · supabase/migrations/0007_assets_purchasing.sql save_asset, record_asset_event |
+| REQ-0235 | III | Expenses | SOFTWARE & DIGITAL SUBSCRIPTIONS | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-0236 | III | Forward | DOMAIN & HOSTING REGISTER | PARTIAL | 2 | src/engine/registerKinds.json domain_hosting · src/pages/Registers.tsx · src/pages/Register360.tsx · src/engine/forward.ts earlyWarnings |
+| REQ-0237 | III | Assets | REPAIRS & MAINTENANCE | PARTIAL | 2 | src/pages/Asset360.tsx (Record an event) · supabase/migrations/0007_assets_purchasing.sql record_asset_event |
 | REQ-0238 | III | Security | HOUSEKEEPING & SECURITY | PLANNED | 1 |  |
-| REQ-0239 | III | Expenses | RENT & LEASE EXPENSE | PLANNED | 2 |  |
-| REQ-0240 | III | Expenses | DEPOSITS | PARTIAL | 1 | Entry › Deposit paid |
-| REQ-0241 | III | Expenses | FINES & PENALTIES | PLANNED | 2 |  |
-| REQ-0242 | III | Expenses | INSURANCE EXPENSES | PLANNED | 2 |  |
-| REQ-0243 | III | Forward | RECURRING PAYMENT ENGINE | PLANNED | 2 |  |
+| REQ-0239 | III | Expenses | RENT & LEASE EXPENSE | IMPLEMENTED | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Register360.tsx · src/engine/forward.ts · tests/forward.test.ts 'a monthly obligation falls due once a month' 'rent escalation: 10 lakh a month, 5% from April (spec 675)' |
+| REQ-0240 | III | Expenses | DEPOSITS | PARTIAL | 1 | Entry › Deposit paid · src/pages/Registers.tsx · src/engine/registerKinds.json |
+| REQ-0241 | III | Expenses | FINES & PENALTIES | PARTIAL | 2 | src/engine/templates.ts · src/engine/registerKinds.json · src/pages/Registers.tsx |
+| REQ-0242 | III | Expenses | INSURANCE EXPENSES | PARTIAL | 2 | src/engine/registerKinds.json · src/engine/templates.ts · src/pages/Registers.tsx |
+| REQ-0243 | III | Forward | RECURRING PAYMENT ENGINE | TESTED | 2 | tests/forward.test.ts 'a monthly obligation falls due once a month', 'stops at the end date unless it renews automatically', 'rent escalation: 10 lakh a month, 5% from April (spec 675)', 'every event names its source, its certainty and how it was arrived at', 'a scheduled occurrence that has already been billed is not counted twice', 'a bill from another party, a cancelled bill or a bill of another period covers nothing' · tests/sql/phase2_treasury_purchasing.sql T85 · src/pages/Forward.tsx · src/pages/Register360.tsx · tests/forward.test.ts 'only the bill itself stands for the period: a debit note or a credit note covers nothing' |
 | REQ-0244 | III | Banking | AUTOPAY REGISTER | PLANNED | 1 |  |
 | REQ-0245 | III | People Cost | OFFICE COST PER EMPLOYEE | PLANNED | 2 |  |
 | REQ-0246 | III | Reports | COST PER DEPARTMENT | PLANNED | 1 |  |
-| REQ-0247 | III | Projects | COST PER PROJECT | PLANNED | 2 |  |
-| REQ-0248 | III | People Cost | COST PER EMPLOYEE | PLANNED | 2 |  |
-| REQ-0249 | III | Expenses | EMPLOYEE BENEFITS | PLANNED | 2 |  |
-| REQ-0250 | III | Forward | TRAINING & EDUCATION | PLANNED | 2 |  |
-| REQ-0251 | III | Expenses | RELOCATION EXPENSE | PLANNED | 2 |  |
-| REQ-0252 | III | Expenses | COMPANY ACCOMMODATION | PLANNED | 2 |  |
-| REQ-0253 | III | Expenses | COMPANY-PAID FOOD | PLANNED | 2 |  |
-| REQ-0254 | III | Expenses | VEHICLE ALLOWANCE | PLANNED | 2 |  |
-| REQ-0255 | III | Expenses | TRAVEL ALLOWANCE | PLANNED | 2 |  |
-| REQ-0256 | III | Expenses | EXPENSE POLICY BUILDER | PLANNED | 2 |  |
+| REQ-0247 | III | Projects | COST PER PROJECT | PARTIAL | 2 | src/pages/DocumentEditor.tsx · src/pages/ClaimEditor.tsx · src/pages/PurchaseEditor.tsx · src/pages/JournalEditor.tsx · src/pages/Ledger.tsx |
+| REQ-0248 | III | People Cost | COST PER EMPLOYEE | PARTIAL | 2 | tests/forward.test.ts 'people cost: salary is not the whole cost, and shared costs are not invented' · tests/sql/phase2_payroll.sql T117 · src/engine/ops.ts peopleCost · src/pages/PeopleCost.tsx |
+| REQ-0249 | III | Expenses | EMPLOYEE BENEFITS | PARTIAL | 2 | src/pages/Payroll.tsx · src/engine/ops.ts · src/pages/PeopleCost.tsx · tests/forward.test.ts 'people cost: salary is not the whole cost, and shared costs are not invented' |
+| REQ-0250 | III | Forward | TRAINING & EDUCATION | PARTIAL | 2 | src/engine/registerKinds.json event · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-0251 | III | Expenses | RELOCATION EXPENSE | PARTIAL | 2 | src/pages/Expenses.tsx · src/pages/ClaimEditor.tsx |
+| REQ-0252 | III | Expenses | COMPANY ACCOMMODATION | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Register360.tsx · src/engine/templates.ts · src/pages/ClaimEditor.tsx · src/pages/Expenses.tsx · tests/ops.test.ts 'a claim linked to a property or an incident carries that record into its entry' |
+| REQ-0253 | III | Expenses | COMPANY-PAID FOOD | PARTIAL | 2 | src/engine/templates.ts · src/pages/Expenses.tsx |
+| REQ-0254 | III | Expenses | VEHICLE ALLOWANCE | PARTIAL | 2 | src/pages/Payroll.tsx · src/pages/ClaimEditor.tsx · tests/sql/phase2_payroll.sql T110 |
+| REQ-0255 | III | Expenses | TRAVEL ALLOWANCE | PARTIAL | 2 | src/pages/Payroll.tsx · tests/sql/phase2_payroll.sql T110 |
+| REQ-0256 | III | Expenses | EXPENSE POLICY BUILDER | PARTIAL | 2 | src/pages/Expenses.tsx · tests/ops.test.ts 'policy flags inform the approver and never reject on their own' · tests/sql/phase2_flow.sql T48 T49 · numero_private.save_expense_category |
 | REQ-0257 | III | Approvals | EXPENSE APPROVAL MATRIX | PLANNED | 1 |  |
 | REQ-0258 | III | Expenses | SPLIT EXPENSE | PARTIAL | 1 | multi-line journals with tags |
-| REQ-0259 | III | Projects | SPLIT BY PROJECT | PLANNED | 2 |  |
+| REQ-0259 | III | Projects | SPLIT BY PROJECT | PARTIAL | 2 | src/pages/DocumentEditor.tsx · numero_private.approve_invoice |
 | REQ-0260 | III | Expenses | SHARED EXPENSE ALLOCATION | PLANNED | 2 |  |
 | REQ-0261 | III | Expenses | PREPAID EXPENSES | PLANNED | 2 |  |
-| REQ-0262 | III | Expenses | ACCRUED EXPENSES | PLANNED | 2 |  |
+| REQ-0262 | III | Expenses | ACCRUED EXPENSES | PARTIAL | 2 | src/pages/Entry.tsx · src/engine/templates.ts · src/engine/reports.ts · numero_private.reverse_journal |
 | REQ-0263 | III | Accounts Payable | EMPLOYEE REIMBURSEMENT PAYABLE | PLANNED | 1 |  |
 | REQ-0264 | III | Sentinel | RECEIPT DUPLICATE DETECTION | PLANNED | 1 |  |
 | REQ-0265 | III | Sentinel | EXPENSE ANOMALY ENGINE | PLANNED | 1 |  |
-| REQ-0266 | III | Expenses | EXPENSE SEARCH | PLANNED | 2 |  |
+| REQ-0266 | III | Expenses | EXPENSE SEARCH | PARTIAL | 2 | src/numi/engine.ts · src/numi/ops.ts · tests/numiOps.test.ts 'a narrower question gets the narrower figure: fuel is not the whole of travel' 'advances: the total agrees with the ageing engine and is not called an expense' 'advances overdue: lists only those past the settlement date' |
 | REQ-0267 | III | NUMI | NUMERO AI TRAVEL ASSISTANT | PLANNED | 1 |  |
 | REQ-0268 | III | NUMI | NUMERO AI FLEET ASSISTANT | PLANNED | 1 |  |
 | REQ-0269 | III | NUMI | NUMERO AI PETTY CASH ASSISTANT | PLANNED | 1 |  |
 | REQ-0270 | III | Expenses | DAILY EXPENSE PULSE | PLANNED | 2 |  |
-| REQ-0271 | III | Forward | RECEIPT-TO-LEDGER PIPELINE | PLANNED | 2 |  |
+| REQ-0271 | III | Forward | RECEIPT-TO-LEDGER PIPELINE | PARTIAL | 2 | tests/sql/phase2_flow.sql T48 T49 T51 T58 T66 · tests/ops.test.ts 'policy flags inform the approver and never reject on their own', 'the same expense on a second claim is flagged as a possible duplicate' · src/pages/Inbox.tsx · src/pages/ClaimEditor.tsx |
 | REQ-0272 | III | Treasury | THE "WHERE DID THE MONEY GO?" SCREEN | IMPLEMENTED | 1 | ReportView › money-went |
 | REQ-0273 | III | Banking | THE "WHERE DID THE MONEY COME FROM?" SCREEN | IMPLEMENTED | 1 | ReportView › money-came |
-| REQ-0274 | III | Expenses | EVERYDAY EXPENSE QUICK ENTRY | PARTIAL | 1 | src/pages/Entry.tsx |
-| REQ-0275 | III | UI/UX | FINANCE REVIEW MODE | PARTIAL | 1 | JournalDetail |
+| REQ-0274 | III | Expenses | EVERYDAY EXPENSE QUICK ENTRY | PARTIAL | 1 | src/pages/Entry.tsx · src/pages/JournalDetail.tsx · src/pages/ClaimEditor.tsx · src/ui/ops.tsx Attachments |
+| REQ-0275 | III | UI/UX | FINANCE REVIEW MODE | PARTIAL | 1 | src/pages/JournalDetail.tsx · src/pages/ClaimEditor.tsx |
 | REQ-0276 | III | Expenses | OFFLINE EXPENSE CAPTURE | PLANNED | 2 |  |
 | REQ-0277 | III | Expenses | GEO INFORMATION | PLANNED | 2 |  |
 | REQ-0278 | III | Approvals | APPROVAL FROM MOBILE | PLANNED | 1 |  |
@@ -291,48 +291,48 @@ Section numbers absent from the source document itself: none
 | REQ-0280 | III | Period Close | MONTH-END EXPENSE CLOSE | PLANNED | 1 |  |
 | REQ-0281 | III | Budgeting | OPERATING COST COMMAND CENTRE | PLANNED | 1 |  |
 | REQ-0282 | III | Reports | NUMERO MONEY RADAR | PLANNED | 1 |  |
-| REQ-0283 | III | Forward | EXPENSE FORECASTING | PLANNED | 2 |  |
-| REQ-0284 | III | Forward | COMMITMENT ACCOUNTING VIEW | PLANNED | 2 |  |
+| REQ-0283 | III | Forward | EXPENSE FORECASTING | PARTIAL | 2 | tests/forward.test.ts 'every event names its source, its certainty and how it was arrived at', 'the payroll forecast is labelled FORECAST and says what it leaves out' · src/engine/forward.ts buildEvents · src/pages/Forward.tsx |
+| REQ-0284 | III | Forward | COMMITMENT ACCOUNTING VIEW | PARTIAL | 2 | tests/forward.test.ts 'an approved purchase order is COMMITTED for what has not been billed' · tests/sql/phase2_treasury_purchasing.sql T97 · tests/numiOps.test.ts 'commitments are labelled COMMITTED and agree with the engine' · src/pages/Forward.tsx · src/pages/Purchasing.tsx · src/pages/PurchaseDetail.tsx |
 | REQ-0285 | III | Accounts Payable | TOTAL COST OF ACTIVITY | PLANNED | 1 |  |
 | REQ-0286 | III | Engineering Governance | NUMERO MICRO-TO-MACRO PRINCIPLE | PLANNED | 1 |  |
 | REQ-0287 | III | Reports | FINAL OPERATIONS DIRECTIVE | PLANNED | 1 |  |
-| REQ-0288 | IV | Forward | UNIVERSAL FINANCIAL CLASSIFICATION ENGINE | PARTIAL | 1 | Accounts |
-| REQ-0289 | IV | Expenses | FOOD & BEVERAGE UNIVERSE | PLANNED | 2 |  |
-| REQ-0290 | IV | Expenses | PANTRY 360° | PLANNED | 2 |  |
-| REQ-0291 | IV | Expenses | HOSPITALITY & ENTERTAINMENT | PLANNED | 2 |  |
-| REQ-0292 | IV | Expenses | SENSITIVE ENTERTAINMENT EXPENDITURE | PLANNED | 2 |  |
-| REQ-0293 | IV | Treasury | SEMINARS | PLANNED | 2 |  |
-| REQ-0294 | IV | Expenses | CONFERENCES | PLANNED | 2 |  |
-| REQ-0295 | IV | Expenses | MEETING COSTING | PLANNED | 2 |  |
-| REQ-0296 | IV | Expenses | BOARD MEETING COSTS | PLANNED | 2 |  |
+| REQ-0288 | IV | Forward | UNIVERSAL FINANCIAL CLASSIFICATION ENGINE | PARTIAL | 1 | Accounts · src/pages/Expenses.tsx › Policy · numero_private.save_expense_category · tests/sql/phase2_flow.sql T48 T49 |
+| REQ-0289 | IV | Expenses | FOOD & BEVERAGE UNIVERSE | PARTIAL | 2 | src/pages/Expenses.tsx · src/engine/templates.ts · numero_private.save_expense_category |
+| REQ-0290 | IV | Expenses | PANTRY 360° | PARTIAL | 2 | src/engine/templates.ts · src/pages/Ledger.tsx · src/pages/JournalEditor.tsx |
+| REQ-0291 | IV | Expenses | HOSPITALITY & ENTERTAINMENT | PARTIAL | 2 | src/pages/Expenses.tsx · src/pages/ClaimEditor.tsx · src/engine/templates.ts |
+| REQ-0292 | IV | Expenses | SENSITIVE ENTERTAINMENT EXPENDITURE | PARTIAL | 2 | src/pages/Expenses.tsx · src/pages/JournalEditor.tsx · tests/engine.test.ts 'restricted detail is masked for uncleared users while totals stay truthful' · supabase/migrations/0008_expenses_advances_cash.sql · supabase/migrations/0013_review_corrections_2.sql inherit_item_confidentiality · tests/sql/phase2_corrections_2.sql T153 · tests/ops.test.ts 'a claim or an advance is at least as confidential as the item it is linked to' |
+| REQ-0293 | IV | Treasury | SEMINARS | PARTIAL | 2 | src/engine/registerKinds.json (kind 'event') · src/pages/Register360.tsx |
+| REQ-0294 | IV | Expenses | CONFERENCES | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Register360.tsx · src/pages/ClaimEditor.tsx |
+| REQ-0295 | IV | Expenses | MEETING COSTING | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Register360.tsx · src/pages/JournalEditor.tsx |
+| REQ-0296 | IV | Expenses | BOARD MEETING COSTS | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Register360.tsx · supabase/migrations/0013_review_corrections_2.sql · tests/sql/phase2_corrections_2.sql T152 T153 · tests/ops.test.ts 'a claim or an advance is at least as confidential as the item it is linked to' |
 | REQ-0297 | IV | Tax | GROUP LUNCHES | PLANNED | 1 |  |
-| REQ-0298 | IV | Expenses | TEAM OUTINGS | PLANNED | 2 |  |
+| REQ-0298 | IV | Expenses | TEAM OUTINGS | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Register360.tsx |
 | REQ-0299 | IV | Reports | FESTIVALS & CELEBRATIONS | PLANNED | 1 |  |
-| REQ-0300 | IV | Payroll | DEPARTMENT 360° | PLANNED | 2 |  |
-| REQ-0301 | IV | Expenses | DEPARTMENT COST TREE | PLANNED | 2 |  |
+| REQ-0300 | IV | Payroll | DEPARTMENT 360° | PARTIAL | 2 | src/pages/PeopleCost.tsx · src/pages/PayrollRun.tsx · src/pages/Ledger.tsx · tests/sql/phase2_payroll.sql T114 |
+| REQ-0301 | IV | Expenses | DEPARTMENT COST TREE | PARTIAL | 2 | src/pages/ReportView.tsx · src/pages/Ledger.tsx · src/pages/PeopleCost.tsx |
 | REQ-0302 | IV | People Cost | OFFICE 360° EXPANSION | PLANNED | 2 |  |
-| REQ-0303 | IV | Expenses | ELECTRICITY MANAGEMENT | PLANNED | 2 |  |
+| REQ-0303 | IV | Expenses | ELECTRICITY MANAGEMENT | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/DocumentEditor.tsx · src/engine/templates.ts |
 | REQ-0304 | IV | System Health | GENERATOR / BACKUP POWER | PLANNED | 3 |  |
-| REQ-0305 | IV | Expenses | WATER & UTILITIES | PLANNED | 2 |  |
-| REQ-0306 | IV | People Cost | STAFF COST UNIVERSE | PLANNED | 2 |  |
-| REQ-0307 | IV | Expenses | SOFTWARE UNIVERSE | PLANNED | 2 |  |
-| REQ-0308 | IV | Expenses | SUBSCRIPTION COMMAND CENTRE | PLANNED | 2 |  |
-| REQ-0309 | IV | Expenses | CANCELLATION MANAGEMENT | PLANNED | 2 |  |
-| REQ-0310 | IV | Expenses | REFUND UNIVERSE | PLANNED | 2 |  |
-| REQ-0311 | IV | Expenses | SUDDEN / UNPLANNED EXPENSES | PLANNED | 2 |  |
+| REQ-0305 | IV | Expenses | WATER & UTILITIES | PARTIAL | 2 | src/engine/templates.ts · src/engine/registerKinds.json · src/pages/Expenses.tsx |
+| REQ-0306 | IV | People Cost | STAFF COST UNIVERSE | PARTIAL | 2 | tests/forward.test.ts 'people cost: salary is not the whole cost, and shared costs are not invented' · tests/sql/phase2_payroll.sql T117 T119 · src/engine/ops.ts peopleCost · src/pages/PeopleCost.tsx |
+| REQ-0307 | IV | Expenses | SOFTWARE UNIVERSE | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-0308 | IV | Expenses | SUBSCRIPTION COMMAND CENTRE | PARTIAL | 2 | src/pages/Registers.tsx · src/engine/forward.ts · tests/numiOps.test.ts 'renewals and expiries come from recorded dates' |
+| REQ-0309 | IV | Expenses | CANCELLATION MANAGEMENT | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx |
+| REQ-0310 | IV | Expenses | REFUND UNIVERSE | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Entry.tsx · src/pages/DocumentEditor.tsx |
+| REQ-0311 | IV | Expenses | SUDDEN / UNPLANNED EXPENSES | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Register360.tsx |
 | REQ-0312 | IV | Accounts Receivable | UNEXPECTED REVENUE | PLANNED | 1 |  |
 | REQ-0313 | IV | Reconciliation | CASH IN / CASH OUT | PLANNED | 1 |  |
-| REQ-0314 | IV | Expenses | CASH MOVEMENT REGISTER | PLANNED | 2 |  |
-| REQ-0315 | IV | Incidents & Exceptions | EMERGENCY CASH | PLANNED | 2 |  |
-| REQ-0316 | IV | Incidents & Exceptions | ACCIDENT REGISTER | PLANNED | 2 |  |
-| REQ-0317 | IV | Incidents & Exceptions | ACCIDENT COSTING | PLANNED | 2 |  |
-| REQ-0318 | IV | Expenses | INSURANCE CLAIMS | PLANNED | 2 |  |
-| REQ-0319 | IV | Incidents & Exceptions | DAMAGE / LOSS REGISTER | PLANNED | 2 |  |
+| REQ-0314 | IV | Expenses | CASH MOVEMENT REGISTER | PARTIAL | 2 | tests/sql/phase2_flow.sql T62 T63 T64 · src/pages/Cash.tsx · src/pages/Ledger.tsx · numero_private.propose_fund_transfer |
+| REQ-0315 | IV | Incidents & Exceptions | EMERGENCY CASH | PARTIAL | 2 | tests/sql/phase2_flow.sql T42 T43 T44 T46 T52 T54 · src/pages/Expenses.tsx · src/pages/Advance360.tsx · numero_private.save_advance |
+| REQ-0316 | IV | Incidents & Exceptions | ACCIDENT REGISTER | PARTIAL | 2 | src/engine/registerKinds.json incident · src/pages/Registers.tsx · src/pages/Register360.tsx · tests/sql/phase2_flow.sql T70 T71 |
+| REQ-0317 | IV | Incidents & Exceptions | ACCIDENT COSTING | PARTIAL | 2 | src/pages/Register360.tsx · src/engine/registerKinds.json incident, insurance_claim |
+| REQ-0318 | IV | Expenses | INSURANCE CLAIMS | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-0319 | IV | Incidents & Exceptions | DAMAGE / LOSS REGISTER | PARTIAL | 2 | src/engine/registerKinds.json incident · src/pages/Register360.tsx · src/pages/Asset360.tsx · tests/ops.test.ts 'a missing asset raises a factual alert and changes nothing in the books', 'disposal removes cost and accumulated depreciation and records the loss' |
 | REQ-0320 | IV | Sentinel | FRAUD INCIDENT REGISTER | PLANNED | 1 |  |
 | REQ-0321 | IV | Sentinel | FRAUD FINANCIAL IMPACT | PLANNED | 1 |  |
-| REQ-0322 | IV | Incidents & Exceptions | EXTORTION / COERCION INCIDENTS | PLANNED | 2 |  |
-| REQ-0323 | IV | Incidents & Exceptions | BRIBERY / IMPROPER PAYMENT INCIDENTS | PLANNED | 2 |  |
-| REQ-0324 | IV | Incidents & Exceptions | UNDER-THE-TABLE / OFF-BOOK TRANSACTIONS | PLANNED | 2 |  |
+| REQ-0322 | IV | Incidents & Exceptions | EXTORTION / COERCION INCIDENTS | PARTIAL | 2 | src/engine/registerKinds.json incident · supabase/migrations/0006_workflow_registers_documents.sql register_items_select · supabase/migrations/0012_follow_up_confidentiality.sql · tests/sql/phase2_flow.sql T68 T69 · tests/sql/phase2_corrections.sql T143 · tests/ops.test.ts 'a follow-up is as confidential as the record it is linked to' · src/pages/Register360.tsx · supabase/migrations/0013_review_corrections_2.sql follow_ups_follow_record · tests/sql/phase2_corrections_2.sql T152 · tests/ops.test.ts 'a follow-up stays as confidential as its record when the record is reclassified' |
+| REQ-0323 | IV | Incidents & Exceptions | BRIBERY / IMPROPER PAYMENT INCIDENTS | PARTIAL | 2 | src/engine/registerKinds.json incident · supabase/migrations/0006_workflow_registers_documents.sql register_items_select · tests/sql/phase2_flow.sql T68 · src/pages/Register360.tsx |
+| REQ-0324 | IV | Incidents & Exceptions | UNDER-THE-TABLE / OFF-BOOK TRANSACTIONS | PARTIAL | 2 | src/engine/registerKinds.json incident · tests/sql/phase2_flow.sql T68 T69 · src/pages/Register360.tsx · src/pages/Tasks.tsx |
 | REQ-0325 | IV | Black Vault | NUMERO BLACK VAULT | IMPLEMENTED | 1 | src/pages/Vault.tsx |
 | REQ-0326 | IV | Black Vault | BLACK VAULT ACCESS | PARTIAL | 1 | vault_grants |
 | REQ-0327 | IV | Black Vault | VAULT ACCESS LEVELS | IMPLEMENTED | 1 | five confidentiality levels |
@@ -342,34 +342,34 @@ Section numbers absent from the source document itself: none
 | REQ-0331 | IV | Security | SENSITIVE TRANSACTION MASKING | TESTED | 1 | tests/sql/engine_invariants.sql T19b · tests/engine.test.ts |
 | REQ-0332 | IV | Black Vault | SEALED DOCUMENTS | PLANNED | 1 |  |
 | REQ-0333 | IV | Black Vault | SECRET PROJECT COST CENTRES | PARTIAL | 1 | org_units.confidentiality |
-| REQ-0334 | IV | Incidents & Exceptions | WHISTLEBLOWER / INCIDENT FINANCIAL LINK | PLANNED | 2 |  |
-| REQ-0335 | IV | Incidents & Exceptions | LEGAL CASE COSTING | PLANNED | 2 |  |
-| REQ-0336 | IV | Incidents & Exceptions | SETTLEMENTS | PLANNED | 2 |  |
-| REQ-0337 | IV | Incidents & Exceptions | WRITE-OFFS | PLANNED | 2 |  |
-| REQ-0338 | IV | Treasury | BAD DEBT REGISTER | PLANNED | 2 |  |
-| REQ-0339 | IV | Incidents & Exceptions | THEFT & LOSS | PLANNED | 2 |  |
-| REQ-0340 | IV | Incidents & Exceptions | EMERGENCY EXPENDITURE | PLANNED | 2 |  |
-| REQ-0341 | IV | Expenses | DISASTER EXPENSES | PLANNED | 2 |  |
+| REQ-0334 | IV | Incidents & Exceptions | WHISTLEBLOWER / INCIDENT FINANCIAL LINK | PARTIAL | 2 | src/engine/registerKinds.json incident · src/pages/Register360.tsx · src/ui/ops.tsx Attachments · supabase/migrations/0006_workflow_registers_documents.sql register_items_select · supabase/migrations/0012_follow_up_confidentiality.sql · tests/sql/phase2_corrections.sql T143 · supabase/migrations/0013_review_corrections_2.sql · tests/sql/phase2_corrections_2.sql T152 |
+| REQ-0335 | IV | Incidents & Exceptions | LEGAL CASE COSTING | PARTIAL | 2 | src/engine/registerKinds.json legal_claim · src/pages/Register360.tsx · tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it' |
+| REQ-0336 | IV | Incidents & Exceptions | SETTLEMENTS | PARTIAL | 2 | src/engine/registerKinds.json exception · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-0337 | IV | Incidents & Exceptions | WRITE-OFFS | PARTIAL | 2 | src/engine/registerKinds.json write_off · src/pages/Asset360.tsx · numero_private.propose_asset_disposal · tests/sql/phase2_flow.sql T32 |
+| REQ-0338 | IV | Treasury | BAD DEBT REGISTER | PARTIAL | 2 | src/engine/registerKinds.json (kinds 'bad_debt', 'write_off', 'recovery') · src/pages/Registers.tsx |
+| REQ-0339 | IV | Incidents & Exceptions | THEFT & LOSS | PARTIAL | 2 | src/engine/registerKinds.json incident · tests/sql/phase2_flow.sql T62 T63 · src/pages/Register360.tsx · src/pages/Cash.tsx |
+| REQ-0340 | IV | Incidents & Exceptions | EMERGENCY EXPENDITURE | PARTIAL | 2 | src/engine/registerKinds.json exception · src/pages/Registers.tsx · src/pages/Expenses.tsx |
+| REQ-0341 | IV | Expenses | DISASTER EXPENSES | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Register360.tsx · src/pages/JournalEditor.tsx · src/pages/ClaimEditor.tsx · src/pages/Expenses.tsx · tests/ops.test.ts 'a claim linked to a property or an incident carries that record into its entry' |
 | REQ-0342 | IV | Accounts Receivable | REVENUE 360° | PLANNED | 1 |  |
 | REQ-0343 | IV | NUMI | OTHER / MISCELLANEOUS | PLANNED | 1 |  |
 | REQ-0344 | IV | Expenses | CANCELLATION LOSS ANALYSIS | PLANNED | 2 |  |
-| REQ-0345 | IV | Expenses | NO-SHOW COST | PLANNED | 2 |  |
-| REQ-0346 | IV | Expenses | WASTAGE | PLANNED | 2 |  |
+| REQ-0345 | IV | Expenses | NO-SHOW COST | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx |
+| REQ-0346 | IV | Expenses | WASTAGE | PARTIAL | 2 | src/engine/registerKinds.json · src/engine/templates.ts · src/pages/Registers.tsx |
 | REQ-0347 | IV | Budgeting | DEPARTMENTAL BUDGET CONTROL | PARTIAL | 1 | Budgets |
-| REQ-0348 | IV | Budgeting | BUDGET OVERRUN | PARTIAL | 1 | Budgets › overrun alerts |
+| REQ-0348 | IV | Budgeting | BUDGET OVERRUN | PARTIAL | 1 | Budgets › overrun alerts · src/pages/PurchaseDetail.tsx › Budget context · src/pages/Purchasing.tsx › Commitments · tests/forward.test.ts › an approved purchase order is COMMITTED for what has not been billed |
 | REQ-0349 | IV | Budgeting | SOFT VS HARD BUDGET LIMIT | PARTIAL | 1 | budgets.limit_mode |
 | REQ-0350 | IV | Black Vault | SUPER ADMIN PRIVATE DASHBOARD | PARTIAL | 1 | Vault |
 | REQ-0351 | IV | Black Vault | PRIVATE AI MODE | PLANNED | 1 |  |
 | REQ-0352 | IV | NUMI | AI MUST RESPECT VAULT SECURITY | TESTED | 1 | tests/sql/engine_invariants.sql T19b |
 | REQ-0353 | IV | NUMI | AI CANNOT BE USED TO CIRCUMVENT PERMISSIONS | TESTED | 1 | tests/sql/engine_invariants.sql T11 T19 |
-| REQ-0354 | IV | Incidents & Exceptions | EXCEPTIONAL TRANSACTION REGISTER | PLANNED | 2 |  |
-| REQ-0355 | IV | Incidents & Exceptions | EXCEPTION 360° | PLANNED | 2 |  |
+| REQ-0354 | IV | Incidents & Exceptions | EXCEPTIONAL TRANSACTION REGISTER | PARTIAL | 2 | src/pages/Registers.tsx · src/engine/registerKinds.json |
+| REQ-0355 | IV | Incidents & Exceptions | EXCEPTION 360° | PARTIAL | 2 | src/pages/Register360.tsx · src/ui/ops.tsx |
 | REQ-0356 | IV | Approvals | SUPER ADMIN ACCESS DELEGATION | PARTIAL | 1 | memberships valid_from / valid_to |
 | REQ-0357 | IV | Black Vault | BREAK-GLASS ACCESS | PLANNED | 1 |  |
 | REQ-0358 | IV | Black Vault | CONFIDENTIALITY DOES NOT OVERRIDE LAW | TESTED | 1 | tests/sql/engine_invariants.sql T19b |
 | REQ-0359 | IV | Audit | NEVER DELETE EVIDENCE | TESTED | 1 | tests/sql/engine_invariants.sql T10 |
 | REQ-0360 | IV | Truth | NUMERO FINANCIAL TRUTH PRINCIPLE | IMPLEMENTED | 1 | architecture |
-| REQ-0361 | IV | Genesis Builder | CUSTOM EVERYTHING | PLANNED | 2 |  |
+| REQ-0361 | IV | Genesis Builder | CUSTOM EVERYTHING | PARTIAL | 2 | src/pages/Expenses.tsx (Categories) · src/pages/Accounts.tsx · src/pages/Genesis.tsx · src/pages/Registers.tsx (Register kinds) · src/pages/Payroll.tsx · src/ui/ApprovalRuleEditor.tsx · src/ui/ops.tsx (CustomFields) · tests/sql/phase2_flow.sql T70 · tests/ops.test.ts 'policy flags inform the approver and never reject on their own' |
 | REQ-0362 | IV | Approvals | "I DON'T KNOW WHAT THIS IS" TRANSACTION | PARTIAL | 1 | Entry › I don't know what this is |
 | REQ-0363 | IV | Reconciliation | UNIDENTIFIED CASH MOVEMENT | PLANNED | 1 |  |
 | REQ-0364 | IV | Sentinel | NUMERO LEAKAGE RADAR | PLANNED | 1 |  |
@@ -381,7 +381,7 @@ Section numbers absent from the source document itself: none
 | REQ-0370 | V | Accounting | COMPLETE CHART OF ACCOUNTS | IMPLEMENTED | 1 | src/pages/Accounts.tsx |
 | REQ-0371 | V | Accounting | CHART OF ACCOUNTS TEMPLATES | TESTED | 1 | tests/engine.test.ts |
 | REQ-0372 | V | Accounting | GENERAL LEDGER | IMPLEMENTED | 1 | src/pages/Ledger.tsx |
-| REQ-0373 | V | Accounting | SUBLEDGERS | PARTIAL | 1 | tests/engine.test.ts |
+| REQ-0373 | V | Accounting | SUBLEDGERS | PARTIAL | 1 | tests/engine.test.ts · src/pages/Assets.tsx › Reconciliation · tests/ops.test.ts › the asset register agrees with the general ledger · src/pages/Treasury.tsx · src/pages/Expenses.tsx |
 | REQ-0374 | V | Accounting | JOURNAL ENGINE | IMPLEMENTED | 1 | 21 voucher types |
 | REQ-0375 | V | Accounting | VOUCHER SYSTEM | IMPLEMENTED | 1 | voucher_types, voucher_sequences |
 | REQ-0376 | V | Reports | TRIAL BALANCE | TESTED | 1 | tests/sql/engine_invariants.sql T18 · tests/engine.test.ts |
@@ -397,14 +397,14 @@ Section numbers absent from the source document itself: none
 | REQ-0386 | V | Reports | FUND FLOW | PLANNED | 1 |  |
 | REQ-0387 | V | Reports | STATEMENT OF CHANGES IN EQUITY | PLANNED | 1 |  |
 | REQ-0388 | V | Period Close | RETAINED EARNINGS | PARTIAL | 1 | reports.ts |
-| REQ-0389 | V | Reconciliation | ACCOUNT RECONCILIATION ENGINE | PARTIAL | 1 | Banking |
+| REQ-0389 | V | Reconciliation | ACCOUNT RECONCILIATION ENGINE | PARTIAL | 1 | Banking · src/pages/Cash.tsx · src/pages/Assets.tsx › Reconciliation · tests/sql/phase2_flow.sql T62 · tests/ops.test.ts › the asset register agrees with the general ledger |
 | REQ-0390 | V | Reconciliation | BANK RECONCILIATION | IMPLEMENTED | 1 | src/pages/Banking.tsx |
 | REQ-0391 | V | Reconciliation | AUTOMATIC MATCHING | TESTED | 1 | tests/engine.test.ts |
 | REQ-0392 | V | Reconciliation | RECONCILIATION DIFFERENCE | IMPLEMENTED | 1 | Banking header |
 | REQ-0393 | V | Consolidation | INTERCOMPANY RECONCILIATION | TESTED | 1 | tests/engine.test.ts |
 | REQ-0394 | V | Reconciliation | CUSTOMER RECONCILIATION | PLANNED | 1 |  |
 | REQ-0395 | V | Reconciliation | VENDOR RECONCILIATION | PLANNED | 1 |  |
-| REQ-0396 | V | Reconciliation | CONTROL ACCOUNT RECONCILIATION | PARTIAL | 1 | tests/engine.test.ts |
+| REQ-0396 | V | Reconciliation | CONTROL ACCOUNT RECONCILIATION | PARTIAL | 1 | tests/engine.test.ts · src/pages/Assets.tsx › Reconciliation · tests/ops.test.ts › the asset register agrees with the general ledger |
 | REQ-0397 | V | Period Close | MONTH-END CLOSE | PARTIAL | 1 | src/pages/PeriodClose.tsx |
 | REQ-0398 | V | Period Close | CLOSE PROGRESS | IMPLEMENTED | 1 | PeriodClose gauge |
 | REQ-0399 | V | Period Close | PERIOD LOCK | TESTED | 1 | tests/sql/engine_invariants.sql T14 |
@@ -422,23 +422,23 @@ Section numbers absent from the source document itself: none
 | REQ-0411 | V | Audit | INTERNAL CONTROL MATRIX | PLANNED | 1 |  |
 | REQ-0412 | V | Audit | SEGREGATION OF DUTIES | IMPLEMENTED | 1 | Team › Segregation of duties |
 | REQ-0413 | V | Accounting | JOURNAL RISK REVIEW | PARTIAL | 1 | Sentinel |
-| REQ-0414 | V | Forward | ACCOUNTING FORECASTER | PLANNED | 2 |  |
-| REQ-0415 | V | Forward | FORECAST HORIZONS | PLANNED | 2 |  |
-| REQ-0416 | V | Forward | FORECAST SOURCES | PLANNED | 2 |  |
-| REQ-0417 | V | Forward | ROLLING FORECAST | PLANNED | 2 |  |
+| REQ-0414 | V | Forward | ACCOUNTING FORECASTER | PARTIAL | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it', 'every event names its source, its certainty and how it was arrived at' · src/engine/forward.ts · src/pages/Forward.tsx |
+| REQ-0415 | V | Forward | FORECAST HORIZONS | PARTIAL | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it' · src/engine/forward.ts cashHorizon · src/pages/Forward.tsx |
+| REQ-0416 | V | Forward | FORECAST SOURCES | TESTED | 2 | tests/forward.test.ts 'an estimate never replaces the contractual date', 'the payroll forecast is labelled FORECAST and says what it leaves out' · tests/numiOps.test.ts 'firm and uncertain amounts are never added into one unlabelled figure' · src/lib/forwardData.ts · src/pages/Forward.tsx |
+| REQ-0417 | V | Forward | ROLLING FORECAST | PARTIAL | 2 | src/lib/forwardData.ts · src/engine/forward.ts buildEvents · src/pages/Forward.tsx |
 | REQ-0418 | V | Forward | FORECAST VS ACTUAL | PLANNED | 2 |  |
-| REQ-0419 | V | Forward | CASH FORECASTER | PLANNED | 2 |  |
-| REQ-0420 | V | Treasury | CASH CRUNCH RADAR | PARTIAL | 1 | Forward › shortfall warning |
-| REQ-0421 | V | Forward | RECEIVABLE FORECAST | PLANNED | 2 |  |
-| REQ-0422 | V | Forward | PAYABLE FORECAST | PARTIAL | 1 | Forward |
-| REQ-0423 | V | Forward | EXPENSE FORECAST | PLANNED | 2 |  |
-| REQ-0424 | V | Forward | REVENUE FORECAST | PLANNED | 2 |  |
+| REQ-0419 | V | Forward | CASH FORECASTER | TESTED | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it', 'daily balance ends where the horizon ends' · tests/numiOps.test.ts 'a projection is labelled FORECAST and INFERENCE, and starts from ACTUAL cash' · src/pages/Forward.tsx |
+| REQ-0420 | V | Treasury | CASH CRUNCH RADAR | TESTED | 1 | tests/forward.test.ts › a cash shortfall names its causes and assumptions · tests/forward.test.ts › contingent amounts are reported beside the projection, never inside it · src/engine/forward.ts earlyWarnings · src/pages/Forward.tsx |
+| REQ-0421 | V | Forward | RECEIVABLE FORECAST | PARTIAL | 2 | tests/forward.test.ts 'an estimate never replaces the contractual date' · src/engine/forward.ts paymentBehaviour · src/ui/records.tsx · src/pages/Forward.tsx |
+| REQ-0422 | V | Forward | PAYABLE FORECAST | PARTIAL | 1 | src/pages/Forward.tsx · src/engine/forward.ts cashHorizon · tests/forward.test.ts › contingent amounts are reported beside the projection, never inside it |
+| REQ-0423 | V | Forward | EXPENSE FORECAST | PARTIAL | 2 | tests/forward.test.ts 'every event names its source, its certainty and how it was arrived at' · src/engine/forward.ts buildEvents · src/pages/Forward.tsx |
+| REQ-0424 | V | Forward | REVENUE FORECAST | PARTIAL | 2 | src/engine/registerKinds.json contract_revenue, sales_order, tenant_lease, quotation · tests/forward.test.ts 'every event names its source, its certainty and how it was arrived at' · src/pages/Forward.tsx |
 | REQ-0425 | V | Forward | P&L FORECAST | PLANNED | 2 |  |
 | REQ-0426 | V | Forward | BALANCE SHEET FORECAST | PLANNED | 2 |  |
 | REQ-0427 | V | Digital Twin | SCENARIO ENGINE 2.0 | PLANNED | 3 |  |
 | REQ-0428 | V | Digital Twin | SCENARIO COMPARISON | PLANNED | 3 |  |
 | REQ-0429 | V | Budgeting | BREAK-EVEN ANALYSIS | PLANNED | 1 |  |
-| REQ-0430 | V | Treasury | WORKING CAPITAL | PLANNED | 2 |  |
+| REQ-0430 | V | Treasury | WORKING CAPITAL | PARTIAL | 2 | src/pages/Home.tsx · src/pages/ReportView.tsx (Financial Health) · src/engine/reports.ts |
 | REQ-0431 | V | General | CASH CONVERSION CYCLE | IMPLEMENTED | 1 | ReportView › ratios |
 | REQ-0432 | V | Reports | FINANCIAL RATIOS | IMPLEMENTED | 1 | ReportView › ratios |
 | REQ-0433 | V | Budgeting | KPI BUILDER | PLANNED | 1 |  |
@@ -452,18 +452,18 @@ Section numbers absent from the source document itself: none
 | REQ-0441 | V | Budgeting | BUDGET ENGINE 2.0 | PARTIAL | 1 | Budgets |
 | REQ-0442 | V | Budgeting | ZERO-BASED BUDGETING | IMPLEMENTED | 1 | Budgets › start from zero |
 | REQ-0443 | V | Budgeting | BUDGET VERSIONING | IMPLEMENTED | 1 | guard_budget · Budgets |
-| REQ-0444 | V | Budgeting | BUDGET VS ACTUAL | PARTIAL | 1 | Budgets |
+| REQ-0444 | V | Budgeting | BUDGET VS ACTUAL | PARTIAL | 1 | Budgets · src/pages/PurchaseDetail.tsx › Budget context · src/pages/Purchasing.tsx › Commitments |
 | REQ-0445 | V | Budgeting | CAPEX BUDGET | PARTIAL | 1 | budgets.kind |
 | REQ-0446 | V | Budgeting | CAPEX REQUEST | PLANNED | 1 |  |
-| REQ-0447 | V | Assets | DEPRECIATION ENGINE | PLANNED | 2 |  |
-| REQ-0448 | V | Assets | ASSET REVALUATION / IMPAIRMENT | PLANNED | 2 |  |
+| REQ-0447 | V | Assets | DEPRECIATION ENGINE | PARTIAL | 2 | supabase/migrations/0007_assets_purchasing.sql create_depreciation_run · src/pages/Assets.tsx · tests/sql/phase2_flow.sql T30, T34–T38 · tests/ops.test.ts 'written-down value and part-month depreciation' |
+| REQ-0448 | V | Assets | ASSET REVALUATION / IMPAIRMENT | PARTIAL | 2 | supabase/migrations/0007_assets_purchasing.sql propose_asset_impairment · src/pages/Asset360.tsx |
 | REQ-0449 | V | Accounting | PROVISIONS | PLANNED | 1 |  |
-| REQ-0450 | V | Forward | CONTINGENT LIABILITIES REGISTER | PLANNED | 2 |  |
-| REQ-0451 | V | Forward | COMMITMENTS REGISTER | PLANNED | 2 |  |
-| REQ-0452 | V | Treasury | LOAN ACCOUNTING | PLANNED | 2 |  |
-| REQ-0453 | V | Treasury | INTEREST CALCULATION | PLANNED | 2 |  |
-| REQ-0454 | V | Treasury | DIRECTOR / SHAREHOLDER ACCOUNTS | PLANNED | 2 |  |
-| REQ-0455 | V | Treasury | CAPITAL MANAGEMENT | PLANNED | 2 |  |
+| REQ-0450 | V | Forward | CONTINGENT LIABILITIES REGISTER | TESTED | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it' · tests/numiOps.test.ts 'contingent exposure is shown beside the projection, not inside it' · src/pages/Registers.tsx · src/engine/registerKinds.json legal_claim, contingent_liability, bank_guarantee, corporate_guarantee |
+| REQ-0451 | V | Forward | COMMITMENTS REGISTER | TESTED | 2 | tests/sql/phase2_treasury_purchasing.sql T97 · tests/forward.test.ts 'an approved purchase order is COMMITTED for what has not been billed' · tests/numiOps.test.ts 'commitments are labelled COMMITTED and agree with the engine' · src/pages/Purchasing.tsx · src/pages/Forward.tsx · src/pages/Registers.tsx |
+| REQ-0452 | V | Treasury | LOAN ACCOUNTING | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql · src/pages/Loan360.tsx · tests/sql/phase2_treasury_purchasing.sql T85, T88–T90 |
+| REQ-0453 | V | Treasury | INTEREST CALCULATION | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql build_loan_schedule, save_fixed_deposit · src/pages/Calculators.tsx · tests/sql/phase2_treasury_purchasing.sql T85, T91 |
+| REQ-0454 | V | Treasury | DIRECTOR / SHAREHOLDER ACCOUNTS | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql loans.kind · src/pages/Treasury.tsx · src/engine/registerKinds.json (kinds 'capital_infusion', 'dividend') · tests/sql/phase2_treasury_purchasing.sql T84 |
+| REQ-0455 | V | Treasury | CAPITAL MANAGEMENT | PARTIAL | 2 | src/engine/templates.ts · src/engine/registerKinds.json (kinds 'capital_infusion', 'capital_call') |
 | REQ-0456 | V | Investments | DIVIDENDS / DISTRIBUTIONS | PLANNED | 3 |  |
 | REQ-0457 | V | Treasury | FOREX ACCOUNTING | PARTIAL | 1 | approve_payment |
 | REQ-0458 | V | Reconciliation | SUSPENSE RECONCILIATION | PLANNED | 1 |  |
@@ -480,13 +480,13 @@ Section numbers absent from the source document itself: none
 | REQ-0469 | V | Reports | SEGMENT REPORTING | PLANNED | 1 |  |
 | REQ-0470 | V | Accounting | PROFIT CENTRE ACCOUNTING | PLANNED | 1 |  |
 | REQ-0471 | V | Accounting | COST CENTRE ACCOUNTING | PLANNED | 1 |  |
-| REQ-0472 | V | Projects | PROJECT ACCOUNTING | PLANNED | 2 |  |
+| REQ-0472 | V | Projects | PROJECT ACCOUNTING | PARTIAL | 2 | src/pages/DocumentEditor.tsx · src/pages/ClaimEditor.tsx · src/pages/PurchaseEditor.tsx · src/pages/JournalEditor.tsx · src/pages/Ledger.tsx · src/pages/Expenses.tsx |
 | REQ-0473 | V | Projects | PROJECTED FINAL COST | PLANNED | 2 |  |
 | REQ-0474 | V | Accounts Receivable | PROFITABILITY CUBE | PLANNED | 1 |  |
-| REQ-0475 | V | Treasury | FINANCIAL TREND ENGINE | PLANNED | 2 |  |
+| REQ-0475 | V | Treasury | FINANCIAL TREND ENGINE | PARTIAL | 2 | src/lib/data.ts monthlySeries · src/pages/Home.tsx · src/pages/Cockpit.tsx |
 | REQ-0476 | V | General | YEAR-ON-YEAR ANALYSIS | PLANNED | 3 |  |
 | REQ-0477 | V | Reports | COMMON-SIZE FINANCIAL STATEMENTS | IMPLEMENTED | 1 | common-size toggle |
-| REQ-0478 | V | Forward | MONTHLY RUN RATE | PLANNED | 2 |  |
+| REQ-0478 | V | Forward | MONTHLY RUN RATE | PARTIAL | 2 | src/engine/reports.ts ratios · src/pages/ReportView.tsx |
 | REQ-0479 | V | General | BURN RATE | PLANNED | 3 |  |
 | REQ-0480 | V | Expenses | CASH RUNWAY | PARTIAL | 1 | ratios › runway |
 | REQ-0481 | V | Reconciliation | FINANCIAL ALERT ENGINE | PLANNED | 1 |  |
@@ -497,7 +497,7 @@ Section numbers absent from the source document itself: none
 | REQ-0486 | V | Forward | BOARD FINANCIAL PACK | PLANNED | 2 |  |
 | REQ-0487 | V | Reports | INVESTOR REPORTING | PLANNED | 1 |  |
 | REQ-0488 | V | Reports | LENDER REPORTING | PLANNED | 1 |  |
-| REQ-0489 | V | Treasury | COVENANT TRACKER | PLANNED | 2 |  |
+| REQ-0489 | V | Treasury | COVENANT TRACKER | PARTIAL | 2 | src/engine/registerKinds.json (kind 'covenant') · src/pages/Treasury.tsx (Facilities and guarantees) · src/engine/forward.ts earlyWarnings · tests/forward.test.ts 'early warnings state facts, rules and assumptions' |
 | REQ-0490 | V | Documents | FINANCIAL DOCUMENT PACK | PLANNED | 2 |  |
 | REQ-0491 | V | Reports | EXPORT | PARTIAL | 1 | DataTable CSV · print |
 | REQ-0492 | V | Reports | SCHEDULED REPORTING | PLANNED | 1 |  |
@@ -506,7 +506,7 @@ Section numbers absent from the source document itself: none
 | REQ-0495 | V | Reconciliation | FINANCE TEAM WORKSPACE | PLANNED | 1 |  |
 | REQ-0496 | V | Accounting | ACCOUNTING DATA QUALITY | PLANNED | 1 |  |
 | REQ-0497 | V | System Health | NUMERO FINANCIAL HEALTH | IMPLEMENTED | 1 | ReportView › ratios |
-| REQ-0498 | V | Consolidation | NUMERO CFO AI | PARTIAL | 1 | NUMI |
+| REQ-0498 | V | Consolidation | NUMERO CFO AI | PARTIAL | 1 | src/numi/engine.ts · src/numi/ops.ts · tests/numiOps.test.ts › the wording of the specification's own example questions · tests/numiOps.test.ts › cash, receivables and approvals answer as before · tests/numiOps.test.ts › whole words only |
 | REQ-0499 | V | NUMI | NUMERO ACCOUNTANT AI | PLANNED | 1 |  |
 | REQ-0500 | V | Audit | NUMERO AUDITOR AI | PLANNED | 1 |  |
 | REQ-0501 | V | Accounting | ACCOUNTING EXPLAINER MODE | IMPLEMENTED | 1 | Explain component |
@@ -514,19 +514,19 @@ Section numbers absent from the source document itself: none
 | REQ-0503 | V | Reports | ACCOUNTING INTEGRITY DASHBOARD | PARTIAL | 1 | Home, Cockpit, NUMI integrity |
 | REQ-0504 | V | NUMI | FINANCIAL CONTROL TOWER | IMPLEMENTED | 1 | Home, Cockpit |
 | REQ-0505 | V | General | NUMERO TIME MACHINE EXPANSION | PARTIAL | 1 | time machine |
-| REQ-0506 | V | Treasury | FINANCIAL CHANGE EXPLAINER | PLANNED | 2 |  |
-| REQ-0507 | V | Forward | FUTURE FINANCIAL POSITION | PLANNED | 2 |  |
+| REQ-0506 | V | Treasury | FINANCIAL CHANGE EXPLAINER | PARTIAL | 2 | src/numi/engine.ts · src/pages/ReportView.tsx · tests/numiOps.test.ts 'a question about why a figure changed is still a comparison' |
+| REQ-0507 | V | Forward | FUTURE FINANCIAL POSITION | PARTIAL | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it' · src/pages/Forward.tsx |
 | REQ-0508 | V | Digital Twin | FINANCIAL DIGITAL TWIN 2.0 | PLANNED | 3 |  |
-| REQ-0509 | V | Genesis Builder | NO SPREADSHEET PRISON | PLANNED | 2 |  |
+| REQ-0509 | V | Genesis Builder | NO SPREADSHEET PRISON | PARTIAL | 2 | src/ui/DataTable.tsx · src/pages/ReportView.tsx · src/pages/Ledger.tsx · src/pages/Home.tsx · src/ui/charts.tsx |
 | REQ-0510 | V | NUMI | NO BLACK-BOX AI ACCOUNTING | IMPLEMENTED | 1 | answer structure |
 | REQ-0511 | V | Accounting | NO SILENT AUTO-POSTING OF MATERIAL JUDGMENTS | IMPLEMENTED | 1 | no posting path without human approval |
 | REQ-0512 | V | Truth | COMPLETE FINANCIAL TRACEABILITY | PARTIAL | 1 | drill-down |
 | REQ-0513 | V | Accounting | FINAL ACCOUNTING DIRECTIVE | PLANNED | 1 |  |
 | REQ-0514 | V | Engineering Governance | FINAL COMPLETENESS PRINCIPLE | PLANNED | 1 |  |
 | REQ-0515 | V | Engineering Governance | THE NUMERO TEST | PLANNED | 1 |  |
-| REQ-0516 | VI | Documents | NUMERO UNIVERSAL INBOX | PLANNED | 2 |  |
+| REQ-0516 | VI | Documents | NUMERO UNIVERSAL INBOX | PARTIAL | 2 | tests/sql/phase2_flow.sql T66 T67 T68 T69 · tests/ops.test.ts 'an identical file is kept and flagged, never discarded' · src/pages/Inbox.tsx · src/engine/opsTypes.ts · numero_private.register_document |
 | REQ-0517 | VI | Documents | INTELLIGENT DOCUMENT INTAKE | PLANNED | 2 |  |
-| REQ-0518 | VI | Forward | DOCUMENT-TO-ACCOUNTING PIPELINE | PLANNED | 2 |  |
+| REQ-0518 | VI | Forward | DOCUMENT-TO-ACCOUNTING PIPELINE | PARTIAL | 2 | tests/sql/phase2_flow.sql T66 T68 · tests/sql/phase2_treasury_purchasing.sql T100 T101 T102 · src/pages/Inbox.tsx · src/pages/DocumentEditor.tsx · src/ui/records.tsx |
 | REQ-0519 | VI | Documents | EMAIL-TO-NUMERO | PLANNED | 2 |  |
 | REQ-0520 | VI | Sentinel | DOCUMENT DUPLICATE DETECTION | PLANNED | 1 |  |
 | REQ-0521 | VI | Parties | DOCUMENT RELATIONSHIP ENGINE | PLANNED | 1 |  |
@@ -536,7 +536,7 @@ Section numbers absent from the source document itself: none
 | REQ-0525 | VI | Reports | QUOTATION COMPARISON | PLANNED | 1 |  |
 | REQ-0526 | VI | Accounts Payable | PURCHASE ORDER | PLANNED | 1 |  |
 | REQ-0527 | VI | Accounts Payable | GOODS RECEIPT | PLANNED | 1 |  |
-| REQ-0528 | VI | Expenses | SERVICE RECEIPT | PLANNED | 2 |  |
+| REQ-0528 | VI | Expenses | SERVICE RECEIPT | PARTIAL | 2 | src/pages/PurchaseEditor.tsx · src/pages/PurchaseDetail.tsx · supabase/migrations/0007_assets_purchasing.sql |
 | REQ-0529 | VI | Accounts Payable | THREE-WAY MATCH | PLANNED | 1 |  |
 | REQ-0530 | VI | Accounts Receivable | ORDER-TO-CASH | PLANNED | 1 |  |
 | REQ-0531 | VI | Accounts Receivable | CUSTOMER CREDIT CONTROL | PLANNED | 1 |  |
@@ -551,30 +551,30 @@ Section numbers absent from the source document itself: none
 | REQ-0540 | VI | Banking | BENEFICIARY VERIFICATION | TESTED | 1 | tests/sql/engine_invariants.sql T22 · tests/engine.test.ts |
 | REQ-0541 | VI | Banking | PAYMENT CONTROLS | PLANNED | 1 |  |
 | REQ-0542 | VI | Projects | NO AI MONEY RELEASE | IMPLEMENTED | 1 | no code path |
-| REQ-0543 | VI | Payroll | PAYROLL UNIVERSE | PLANNED | 2 |  |
-| REQ-0544 | VI | Payroll | SALARY STRUCTURE | PLANNED | 2 |  |
-| REQ-0545 | VI | Payroll | PAYROLL ACCOUNTING | PLANNED | 2 |  |
+| REQ-0543 | VI | Payroll | PAYROLL UNIVERSE | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql · src/pages/Payroll.tsx · src/pages/PayrollRun.tsx · src/pages/PeopleCost.tsx · tests/sql/phase2_payroll.sql T110–T125 · tests/sql/phase2_treasury_purchasing.sql T107–T109 |
+| REQ-0544 | VI | Payroll | SALARY STRUCTURE | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql save_salary_structure, propose_payroll_run · src/pages/Payroll.tsx · tests/sql/phase2_payroll.sql T110, T115 |
+| REQ-0545 | VI | Payroll | PAYROLL ACCOUNTING | TESTED | 2 | tests/sql/phase2_payroll.sql T113–T115, T120–T121, T124 · tests/ops.test.ts 'the payroll journal is confidential, by department, and names no one', 'payment settles the payable; a paid payroll cannot be reversed' · src/pages/PayrollRun.tsx |
 | REQ-0546 | VI | Tax | PAYROLL STATUTORY COMPONENTS | PLANNED | 1 |  |
-| REQ-0547 | VI | Payroll | BONUS & INCENTIVE | PLANNED | 2 |  |
-| REQ-0548 | VI | Payroll | SALARY ADVANCE | PLANNED | 2 |  |
-| REQ-0549 | VI | Treasury | EMPLOYEE LOAN | PLANNED | 2 |  |
-| REQ-0550 | VI | Payroll | FULL & FINAL SETTLEMENT | PLANNED | 2 |  |
+| REQ-0547 | VI | Payroll | BONUS & INCENTIVE | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql create_payroll_run, propose_payroll_run · src/pages/Payroll.tsx · tests/sql/phase2_payroll.sql T110, T114 |
+| REQ-0548 | VI | Payroll | SALARY ADVANCE | PARTIAL | 2 | supabase/migrations/0008_expenses_advances_cash.sql advances · supabase/migrations/0009_treasury_payroll.sql create_payroll_run, wf_payroll · tests/sql/phase2_treasury_purchasing.sql T109 · tests/sql/phase2_payroll.sql T121 |
+| REQ-0549 | VI | Treasury | EMPLOYEE LOAN | TESTED | 2 | tests/ops.test.ts 'a loan recovered through payroll reaches its instalment schedule and is never counted twice', 'reversing the payroll takes the recovery back from the schedule' · tests/forward.test.ts 'an instalment partly recovered through payroll is projected for what remains' · tests/sql/phase2_corrections.sql T130–T133 · supabase/migrations/0011_review_corrections.sql apply_loan_recovery · supabase/migrations/0009_treasury_payroll.sql loans (direction 'lent', kind 'employee_loan'), create_payroll_run, wf_payroll · src/pages/Payroll.tsx (LoanPicker) · src/pages/Loan360.tsx |
+| REQ-0550 | VI | Payroll | FULL & FINAL SETTLEMENT | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql payroll_runs.run_type, create_payroll_run · src/pages/Payroll.tsx |
 | REQ-0551 | VI | Reconciliation | PAYROLL RECONCILIATION | PLANNED | 1 |  |
-| REQ-0552 | VI | Treasury | TREASURY COMMAND CENTRE | PLANNED | 2 |  |
+| REQ-0552 | VI | Treasury | TREASURY COMMAND CENTRE | PARTIAL | 2 | src/pages/Treasury.tsx · tests/sql/phase2_treasury_purchasing.sql T84–T93 · tests/forward.test.ts 'loan position and debt ladder' |
 | REQ-0553 | VI | Banking | BANK ACCOUNT 360° | PLANNED | 1 |  |
-| REQ-0554 | VI | Treasury | FIXED DEPOSITS | PLANNED | 2 |  |
-| REQ-0555 | VI | Treasury | LOAN COMMAND CENTRE | PLANNED | 2 |  |
-| REQ-0556 | VI | Treasury | CREDIT FACILITY REGISTER | PLANNED | 2 |  |
+| REQ-0554 | VI | Treasury | FIXED DEPOSITS | TESTED | 2 | tests/sql/phase2_treasury_purchasing.sql T91–T93 · tests/ops.test.ts 'fixed deposit: maturity value, lien, and interest as actually paid' · src/pages/Treasury.tsx · supabase/migrations/0009_treasury_payroll.sql fixed_deposits |
+| REQ-0555 | VI | Treasury | LOAN COMMAND CENTRE | PARTIAL | 2 | src/pages/Treasury.tsx · supabase/migrations/0009_treasury_payroll.sql loans.kind · src/engine/registerKinds.json (kind 'credit_facility') |
+| REQ-0556 | VI | Treasury | CREDIT FACILITY REGISTER | PARTIAL | 2 | src/engine/registerKinds.json (kind 'credit_facility') · src/pages/Treasury.tsx (Facilities and guarantees) |
 | REQ-0557 | VI | Banking | BANK GUARANTEES | PLANNED | 1 |  |
-| REQ-0558 | VI | Treasury | LETTERS OF CREDIT | PLANNED | 2 |  |
-| REQ-0559 | VI | Treasury | FOREX EXPOSURE | PLANNED | 2 |  |
-| REQ-0560 | VI | Treasury | INVESTMENT TREASURY | PLANNED | 2 |  |
+| REQ-0558 | VI | Treasury | LETTERS OF CREDIT | PARTIAL | 2 | src/engine/registerKinds.json (kind 'letter_of_credit') · src/pages/Treasury.tsx (Facilities and guarantees) |
+| REQ-0559 | VI | Treasury | FOREX EXPOSURE | PARTIAL | 2 | src/pages/Treasury.tsx (Forex exposure) · src/lib/data.ts openDocuments |
+| REQ-0560 | VI | Treasury | INVESTMENT TREASURY | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql fixed_deposits · src/pages/Treasury.tsx · tests/sql/phase2_treasury_purchasing.sql T91–T93 |
 | REQ-0561 | VI | Investments | CORPORATE STRUCTURE REGISTER | PLANNED | 3 |  |
 | REQ-0562 | VI | Consolidation | OWNERSHIP | PLANNED | 1 |  |
 | REQ-0563 | VI | Black Vault | DIRECTORS / KEY OFFICERS | PLANNED | 1 |  |
 | REQ-0564 | VI | Consolidation | INTERCOMPANY MATRIX | PLANNED | 1 |  |
 | REQ-0565 | VI | NUMI | CONTRACT INTELLIGENCE | PLANNED | 1 |  |
-| REQ-0566 | VI | Forward | CONTRACT OBLIGATION CALENDAR | PLANNED | 2 |  |
+| REQ-0566 | VI | Forward | CONTRACT OBLIGATION CALENDAR | PARTIAL | 2 | tests/forward.test.ts 'early warnings state facts, rules and assumptions' · src/engine/forward.ts calendarMonth, earlyWarnings · src/pages/Forward.tsx |
 | REQ-0567 | VI | Expenses | INVENTORY ADVANCED | PLANNED | 2 |  |
 | REQ-0568 | VI | Inventory | PHYSICAL STOCK COUNT | PLANNED | 3 |  |
 | REQ-0569 | VI | Reports | INVENTORY AGEING | PLANNED | 1 |  |
@@ -582,16 +582,16 @@ Section numbers absent from the source document itself: none
 | REQ-0571 | VI | Inventory | MANUFACTURING OPTIONAL MODULE | PLANNED | 3 |  |
 | REQ-0572 | VI | Reports | IMPORT / EXPORT ADVANCED | PLANNED | 1 |  |
 | REQ-0573 | VI | Inventory | LANDED COST ENGINE | PLANNED | 3 |  |
-| REQ-0574 | VI | Assets | ASSET LIFECYCLE | PLANNED | 2 |  |
+| REQ-0574 | VI | Assets | ASSET LIFECYCLE | PARTIAL | 2 | src/pages/Purchasing.tsx · src/pages/Assets.tsx · src/pages/Asset360.tsx · supabase/migrations/0007_assets_purchasing.sql · tests/sql/phase2_treasury_purchasing.sql T94–T103 · tests/sql/phase2_flow.sql T30–T41 |
 | REQ-0575 | VI | Reality | ASSET PHYSICAL VERIFICATION | PLANNED | 3 |  |
-| REQ-0576 | VI | Projects | PROPERTY & LEASE MANAGEMENT | PLANNED | 2 |  |
+| REQ-0576 | VI | Projects | PROPERTY & LEASE MANAGEMENT | IMPLEMENTED | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Register360.tsx |
 | REQ-0577 | VI | Security | TENANT ACCOUNTING | PLANNED | 1 |  |
 | REQ-0578 | VI | Parties | LANDLORD ACCOUNTING | PLANNED | 1 |  |
-| REQ-0579 | VI | Expenses | CONSTRUCTION ADVANCED | PLANNED | 2 |  |
+| REQ-0579 | VI | Expenses | CONSTRUCTION ADVANCED | PARTIAL | 2 | src/engine/registerKinds.json · src/engine/templates.ts · src/engine/forward.ts · tests/forward.test.ts 'an approved purchase order is COMMITTED for what has not been billed' |
 | REQ-0580 | VI | Projects | PROJECT COST-TO-COMPLETE | PLANNED | 2 |  |
-| REQ-0581 | VI | Expenses | AIF / FUND ACCOUNTING ADVANCED | PLANNED | 2 |  |
+| REQ-0581 | VI | Expenses | AIF / FUND ACCOUNTING ADVANCED | PARTIAL | 2 | src/engine/templates.ts · src/engine/registerKinds.json · src/pages/Registers.tsx |
 | REQ-0582 | VI | Tax | TAX & COMPLIANCE CALENDAR | PLANNED | 1 |  |
-| REQ-0583 | VI | Forward | COMPLIANCE TASK | PLANNED | 2 |  |
+| REQ-0583 | VI | Forward | COMPLIANCE TASK | IMPLEMENTED | 2 | src/engine/registerKinds.json compliance · src/pages/Registers.tsx · src/pages/Register360.tsx · tests/forward.test.ts 'early warnings state facts, rules and assumptions' |
 | REQ-0584 | VI | Tax | GLOBAL TAX ARCHITECTURE | PLANNED | 1 |  |
 | REQ-0585 | VI | Tax | TRANSFER-PRICING SUPPORT | PLANNED | 1 |  |
 | REQ-0586 | VI | Audit | LEGAL HOLD | PLANNED | 1 |  |
@@ -603,7 +603,7 @@ Section numbers absent from the source document itself: none
 | REQ-0592 | VI | System Health | BACKUP HEALTH | PLANNED | 3 |  |
 | REQ-0593 | VI | Security | SECURITY COMMAND CENTRE | PLANNED | 1 |  |
 | REQ-0594 | VI | Security | PRIVILEGED ACCESS | PLANNED | 1 |  |
-| REQ-0595 | VI | Security | SENSITIVE DATA MASKING | PARTIAL | 1 | privacy mode, masked account numbers |
+| REQ-0595 | VI | Security | SENSITIVE DATA MASKING | PARTIAL | 1 | privacy mode, masked account numbers · tests/sql/phase2_payroll.sql T113 T117–T119 · tests/numiOps.test.ts › declines to state what an individual is paid, even for a person who may see payroll |
 | REQ-0596 | VI | Security | API SECURITY | PLANNED | 1 |  |
 | REQ-0597 | VI | Reports | NUMERO INTEGRATION HUB | PLANNED | 1 |  |
 | REQ-0598 | VI | Integrations | GHL ECOSYSTEM CONNECTIVITY | PLANNED | 3 |  |
@@ -615,7 +615,7 @@ Section numbers absent from the source document itself: none
 | REQ-0604 | VI | Reconciliation | UNIVERSAL RECONCILIATION | PLANNED | 1 |  |
 | REQ-0605 | VI | Reports | FINANCIAL INTEGRITY DASHBOARD | PLANNED | 1 |  |
 | REQ-0606 | VI | Reconciliation | RECONCILIATION DRILL-DOWN | PLANNED | 1 |  |
-| REQ-0607 | VI | Forward | NUMERO MORNING | PLANNED | 2 |  |
+| REQ-0607 | VI | Forward | NUMERO MORNING | PARTIAL | 2 | src/pages/Home.tsx |
 | REQ-0608 | VI | General | OWNER ATTENTION ENGINE | PLANNED | 3 |  |
 | REQ-0609 | VI | NUMI | NUMERO COMMAND | IMPLEMENTED | 1 | CommandPalette |
 | REQ-0610 | VI | Accounts Receivable | CONVERSATIONAL DRILL-DOWN | PLANNED | 1 |  |
@@ -623,21 +623,21 @@ Section numbers absent from the source document itself: none
 | REQ-0612 | VI | NUMI | ASK NUMERO — PROFIT | PLANNED | 1 |  |
 | REQ-0613 | VI | NUMI | ASK NUMERO — MONEY LEAKAGE | PLANNED | 1 |  |
 | REQ-0614 | VI | NUMI | ASK NUMERO — FORECAST | PLANNED | 1 |  |
-| REQ-0615 | VI | Treasury | NUMERO DAILY CASH WATERFALL | PLANNED | 2 |  |
+| REQ-0615 | VI | Treasury | NUMERO DAILY CASH WATERFALL | PARTIAL | 2 | src/pages/Forward.tsx (Cash horizon) · src/ui/charts.tsx Waterfall · src/pages/ReportView.tsx (Cash Book) |
 | REQ-0616 | VI | Reports | 13-WEEK CASH FLOW | PLANNED | 1 |  |
-| REQ-0617 | VI | Treasury | LIQUIDITY LADDER | PLANNED | 2 |  |
-| REQ-0618 | VI | Forward | COMMITMENT WATERFALL | PLANNED | 2 |  |
-| REQ-0619 | VI | Forward | NUMERO CONTROL ROOM | PLANNED | 2 |  |
+| REQ-0617 | VI | Treasury | LIQUIDITY LADDER | TESTED | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it', 'daily balance ends where the horizon ends' · src/engine/forward.ts cashHorizon · src/pages/Forward.tsx (All horizons) · src/pages/Treasury.tsx (Liquidity ladder) |
+| REQ-0618 | VI | Forward | COMMITMENT WATERFALL | PARTIAL | 2 | src/pages/Forward.tsx · src/ui/charts.tsx · src/engine/forward.ts cashHorizon |
+| REQ-0619 | VI | Forward | NUMERO CONTROL ROOM | PARTIAL | 2 | src/pages/Cockpit.tsx |
 | REQ-0620 | VI | Reports | FINANCIAL PERIOD COMPARISON | PLANNED | 1 |  |
 | REQ-0621 | VI | Reports | ENTITY COMPARISON | PLANNED | 1 |  |
 | REQ-0622 | VI | Reports | DEPARTMENT COMPARISON | PLANNED | 1 |  |
 | REQ-0623 | VI | Banking | BANK POSITION | PLANNED | 1 |  |
-| REQ-0624 | VI | Forward | PAYMENT CALENDAR | PARTIAL | 1 | Forward |
-| REQ-0625 | VI | Accounts Receivable | COLLECTION CALENDAR | PARTIAL | 1 | Forward |
-| REQ-0626 | VI | Treasury | MONEY TIMELINE | PLANNED | 2 |  |
+| REQ-0624 | VI | Forward | PAYMENT CALENDAR | PARTIAL | 1 | src/pages/Forward.tsx › Calendar · src/engine/forward.ts · tests/forward.test.ts |
+| REQ-0625 | VI | Accounts Receivable | COLLECTION CALENDAR | PARTIAL | 1 | src/pages/Forward.tsx › Calendar · src/engine/forward.ts · tests/forward.test.ts › an estimate never replaces the contractual date |
+| REQ-0626 | VI | Treasury | MONEY TIMELINE | PARTIAL | 2 | src/pages/Forward.tsx (Calendar, All events) · src/pages/MoneyMap.tsx |
 | REQ-0627 | VI | Search & Command | FINANCIAL SEARCH ENGINE | IMPLEMENTED | 1 | CommandPalette |
 | REQ-0628 | VI | Search & Command | UNIVERSAL REFERENCE NUMBER | PLANNED | 1 |  |
-| REQ-0629 | VI | Expenses | ACCOUNTING EVENT GRAPH | PLANNED | 2 |  |
+| REQ-0629 | VI | Expenses | ACCOUNTING EVENT GRAPH | PARTIAL | 2 | src/pages/PurchaseDetail.tsx · src/pages/JournalDetail.tsx · src/pages/ClaimEditor.tsx · src/ui/ops.tsx |
 | REQ-0630 | VI | Truth | FINANCIAL LINEAGE | PLANNED | 1 |  |
 | REQ-0631 | VI | Truth | DATA PROVENANCE | PLANNED | 1 |  |
 | REQ-0632 | VI | Approvals | AI-GENERATED VS HUMAN DATA | IMPLEMENTED | 1 | journals.origin |
@@ -672,66 +672,66 @@ Section numbers absent from the source document itself: none
 | REQ-0661 | VI | Engineering Governance | THE FINAL OWNER QUESTION | PLANNED | 1 |  |
 | REQ-0662 | VI | Engineering Governance | FINAL MASTER PRINCIPLE | PLANNED | 1 |  |
 | REQ-0663 | VII | Sentinel | THE FUNDAMENTAL CHANGE | PLANNED | 1 |  |
-| REQ-0664 | VII | Forward | NUMERO FORWARD | PARTIAL | 1 | src/pages/Forward.tsx |
-| REQ-0665 | VII | Expenses | FINANCIAL EVENT STATES | PLANNED | 2 |  |
-| REQ-0666 | VII | Forward | FINANCIAL CERTAINTY LEVELS | PLANNED | 2 |  |
-| REQ-0667 | VII | Expenses | PRE-ACCOUNTING EVENT ENGINE | PLANNED | 2 |  |
-| REQ-0668 | VII | Forward | QUOTATION PIPELINE | PLANNED | 2 |  |
-| REQ-0669 | VII | Expenses | NEGOTIATION REGISTER | PLANNED | 2 |  |
+| REQ-0664 | VII | Forward | NUMERO FORWARD | PARTIAL | 1 | src/engine/forward.ts · src/pages/Forward.tsx · src/lib/forwardData.ts · tests/forward.test.ts · tests/numiOps.test.ts |
+| REQ-0665 | VII | Expenses | FINANCIAL EVENT STATES | PARTIAL | 2 | supabase/migrations/0006_workflow_registers_documents.sql · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-0666 | VII | Forward | FINANCIAL CERTAINTY LEVELS | PARTIAL | 2 | tests/forward.test.ts 'every event names its source, its certainty and how it was arrived at', 'contingent amounts are reported beside the projection, never inside it' · tests/numiOps.test.ts 'firm and uncertain amounts are never added into one unlabelled figure' · tests/sql/phase2_flow.sql T72 · src/engine/forward.ts |
+| REQ-0667 | VII | Expenses | PRE-ACCOUNTING EVENT ENGINE | IMPLEMENTED | 2 | src/engine/forward.ts · src/engine/registerKinds.json · src/pages/Forward.tsx · src/pages/Registers.tsx · tests/forward.test.ts 'every event names its source, its certainty and how it was arrived at' · tests/ops.test.ts 'requisition → order → receipt → bill, with a three-way comparison' |
+| REQ-0668 | VII | Forward | QUOTATION PIPELINE | PARTIAL | 2 | src/engine/registerKinds.json quotation · src/pages/Registers.tsx · src/pages/Register360.tsx · src/engine/forward.ts buildEvents |
+| REQ-0669 | VII | Expenses | NEGOTIATION REGISTER | IMPLEMENTED | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/pages/Register360.tsx |
 | REQ-0670 | VII | Accounts Receivable | CONTRACTED REVENUE | PLANNED | 1 |  |
-| REQ-0671 | VII | Forward | CONTRACTED EXPENDITURE | PLANNED | 2 |  |
-| REQ-0672 | VII | Forward | PURCHASE COMMITMENTS | PLANNED | 2 |  |
+| REQ-0671 | VII | Forward | CONTRACTED EXPENDITURE | TESTED | 2 | tests/forward.test.ts 'a monthly obligation falls due once a month', 'stops at the end date unless it renews automatically', 'every event names its source, its certainty and how it was arrived at' · src/pages/Register360.tsx · src/pages/Forward.tsx |
+| REQ-0672 | VII | Forward | PURCHASE COMMITMENTS | PARTIAL | 2 | tests/sql/phase2_treasury_purchasing.sql T97 · tests/forward.test.ts 'an approved purchase order is COMMITTED for what has not been billed' · src/pages/PurchaseDetail.tsx · src/pages/Purchasing.tsx |
 | REQ-0673 | VII | Accounts Receivable | SALES ORDERS | PLANNED | 1 |  |
-| REQ-0674 | VII | Forward | RECURRING OBLIGATION ENGINE | PLANNED | 2 |  |
+| REQ-0674 | VII | Forward | RECURRING OBLIGATION ENGINE | TESTED | 2 | tests/forward.test.ts 'a monthly obligation falls due once a month', 'stops at the end date unless it renews automatically', 'an occurrence already past is kept once, as overdue', 'rent escalation: 10 lakh a month, 5% from April (spec 675)', 'the payroll forecast is labelled FORECAST and says what it leaves out', 'a scheduled occurrence that has already been billed is not counted twice', 'a bill from another party, a cancelled bill or a bill of another period covers nothing' · tests/sql/phase2_treasury_purchasing.sql T85 · src/pages/Forward.tsx · src/pages/Register360.tsx · tests/forward.test.ts 'only the bill itself stands for the period: a debit note or a credit note covers nothing' |
 | REQ-0675 | VII | Approvals | RENT ESCALATION | PLANNED | 1 |  |
-| REQ-0676 | VII | Forward | PAYROLL FORWARD | PLANNED | 2 |  |
+| REQ-0676 | VII | Forward | PAYROLL FORWARD | PARTIAL | 2 | tests/forward.test.ts 'the payroll forecast is labelled FORECAST and says what it leaves out' · src/engine/forward.ts buildEvents · src/pages/Forward.tsx · src/pages/PeopleCost.tsx |
 | REQ-0677 | VII | Accounts Payable | COMMISSION NOT YET PAYABLE | PLANNED | 1 |  |
-| REQ-0678 | VII | Forward | EMPLOYEE CLAIM PIPELINE | PLANNED | 2 |  |
-| REQ-0679 | VII | Forward | CONSTRUCTION FUTURE PAYMENTS | PLANNED | 2 |  |
+| REQ-0678 | VII | Forward | EMPLOYEE CLAIM PIPELINE | TESTED | 2 | tests/sql/phase2_flow.sql T51 T56 T58 · tests/ops.test.ts 'excess expense becomes a reimbursement due, then paid' · src/pages/Expenses.tsx · src/pages/ClaimEditor.tsx · src/engine/forward.ts buildEvents |
+| REQ-0679 | VII | Forward | CONSTRUCTION FUTURE PAYMENTS | PARTIAL | 2 | src/engine/registerKinds.json work_order · src/pages/Register360.tsx · src/engine/forward.ts buildEvents |
 | REQ-0680 | VII | Audit | CONSTRUCTION RETENTION | PLANNED | 1 |  |
-| REQ-0681 | VII | Forward | INVESTOR FLOW FORECAST | PLANNED | 2 |  |
-| REQ-0682 | VII | Forward | LOAN & EMI FORECAST | PLANNED | 2 |  |
-| REQ-0683 | VII | Forward | CREDIT CARD FUTURE OBLIGATION | PLANNED | 2 |  |
-| REQ-0684 | VII | Forward | SUBSCRIPTION FUTURE COST | PLANNED | 2 |  |
-| REQ-0685 | VII | Forward | INSURANCE RENEWAL FORECAST | PLANNED | 2 |  |
-| REQ-0686 | VII | Forward | WARRANTY OBLIGATIONS | PLANNED | 2 |  |
-| REQ-0687 | VII | Forward | LEGAL OBLIGATION REGISTER | PLANNED | 2 |  |
-| REQ-0688 | VII | Forward | CONTINGENT LIABILITIES | PLANNED | 2 |  |
-| REQ-0689 | VII | Treasury | GUARANTEE REGISTER | PLANNED | 2 |  |
-| REQ-0690 | VII | Forward | LC / BG FORWARD VIEW | PLANNED | 2 |  |
-| REQ-0691 | VII | Forward | TAX FORECAST | PLANNED | 2 |  |
-| REQ-0692 | VII | Forward | ASSET PURCHASE PIPELINE | PLANNED | 2 |  |
-| REQ-0693 | VII | Forward | ASSET SALE PIPELINE | PLANNED | 2 |  |
-| REQ-0694 | VII | Forward | DEPRECIATION FORECAST | PLANNED | 2 |  |
-| REQ-0695 | VII | Treasury | CAPITAL INFUSION | PLANNED | 2 |  |
-| REQ-0696 | VII | Forward | DIVIDEND / DISTRIBUTION PIPELINE | PLANNED | 2 |  |
-| REQ-0697 | VII | Forward | CSR / DONATION | PLANNED | 2 |  |
-| REQ-0698 | VII | Forward | CUSTOMER REFUND PIPELINE | PLANNED | 2 |  |
-| REQ-0699 | VII | Forward | BAD DEBT FUTURE RISK | PLANNED | 2 |  |
+| REQ-0681 | VII | Forward | INVESTOR FLOW FORECAST | PARTIAL | 2 | src/engine/registerKinds.json capital_call, capital_infusion, dividend · src/pages/Registers.tsx · src/engine/forward.ts buildEvents |
+| REQ-0682 | VII | Forward | LOAN & EMI FORECAST | TESTED | 2 | tests/sql/phase2_treasury_purchasing.sql T85 T90 · tests/forward.test.ts 'loan position and debt ladder' · tests/ops.test.ts 'loan schedule, disbursement and instalments in order' · src/pages/Loan360.tsx · src/pages/Treasury.tsx |
+| REQ-0683 | VII | Forward | CREDIT CARD FUTURE OBLIGATION | PARTIAL | 2 | src/engine/registerKinds.json credit_card · src/pages/Registers.tsx · src/engine/forward.ts buildEvents |
+| REQ-0684 | VII | Forward | SUBSCRIPTION FUTURE COST | TESTED | 2 | tests/forward.test.ts 'stops at the end date unless it renews automatically', 'rent escalation: 10 lakh a month, 5% from April (spec 675)' · tests/sql/phase2_flow.sql T72 · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-0685 | VII | Forward | INSURANCE RENEWAL FORECAST | PARTIAL | 2 | tests/forward.test.ts 'early warnings state facts, rules and assumptions' · src/engine/registerKinds.json insurance, insurance_claim · src/pages/Register360.tsx |
+| REQ-0686 | VII | Forward | WARRANTY OBLIGATIONS | PARTIAL | 2 | src/engine/registerKinds.json warranty · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-0687 | VII | Forward | LEGAL OBLIGATION REGISTER | TESTED | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it' · src/engine/registerKinds.json legal_claim · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-0688 | VII | Forward | CONTINGENT LIABILITIES | TESTED | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it' · tests/numiOps.test.ts 'contingent exposure is shown beside the projection, not inside it' · src/engine/registerKinds.json contingent_liability · src/pages/Registers.tsx |
+| REQ-0689 | VII | Treasury | GUARANTEE REGISTER | IMPLEMENTED | 2 | src/engine/registerKinds.json (kinds 'bank_guarantee', 'corporate_guarantee') · src/pages/Registers.tsx · src/pages/Treasury.tsx · src/engine/forward.ts · tests/forward.test.ts 'early warnings state facts, rules and assumptions', 'a guarantee given is contingent: beside the projection, never inside it' |
+| REQ-0690 | VII | Forward | LC / BG FORWARD VIEW | PARTIAL | 2 | tests/forward.test.ts 'early warnings state facts, rules and assumptions', 'a guarantee given is contingent: beside the projection, never inside it' · src/engine/registerKinds.json bank_guarantee, letter_of_credit · src/pages/Forward.tsx · src/pages/Registers.tsx |
+| REQ-0691 | VII | Forward | TAX FORECAST | PARTIAL | 2 | tests/forward.test.ts 'early warnings state facts, rules and assumptions' · src/engine/registerKinds.json compliance · src/pages/Forward.tsx · src/pages/Cockpit.tsx |
+| REQ-0692 | VII | Forward | ASSET PURCHASE PIPELINE | PARTIAL | 2 | src/engine/registerKinds.json asset_purchase · src/pages/Purchasing.tsx · src/pages/Assets.tsx · src/engine/forward.ts buildEvents |
+| REQ-0693 | VII | Forward | ASSET SALE PIPELINE | PARTIAL | 2 | tests/sql/phase2_flow.sql T40 T41 · src/engine/registerKinds.json asset_sale · src/pages/Asset360.tsx |
+| REQ-0694 | VII | Forward | DEPRECIATION FORECAST | PARTIAL | 2 | tests/forward.test.ts 'depreciation forecast follows the recorded method' · src/engine/ops.ts depreciationForecast · src/pages/Assets.tsx · src/pages/Asset360.tsx |
+| REQ-0695 | VII | Treasury | CAPITAL INFUSION | PARTIAL | 2 | src/engine/registerKinds.json (kind 'capital_infusion') · src/pages/Registers.tsx |
+| REQ-0696 | VII | Forward | DIVIDEND / DISTRIBUTION PIPELINE | PARTIAL | 2 | src/engine/registerKinds.json dividend · src/pages/Registers.tsx · src/engine/forward.ts buildEvents |
+| REQ-0697 | VII | Forward | CSR / DONATION | PARTIAL | 2 | src/engine/registerKinds.json csr_donation · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-0698 | VII | Forward | CUSTOMER REFUND PIPELINE | PARTIAL | 2 | src/engine/registerKinds.json customer_refund · src/pages/Registers.tsx · src/engine/forward.ts buildEvents |
+| REQ-0699 | VII | Forward | BAD DEBT FUTURE RISK | PARTIAL | 2 | src/pages/Owed.tsx · src/engine/forward.ts earlyWarnings · src/engine/registerKinds.json bad_debt |
 | REQ-0700 | VII | Inventory | INVENTORY LOSS EXPOSURE | PLANNED | 3 |  |
 | REQ-0701 | VII | Forward | FOREX FUTURE EXPOSURE | PLANNED | 2 |  |
-| REQ-0702 | VII | Forward | FUTURE CASH ENGINE | PLANNED | 2 |  |
+| REQ-0702 | VII | Forward | FUTURE CASH ENGINE | TESTED | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it', 'daily balance ends where the horizon ends' · src/engine/forward.ts cashHorizon · src/pages/Forward.tsx |
 | REQ-0703 | VII | Forward | CASH HORIZON WATERFALL | IMPLEMENTED | 1 | Forward › waterfall |
-| REQ-0704 | VII | Forward | CONFIDENCE BANDS | PLANNED | 2 |  |
+| REQ-0704 | VII | Forward | CONFIDENCE BANDS | TESTED | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it' · src/engine/forward.ts cashHorizon · src/pages/Forward.tsx · src/numi/ops.ts |
 | REQ-0705 | VII | Accounts Receivable | EXPECTED COLLECTION ENGINE | PLANNED | 1 |  |
-| REQ-0706 | VII | Forward | PAYMENT PRIORITY VIEW | PLANNED | 2 |  |
-| REQ-0707 | VII | Forward | EARLY-WARNING SYSTEM | PLANNED | 2 |  |
+| REQ-0706 | VII | Forward | PAYMENT PRIORITY VIEW | PARTIAL | 2 | src/pages/Forward.tsx · src/engine/forward.ts buildEvents |
+| REQ-0707 | VII | Forward | EARLY-WARNING SYSTEM | PARTIAL | 2 | tests/forward.test.ts 'early warnings state facts, rules and assumptions', 'a cash shortfall names its causes and assumptions', 'notices rise at 60, 30 and 7 days (spec 712)', 'dependence on one vendor is stated beside dependence on one customer' · src/engine/forward.ts earlyWarnings · src/pages/Forward.tsx · src/numi/ops.ts |
 | REQ-0708 | VII | Forward | CASH SHORTFALL WARNING | IMPLEMENTED | 1 | Forward › shortfall warning |
-| REQ-0709 | VII | Payroll | PAYROLL COVERAGE | PLANNED | 2 |  |
-| REQ-0710 | VII | Forward | DEBT SERVICE WARNING | PLANNED | 2 |  |
-| REQ-0711 | VII | Forward | TAX DEADLINE WARNING | PLANNED | 2 |  |
-| REQ-0712 | VII | Forward | CONTRACT RENEWAL WARNING | PLANNED | 2 |  |
-| REQ-0713 | VII | Forward | SUBSCRIPTION RENEWAL WARNING | PLANNED | 2 |  |
-| REQ-0714 | VII | Forward | INSURANCE EXPIRY WARNING | PLANNED | 2 |  |
-| REQ-0715 | VII | Forward | BANK GUARANTEE EXPIRY WARNING | PLANNED | 2 |  |
-| REQ-0716 | VII | Forward | RECEIVABLE CONCENTRATION WARNING | PARTIAL | 1 | Forward |
-| REQ-0717 | VII | Forward | VENDOR DEPENDENCY WARNING | PARTIAL | 1 | Forward |
-| REQ-0718 | VII | Forward | BUDGET EXHAUSTION FORECAST | PLANNED | 2 |  |
+| REQ-0709 | VII | Payroll | PAYROLL COVERAGE | PARTIAL | 2 | src/engine/forward.ts earlyWarnings · src/pages/Forward.tsx (Early warnings) |
+| REQ-0710 | VII | Forward | DEBT SERVICE WARNING | TESTED | 2 | tests/forward.test.ts 'early warnings state facts, rules and assumptions', 'loan position and debt ladder' · tests/numiOps.test.ts 'debt: principal outstanding agrees with the loan schedule' · src/pages/Forward.tsx · src/pages/Loan360.tsx · src/pages/Treasury.tsx |
+| REQ-0711 | VII | Forward | TAX DEADLINE WARNING | TESTED | 2 | tests/forward.test.ts 'early warnings state facts, rules and assumptions' · src/engine/forward.ts earlyWarnings · src/pages/Forward.tsx · src/engine/registerKinds.json compliance |
+| REQ-0712 | VII | Forward | CONTRACT RENEWAL WARNING | PARTIAL | 2 | tests/forward.test.ts 'notices rise at 60, 30 and 7 days (spec 712)', 'early warnings state facts, rules and assumptions' · src/engine/forward.ts noticeLevel, earlyWarnings · src/pages/Forward.tsx |
+| REQ-0713 | VII | Forward | SUBSCRIPTION RENEWAL WARNING | IMPLEMENTED | 2 | src/engine/forward.ts earlyWarnings · src/pages/Forward.tsx · src/engine/registerKinds.json subscription |
+| REQ-0714 | VII | Forward | INSURANCE EXPIRY WARNING | TESTED | 2 | tests/forward.test.ts 'early warnings state facts, rules and assumptions' · src/engine/registerKinds.json insurance, vehicle · src/pages/Forward.tsx |
+| REQ-0715 | VII | Forward | BANK GUARANTEE EXPIRY WARNING | PARTIAL | 2 | tests/forward.test.ts 'early warnings state facts, rules and assumptions' · src/engine/forward.ts earlyWarnings · src/engine/registerKinds.json bank_guarantee · src/pages/Forward.tsx |
+| REQ-0716 | VII | Forward | RECEIVABLE CONCENTRATION WARNING | IMPLEMENTED | 1 | src/engine/forward.ts earlyWarnings · src/pages/Forward.tsx › Early warnings |
+| REQ-0717 | VII | Forward | VENDOR DEPENDENCY WARNING | PARTIAL | 1 | src/engine/forward.ts earlyWarnings · src/pages/Forward.tsx › Early warnings · tests/forward.test.ts › dependence on one vendor is stated beside dependence on one customer |
+| REQ-0718 | VII | Forward | BUDGET EXHAUSTION FORECAST | PARTIAL | 2 | tests/forward.test.ts 'budget exhaustion is a statement with assumptions, not a verdict' · src/engine/forward.ts budgetExhaustion |
 | REQ-0719 | VII | Forward | PROJECT OVERRUN FORECAST | PLANNED | 2 |  |
 | REQ-0720 | VII | Forward | MARGIN EROSION WARNING | PLANNED | 2 |  |
-| REQ-0721 | VII | Forward | NUMERO FORWARD CALENDAR | PARTIAL | 1 | Forward |
-| REQ-0722 | VII | Forward | MONEY WEATHER | PLANNED | 2 |  |
-| REQ-0723 | VII | Forward | NUMERO FORWARD AI | PLANNED | 2 |  |
+| REQ-0721 | VII | Forward | NUMERO FORWARD CALENDAR | PARTIAL | 1 | src/pages/Forward.tsx › Calendar · src/engine/forward.ts calendarMonth · tests/forward.test.ts |
+| REQ-0722 | VII | Forward | MONEY WEATHER | TESTED | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it', 'early warnings state facts, rules and assumptions' · src/engine/forward.ts cashHorizon · src/pages/Forward.tsx |
+| REQ-0723 | VII | Forward | NUMERO FORWARD AI | PARTIAL | 2 | tests/numiOps.test.ts 'a projection is labelled FORECAST and INFERENCE, and starts from ACTUAL cash', 'renewals and expiries come from recorded dates', 'commitments are labelled COMMITTED and agree with the engine', 'gives totals and never names a person', 'the wording of the specification's own example questions' · src/numi/ops.ts · src/numi/engine.ts |
 | REQ-0724 | VII | Sentinel | FRAUD & ANOMALY DEFENCE SYSTEM | PARTIAL | 1 | Sentinel |
 | REQ-0725 | VII | Sentinel | SENTINEL MONITORING | PLANNED | 1 |  |
 | REQ-0726 | VII | Sentinel | DUPLICATE INVOICE DETECTION | TESTED | 1 | tests/engine.test.ts |
@@ -792,8 +792,8 @@ Section numbers absent from the source document itself: none
 | REQ-0781 | VII | Black Vault | EVIDENCE VAULT | PLANNED | 1 |  |
 | REQ-0782 | VII | Black Vault | CASE CONFIDENTIALITY | PLANNED | 1 |  |
 | REQ-0783 | VII | Audit | INVESTIGATION INDEPENDENCE | PLANNED | 1 |  |
-| REQ-0784 | VII | Incidents & Exceptions | FINANCIAL LOSS TRACKING | PLANNED | 2 |  |
-| REQ-0785 | VII | Incidents & Exceptions | RECOVERY TRACKING | PLANNED | 2 |  |
+| REQ-0784 | VII | Incidents & Exceptions | FINANCIAL LOSS TRACKING | PARTIAL | 2 | src/engine/registerKinds.json incident, recovery, insurance_claim · src/pages/Register360.tsx |
+| REQ-0785 | VII | Incidents & Exceptions | RECOVERY TRACKING | PARTIAL | 2 | src/engine/registerKinds.json recovery · src/pages/Registers.tsx · tests/sql/phase2_treasury_purchasing.sql T109 · tests/sql/phase2_payroll.sql T121 |
 | REQ-0786 | VII | Approvals | CONTROL REMEDIATION | PLANNED | 1 |  |
 | REQ-0787 | VII | Sentinel | SENTINEL LEARNING | PLANNED | 1 |  |
 | REQ-0788 | VII | Sentinel | FRAUD TREND ANALYSIS | PLANNED | 1 |  |
@@ -804,9 +804,9 @@ Section numbers absent from the source document itself: none
 | REQ-0793 | VII | Sentinel | OWNER SENTINEL | PLANNED | 1 |  |
 | REQ-0794 | VII | Sentinel | CRITICAL PAYMENT INTERCEPT | PLANNED | 1 |  |
 | REQ-0795 | VII | Black Vault | NEVER SECRETLY BLOCK ACCOUNTING | IMPLEMENTED | 1 | alerts never block posting |
-| REQ-0796 | VII | Incidents & Exceptions | WHISTLEBLOWER LINK | PLANNED | 2 |  |
-| REQ-0797 | VII | Incidents & Exceptions | BRIBERY / IMPROPER PAYMENT DETECTION | PLANNED | 2 |  |
-| REQ-0798 | VII | Incidents & Exceptions | EXTORTION / COERCION CASE LINK | PLANNED | 2 |  |
+| REQ-0796 | VII | Incidents & Exceptions | WHISTLEBLOWER LINK | PARTIAL | 2 | src/engine/registerKinds.json incident · src/pages/Register360.tsx · supabase/migrations/0006_workflow_registers_documents.sql register_items_select |
+| REQ-0797 | VII | Incidents & Exceptions | BRIBERY / IMPROPER PAYMENT DETECTION | PARTIAL | 2 | supabase/migrations/0004_reporting_sentinel_numi.sql run_sentinel · supabase/migrations/0007_assets_purchasing.sql · tests/sql/phase2_treasury_purchasing.sql T100 T102 · src/pages/Sentinel.tsx |
+| REQ-0798 | VII | Incidents & Exceptions | EXTORTION / COERCION CASE LINK | PARTIAL | 2 | src/engine/registerKinds.json incident · src/pages/Register360.tsx · src/ui/ops.tsx Attachments |
 | REQ-0799 | VII | Sentinel | BLACK VAULT + SENTINEL | PLANNED | 1 |  |
 | REQ-0800 | VII | Sentinel | AUDITOR SENTINEL | PLANNED | 1 |  |
 | REQ-0801 | VII | Sentinel | SENTINEL EXPLAIN THIS ALERT | IMPLEMENTED | 1 | Sentinel drawer |
@@ -818,17 +818,17 @@ Section numbers absent from the source document itself: none
 | REQ-0807 | VII | Sentinel | ANOTHER EXAMPLE | PLANNED | 1 |  |
 | REQ-0808 | VII | Sentinel | ANOTHER EXAMPLE | PLANNED | 1 |  |
 | REQ-0809 | VII | Sentinel | ANOTHER EXAMPLE | PLANNED | 1 |  |
-| REQ-0810 | VII | Forward | ANOTHER EXAMPLE | PLANNED | 2 |  |
+| REQ-0810 | VII | Forward | ANOTHER EXAMPLE | PARTIAL | 2 | tests/forward.test.ts 'early warnings state facts, rules and assumptions', 'an estimate never replaces the contractual date' · src/ui/records.tsx · numero_private.save_promise · src/pages/Forward.tsx |
 | REQ-0811 | VII | Sentinel | NUMERO FINANCIAL RADAR | PLANNED | 1 |  |
-| REQ-0812 | VII | Forward | FINANCIAL HORIZON | PLANNED | 2 |  |
-| REQ-0813 | VII | Forward | OWNER'S FUTURE MONEY SCREEN | PLANNED | 2 |  |
+| REQ-0812 | VII | Forward | FINANCIAL HORIZON | PARTIAL | 2 | tests/forward.test.ts 'every event names its source, its certainty and how it was arrived at' · src/pages/Forward.tsx · src/engine/forward.ts |
+| REQ-0813 | VII | Forward | OWNER'S FUTURE MONEY SCREEN | PARTIAL | 2 | tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it' · src/pages/Forward.tsx · src/engine/forward.ts cashHorizon |
 | REQ-0814 | VII | Forward | THE "CAN WE AFFORD IT?" ENGINE | PLANNED | 2 |  |
 | REQ-0815 | VII | Digital Twin | THE "WHAT IF THIS GOES WRONG?" ENGINE | PLANNED | 3 |  |
 | REQ-0816 | VII | Forward | FUTURE FINANCIAL STRESS TEST | PLANNED | 2 |  |
 | REQ-0817 | VII | Forward | FORECAST ACCURACY TRACKER | PLANNED | 2 |  |
 | REQ-0818 | VII | Forward | ASSUMPTION REGISTER | PLANNED | 2 |  |
-| REQ-0819 | VII | Forward | NUMERO FORWARD MORNING BRIEF | PLANNED | 2 |  |
-| REQ-0820 | VII | Forward | ULTIMATE FORWARD PRINCIPLE | PLANNED | 2 |  |
+| REQ-0819 | VII | Forward | NUMERO FORWARD MORNING BRIEF | PARTIAL | 2 | tests/numiOps.test.ts 'a projection is labelled FORECAST and INFERENCE, and starts from ACTUAL cash' · src/numi/ops.ts · src/pages/Forward.tsx |
+| REQ-0820 | VII | Forward | ULTIMATE FORWARD PRINCIPLE | IMPLEMENTED | 2 | tests/sql/phase2_treasury_purchasing.sql T97 · tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it', 'an estimate never replaces the contractual date' · tests/numiOps.test.ts 'a projection is labelled FORECAST and INFERENCE, and starts from ACTUAL cash' · src/ui/records.tsx · numero_private.save_register_item |
 | REQ-0821 | VII | Sentinel | ULTIMATE SENTINEL PRINCIPLE | TESTED | 1 | tests/engine.test.ts |
 | REQ-0822 | VII | Sentinel | THE NUMERO FINANCIAL INTELLIGENCE LOOP | PLANNED | 1 |  |
 | REQ-0823 | VII | Engineering Governance | FINAL DIRECTIVE | PLANNED | 1 |  |
@@ -838,7 +838,7 @@ Section numbers absent from the source document itself: none
 | REQ-0827 | VIII | NUMI | NUMI CAN DO, NOT ONLY TALK | PLANNED | 1 |  |
 | REQ-0828 | VIII | NUMI | NUMI ACTION LEVELS | PLANNED | 1 |  |
 | REQ-0829 | VIII | NUMI | NUMI GLOBAL COMMAND BAR | IMPLEMENTED | 1 | CommandPalette |
-| REQ-0830 | VIII | NUMI | NUMI UNDERSTANDS PLAIN LANGUAGE | PARTIAL | 1 | src/numi/engine.ts |
+| REQ-0830 | VIII | NUMI | NUMI UNDERSTANDS PLAIN LANGUAGE | PARTIAL | 1 | src/numi/engine.ts · src/numi/ops.ts · tests/numiOps.test.ts › the wording of the specification's own example questions · tests/numiOps.test.ts › whole words only |
 | REQ-0831 | VIII | NUMI | NUMI CLARIFIES AMBIGUITY | TESTED | 1 | tests/engine.test.ts |
 | REQ-0832 | VIII | NUMI | NUMI WEEKLY P&L | PLANNED | 1 |  |
 | REQ-0833 | VIII | NUMI | NUMI PERIOD ANALYSIS | PLANNED | 1 |  |
@@ -931,7 +931,7 @@ Section numbers absent from the source document itself: none
 | REQ-0920 | VIII | NUMI | NUMI TRANSACTION PREVIEW | IMPLEMENTED | 1 | Entry › proposed double entry |
 | REQ-0921 | VIII | NUMI | NUMI NEVER RELEASES MONEY AUTONOMOUSLY | IMPLEMENTED | 1 | no code path |
 | REQ-0922 | VIII | NUMI | NUMI NEVER HIDES ACCOUNTING | PLANNED | 1 |  |
-| REQ-0923 | VIII | NUMI | NUMI PROMPT-INJECTION DEFENCE | PARTIAL | 1 | tests/commands.test.ts |
+| REQ-0923 | VIII | NUMI | NUMI PROMPT-INJECTION DEFENCE | PARTIAL | 1 | tests/commands.test.ts › an instruction embedded in dictated text cannot trigger an action · src/pages/Inbox.tsx · src/numi/ops.ts |
 | REQ-0924 | VIII | NUMI | NUMI TOOL AUTHORIZATION | PLANNED | 1 |  |
 | REQ-0925 | VIII | NUMI | NUMI ACTION RECEIPT | PLANNED | 1 |  |
 | REQ-0926 | VIII | NUMI | NUMI UNDO | PLANNED | 1 |  |
@@ -1205,37 +1205,37 @@ Section numbers absent from the source document itself: none
 | REQ-1194 | X | Truth | NEVER MIX TRUTH STATES | IMPLEMENTED | 1 | Truth chips |
 | REQ-1195 | X | Truth | TRUST THIS NUMBER | PLANNED | 1 |  |
 | REQ-1196 | X | NUMI | DATA CONFIDENCE IS NOT AI CONFIDENCE | PLANNED | 1 |  |
-| REQ-1197 | X | People Cost | NUMERO PEOPLE COST UNIVERSE | PLANNED | 2 |  |
-| REQ-1198 | X | Payroll | EMPLOYEE SALARY MASTER | PLANNED | 2 |  |
-| REQ-1199 | X | Payroll | SALARY COMPONENTS | PLANNED | 2 |  |
-| REQ-1200 | X | Payroll | VARIABLE PAY | PLANNED | 2 |  |
-| REQ-1201 | X | Payroll | OVERTIME | PLANNED | 2 |  |
-| REQ-1202 | X | Payroll | SALARY ARREARS | PLANNED | 2 |  |
-| REQ-1203 | X | Payroll | SALARY REVISION HISTORY | PLANNED | 2 |  |
-| REQ-1204 | X | Payroll | PAYROLL DEDUCTIONS | PLANNED | 2 |  |
-| REQ-1205 | X | Payroll | EMPLOYER COSTS | PLANNED | 2 |  |
-| REQ-1206 | X | Expenses | EMPLOYEE BENEFITS | PLANNED | 2 |  |
-| REQ-1207 | X | Assets | EMPLOYEE EQUIPMENT COST | PLANNED | 2 |  |
+| REQ-1197 | X | People Cost | NUMERO PEOPLE COST UNIVERSE | PARTIAL | 2 | tests/forward.test.ts 'people cost: salary is not the whole cost, and shared costs are not invented' · src/engine/ops.ts peopleCost · src/pages/PeopleCost.tsx |
+| REQ-1198 | X | Payroll | EMPLOYEE SALARY MASTER | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql employees, salary_structures · src/pages/Payroll.tsx · tests/sql/phase2_payroll.sql T117 |
+| REQ-1199 | X | Payroll | SALARY COMPONENTS | TESTED | 2 | tests/sql/phase2_payroll.sql T110 · tests/ops.test.ts 'calculates from approved salaries, pro-rata, and lists anyone left out' · src/pages/Payroll.tsx · supabase/migrations/0009_treasury_payroll.sql save_salary_structure |
+| REQ-1200 | X | Payroll | VARIABLE PAY | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql create_payroll_run · src/pages/Payroll.tsx · src/pages/PeopleCost.tsx · tests/sql/phase2_payroll.sql T110 · tests/forward.test.ts 'people cost: salary is not the whole cost, and shared costs are not invented' |
+| REQ-1201 | X | Payroll | OVERTIME | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql create_payroll_run · src/pages/Payroll.tsx |
+| REQ-1202 | X | Payroll | SALARY ARREARS | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql create_payroll_run, save_salary_structure · src/pages/Payroll.tsx |
+| REQ-1203 | X | Payroll | SALARY REVISION HISTORY | TESTED | 2 | tests/sql/phase2_treasury_purchasing.sql T108 · tests/sql/phase2_payroll.sql T125 · tests/ops.test.ts 'an approved salary is never overwritten; a revision adds history' · src/pages/Payroll.tsx (Salaries) |
+| REQ-1204 | X | Payroll | PAYROLL DEDUCTIONS | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql create_payroll_run, propose_payroll_run · supabase/migrations/0011_review_corrections.sql apply_loan_recovery · tests/sql/phase2_treasury_purchasing.sql T109 · tests/sql/phase2_payroll.sql T115, T121 · tests/sql/phase2_corrections.sql T130–T133 · tests/ops.test.ts 'a loan recovered through payroll reaches its instalment schedule and is never counted twice' |
+| REQ-1205 | X | Payroll | EMPLOYER COSTS | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql save_salary_structure, propose_payroll_run · src/pages/Payroll.tsx · tests/sql/phase2_payroll.sql T110, T115 |
+| REQ-1206 | X | Expenses | EMPLOYEE BENEFITS | PARTIAL | 2 | src/pages/Payroll.tsx · src/engine/ops.ts · src/pages/PeopleCost.tsx · tests/forward.test.ts 'people cost: salary is not the whole cost, and shared costs are not invented' |
+| REQ-1207 | X | Assets | EMPLOYEE EQUIPMENT COST | PARTIAL | 2 | src/pages/Assets.tsx · supabase/migrations/0007_assets_purchasing.sql fixed_assets.custodian_party_id · src/engine/registerKinds.json (kind 'software_licence') |
 | REQ-1208 | X | Expenses | EMPLOYEE SOFTWARE COST | PLANNED | 2 |  |
-| REQ-1209 | X | Expenses | EMPLOYEE TRAVEL COST | PLANNED | 2 |  |
+| REQ-1209 | X | Expenses | EMPLOYEE TRAVEL COST | IMPLEMENTED | 2 | src/pages/ClaimEditor.tsx · src/pages/PeopleCost.tsx · src/engine/ops.ts · tests/forward.test.ts 'people cost: salary is not the whole cost, and shared costs are not invented' · numero_private.propose_claim_posting |
 | REQ-1210 | X | Expenses | EMPLOYEE VEHICLE COST | PLANNED | 2 |  |
 | REQ-1211 | X | Approvals | EMPLOYEE OFFICE COST ALLOCATION | PLANNED | 1 |  |
-| REQ-1212 | X | People Cost | TRUE EMPLOYEE COST | PLANNED | 2 |  |
-| REQ-1213 | X | People Cost | PEOPLE COST BY COMPANY | PLANNED | 2 |  |
-| REQ-1214 | X | People Cost | PEOPLE COST BY DEPARTMENT | PLANNED | 2 |  |
+| REQ-1212 | X | People Cost | TRUE EMPLOYEE COST | PARTIAL | 2 | tests/forward.test.ts 'people cost: salary is not the whole cost, and shared costs are not invented' · src/engine/ops.ts peopleCost · src/pages/PeopleCost.tsx |
+| REQ-1213 | X | People Cost | PEOPLE COST BY COMPANY | PARTIAL | 2 | src/engine/ops.ts peopleCost · src/pages/PeopleCost.tsx |
+| REQ-1214 | X | People Cost | PEOPLE COST BY DEPARTMENT | TESTED | 2 | tests/forward.test.ts 'people cost follows the department recorded on the payroll line, not the person's present department' · tests/sql/phase2_payroll.sql T114 · tests/ops.test.ts 'the payroll journal is confidential, by department, and names no one' · src/engine/ops.ts peopleCost · src/pages/PeopleCost.tsx |
 | REQ-1215 | X | People Cost | PEOPLE COST BY PROJECT | PLANNED | 2 |  |
-| REQ-1216 | X | People Cost | PEOPLE COST PER REVENUE | PLANNED | 2 |  |
+| REQ-1216 | X | People Cost | PEOPLE COST PER REVENUE | IMPLEMENTED | 2 | src/pages/PeopleCost.tsx · src/lib/data.ts |
 | REQ-1217 | X | Accounts Receivable | REVENUE PER EMPLOYEE | PLANNED | 1 |  |
 | REQ-1218 | X | People Cost | EMPLOYEE COST TREND | PLANNED | 2 |  |
-| REQ-1219 | X | Forward | PAYROLL FORECAST | PLANNED | 2 |  |
-| REQ-1220 | X | Payroll | HEADCOUNT PLAN | PLANNED | 2 |  |
+| REQ-1219 | X | Forward | PAYROLL FORECAST | PARTIAL | 2 | tests/forward.test.ts 'the payroll forecast is labelled FORECAST and says what it leaves out' · src/pages/PeopleCost.tsx · src/engine/forward.ts buildEvents |
+| REQ-1220 | X | Payroll | HEADCOUNT PLAN | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql employees.status · src/pages/PeopleCost.tsx (New-hire cost model) · tests/forward.test.ts 'new-hire cost model' |
 | REQ-1221 | X | Payroll | VACANCY COST | PLANNED | 2 |  |
 | REQ-1222 | X | UI/UX | NEW-HIRE COST MODEL | PLANNED | 1 |  |
-| REQ-1223 | X | Treasury | EMPLOYEE EXIT FINANCE | PLANNED | 2 |  |
+| REQ-1223 | X | Treasury | EMPLOYEE EXIT FINANCE | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql payroll_runs.run_type, create_payroll_run · src/pages/Payroll.tsx |
 | REQ-1224 | X | Parties | CONTRACT WORKER COST | PLANNED | 1 |  |
-| REQ-1225 | X | People Cost | NON-EMPLOYEE PEOPLE COST | PLANNED | 2 |  |
-| REQ-1226 | X | People Cost | TOTAL WORKFORCE COST | PLANNED | 2 |  |
-| REQ-1227 | X | Payroll | PAYROLL PRIVACY | PLANNED | 2 |  |
+| REQ-1225 | X | People Cost | NON-EMPLOYEE PEOPLE COST | PARTIAL | 2 | src/engine/ops.ts workforceOutside · src/pages/PeopleCost.tsx |
+| REQ-1226 | X | People Cost | TOTAL WORKFORCE COST | PARTIAL | 2 | src/engine/ops.ts workforceOutside, peopleCost · src/pages/PeopleCost.tsx |
+| REQ-1227 | X | Payroll | PAYROLL PRIVACY | TESTED | 2 | tests/sql/phase2_payroll.sql T116–T119, T122 · tests/numiOps.test.ts 'gives totals and never names a person', 'declines to state what an individual is paid, even for a person who may see payroll' · tests/ops.test.ts 'a restricted salary is invisible to a person without clearance' · src/pages/Payroll.tsx |
 | REQ-1228 | X | Black Vault | PAYROLL BLACK VAULT OPTION | PLANNED | 1 |  |
 | REQ-1229 | X | NUMI | NUMI PEOPLE COST | PLANNED | 1 |  |
 | REQ-1230 | X | NUMI | NUMI MUST NOT MISUSE SALARY DATA | PLANNED | 1 |  |
@@ -1260,17 +1260,17 @@ Section numbers absent from the source document itself: none
 | REQ-1249 | X | Treasury | SENSITIVITY ANALYSIS | PLANNED | 2 |  |
 | REQ-1250 | X | Budgeting | BREAK-EVEN ENGINE | PLANNED | 1 |  |
 | REQ-1251 | X | Budgeting | UNIT ECONOMICS | PLANNED | 1 |  |
-| REQ-1252 | X | Treasury | NUMERO TREASURY CONTROL TOWER | PLANNED | 2 |  |
-| REQ-1253 | X | Treasury | DEBT MATURITY LADDER | PLANNED | 2 |  |
-| REQ-1254 | X | Treasury | COVENANT ENGINE | PLANNED | 2 |  |
-| REQ-1255 | X | Forward | COVENANT EARLY WARNING | PLANNED | 2 |  |
-| REQ-1256 | X | Treasury | CAPITAL STRUCTURE REGISTER | PLANNED | 2 |  |
-| REQ-1257 | X | Treasury | CORPORATE ACTIONS | PLANNED | 2 |  |
+| REQ-1252 | X | Treasury | NUMERO TREASURY CONTROL TOWER | PARTIAL | 2 | src/pages/Treasury.tsx · tests/forward.test.ts 'loan position and debt ladder' |
+| REQ-1253 | X | Treasury | DEBT MATURITY LADDER | TESTED | 2 | tests/forward.test.ts 'loan position and debt ladder' · src/engine/ops.ts debtLadder, loanPosition · src/pages/Treasury.tsx |
+| REQ-1254 | X | Treasury | COVENANT ENGINE | PARTIAL | 2 | src/engine/registerKinds.json (kind 'covenant') · supabase/migrations/0009_treasury_payroll.sql loans.covenants · src/pages/Loan360.tsx |
+| REQ-1255 | X | Forward | COVENANT EARLY WARNING | PARTIAL | 2 | src/engine/registerKinds.json covenant · src/engine/forward.ts earlyWarnings · src/pages/Loan360.tsx |
+| REQ-1256 | X | Treasury | CAPITAL STRUCTURE REGISTER | PARTIAL | 2 | supabase/migrations/0009_treasury_payroll.sql loans.kind · src/engine/registerKinds.json (kinds 'capital_infusion', 'capital_call', 'dividend') |
+| REQ-1257 | X | Treasury | CORPORATE ACTIONS | PARTIAL | 2 | src/engine/registerKinds.json (kinds 'capital_infusion', 'dividend') · src/pages/Registers.tsx |
 | REQ-1258 | X | Accounts Receivable | REVENUE RECOGNITION ENGINE | PLANNED | 1 |  |
-| REQ-1259 | X | Projects | LEASE INTELLIGENCE | PLANNED | 2 |  |
+| REQ-1259 | X | Projects | LEASE INTELLIGENCE | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Register360.tsx · src/engine/forward.ts · tests/forward.test.ts 'rent escalation: 10 lakh a month, 5% from April (spec 675)' 'stops at the end date unless it renews automatically' |
 | REQ-1260 | X | Accounting | PROVISION ENGINE | PLANNED | 1 |  |
 | REQ-1261 | X | Tax | NUMERO TAX CONTROL ROOM | PLANNED | 1 |  |
-| REQ-1262 | X | Forward | REGULATORY OBLIGATION ENGINE | PLANNED | 2 |  |
+| REQ-1262 | X | Forward | REGULATORY OBLIGATION ENGINE | PARTIAL | 2 | src/engine/registerKinds.json compliance · src/pages/Registers.tsx |
 | REQ-1263 | X | Tax | ENTITY COMPLIANCE CALENDAR | PLANNED | 1 |  |
 | REQ-1264 | X | Audit | AUDIT REQUEST PORTAL | PLANNED | 1 |  |
 | REQ-1265 | X | Audit | RISK CONTROL MATRIX | PLANNED | 1 |  |
@@ -1278,7 +1278,7 @@ Section numbers absent from the source document itself: none
 | REQ-1267 | X | Audit | SEGREGATION OF DUTIES ENGINE | PARTIAL | 1 | Team › Segregation of duties |
 | REQ-1268 | X | Banking | CONTROL GRAPH | PLANNED | 1 |  |
 | REQ-1269 | X | Sentinel | CONTROL GRAPH + SENTINEL | PLANNED | 1 |  |
-| REQ-1270 | X | Forward | OBLIGATION GRAPH | PLANNED | 2 |  |
+| REQ-1270 | X | Forward | OBLIGATION GRAPH | PARTIAL | 2 | src/pages/Register360.tsx · src/engine/forward.ts buildEvents |
 | REQ-1271 | X | Banking | MASTER DATA GOVERNANCE | PLANNED | 1 |  |
 | REQ-1272 | X | Approvals | MASTER CHANGE HISTORY | PLANNED | 1 |  |
 | REQ-1273 | X | Truth | FINANCIAL DATA LINEAGE | PLANNED | 1 |  |
@@ -1296,20 +1296,20 @@ Section numbers absent from the source document itself: none
 | REQ-1285 | X | Digital Twin | VALUATION LAB | PLANNED | 3 |  |
 | REQ-1286 | X | Budgeting | CAPEX PLANNING | PLANNED | 1 |  |
 | REQ-1287 | X | Assets | MAINTENANCE ECONOMICS | PLANNED | 2 |  |
-| REQ-1288 | X | Expenses | INSURANCE INTELLIGENCE | PLANNED | 2 |  |
-| REQ-1289 | X | Assets | PHYSICAL ASSET QR | PLANNED | 2 |  |
-| REQ-1290 | X | Approvals | UNIVERSAL APPROVAL INBOX | PARTIAL | 1 | Approvals |
-| REQ-1291 | X | Documents | UNIVERSAL EXCEPTION INBOX | PARTIAL | 1 | Sentinel |
-| REQ-1292 | X | Forward | UNIVERSAL OBLIGATION INBOX | PLANNED | 2 |  |
+| REQ-1288 | X | Expenses | INSURANCE INTELLIGENCE | PARTIAL | 2 | src/engine/registerKinds.json · src/pages/Registers.tsx · src/engine/forward.ts · tests/forward.test.ts 'early warnings state facts, rules and assumptions' |
+| REQ-1289 | X | Assets | PHYSICAL ASSET QR | PARTIAL | 2 | src/pages/Asset360.tsx (Asset tag) · supabase/migrations/0007_assets_purchasing.sql fixed_assets.tag_code |
+| REQ-1290 | X | Approvals | UNIVERSAL APPROVAL INBOX | PARTIAL | 1 | src/pages/Approvals.tsx · src/lib/workflow.ts · tests/sql/phase2_flow.sql T32 T43 T50 · tests/sql/phase2_treasury_purchasing.sql T96 T97 |
+| REQ-1291 | X | Documents | UNIVERSAL EXCEPTION INBOX | PARTIAL | 1 | src/pages/Sentinel.tsx · tests/sql/phase2_flow.sql T63 T65 T74 · tests/sql/phase2_treasury_purchasing.sql T100 T102 · tests/sql/phase2_corrections.sql T136 · tests/ops.test.ts › a missing asset raises a factual alert and changes nothing in the books |
+| REQ-1292 | X | Forward | UNIVERSAL OBLIGATION INBOX | IMPLEMENTED | 2 | src/pages/Forward.tsx · src/engine/forward.ts buildEvents · tests/forward.test.ts 'every event names its source, its certainty and how it was arrived at' |
 | REQ-1293 | X | Documents | UNIVERSAL OPPORTUNITY INBOX | PLANNED | 2 |  |
-| REQ-1294 | X | Documents | UNIVERSAL DECISION INBOX | PLANNED | 2 |  |
+| REQ-1294 | X | Documents | UNIVERSAL DECISION INBOX | PARTIAL | 2 | src/pages/Approvals.tsx · src/numi/engine.ts · tests/numiOps.test.ts 'cash, receivables and approvals answer as before' |
 | REQ-1295 | X | Digital Twin | FINANCIAL DIGITAL TWIN 2.0 | PLANNED | 3 |  |
 | REQ-1296 | X | Digital Twin | DIGITAL TWIN SIMULATION | PLANNED | 3 |  |
 | REQ-1297 | X | Digital Twin | MULTI-SHOCK SIMULATION | PLANNED | 3 |  |
 | REQ-1298 | X | NUMI | NUMI + DIGITAL TWIN | PLANNED | 1 |  |
 | REQ-1299 | X | NUMI | NUMERO AUTOPILOT EXPANSION | PLANNED | 1 |  |
 | REQ-1300 | X | Sentinel | AUTOPILOT GUARDRAILS | PLANNED | 1 |  |
-| REQ-1301 | X | Forward | THE COMPLETE NUMERO CONTROL LOOP | PLANNED | 2 |  |
+| REQ-1301 | X | Forward | THE COMPLETE NUMERO CONTROL LOOP | PARTIAL | 2 | src/pages/Inbox.tsx · src/pages/Approvals.tsx · src/pages/Forward.tsx · src/pages/Sentinel.tsx · src/pages/Tasks.tsx · src/numi/ops.ts |
 | REQ-1302 | X | Engineering Governance | NUMERO OMEGA TEST | PLANNED | 1 |  |
 | REQ-1303 | X | Engineering Governance | FINAL OMEGA PRINCIPLE | PLANNED | 1 |  |
 | REQ-1304 | XI | Multi-Company | NUMERO IS MULTI-COMPANY BY DESIGN | TESTED | 1 | tests/sql/engine_invariants.sql |
@@ -1338,7 +1338,7 @@ Section numbers absent from the source document itself: none
 | REQ-1327 | XI | Expenses | SHARED SOFTWARE | PLANNED | 2 |  |
 | REQ-1328 | XI | Accounts Payable | GROUP PROCUREMENT | PLANNED | 1 |  |
 | REQ-1329 | XI | Reports | SHARED SERVICES | PLANNED | 1 |  |
-| REQ-1330 | XI | Consolidation | INTERCOMPANY ENGINE | PARTIAL | 1 | intercompany ledgers |
+| REQ-1330 | XI | Consolidation | INTERCOMPANY ENGINE | PARTIAL | 1 | intercompany ledgers · src/pages/Cash.tsx · numero_private.propose_fund_transfer · tests/sql/phase2_flow.sql T65 |
 | REQ-1331 | XI | Consolidation | DUE TO / DUE FROM | IMPLEMENTED | 1 | intercompany ledgers |
 | REQ-1332 | XI | Consolidation | INTERCOMPANY MATCHING | TESTED | 1 | tests/engine.test.ts |
 | REQ-1333 | XI | Consolidation | INTERCOMPANY RECONCILIATION | TESTED | 1 | tests/engine.test.ts |
@@ -1356,14 +1356,14 @@ Section numbers absent from the source document itself: none
 | REQ-1345 | XI | Consolidation | GROUP TRIAL BALANCE | IMPLEMENTED | 1 | Trial balance for all companies |
 | REQ-1346 | XI | Reports | COMPANY COMPARISON | IMPLEMENTED | 1 | Home cards, consolidation columns |
 | REQ-1347 | XI | Consolidation | GROUP CASH MAP | PLANNED | 1 |  |
-| REQ-1348 | XI | Treasury | GROUP DEBT MAP | PLANNED | 2 |  |
-| REQ-1349 | XI | Treasury | GROUP GUARANTEE MAP | PLANNED | 2 |  |
+| REQ-1348 | XI | Treasury | GROUP DEBT MAP | PARTIAL | 2 | src/pages/Treasury.tsx (Loans) · src/pages/Loan360.tsx |
+| REQ-1349 | XI | Treasury | GROUP GUARANTEE MAP | PARTIAL | 2 | src/engine/registerKinds.json (kind 'corporate_guarantee') · src/pages/Treasury.tsx |
 | REQ-1350 | XI | Investments | GROUP INVESTMENT MAP | PLANNED | 3 |  |
-| REQ-1351 | XI | Assets | GROUP ASSET MAP | PLANNED | 2 |  |
-| REQ-1352 | XI | People Cost | GROUP PEOPLE COST | PLANNED | 2 |  |
+| REQ-1351 | XI | Assets | GROUP ASSET MAP | PARTIAL | 2 | src/pages/Assets.tsx · src/pages/Registers.tsx · src/engine/registerKinds.json (kinds 'vehicle', 'property') |
+| REQ-1352 | XI | People Cost | GROUP PEOPLE COST | PARTIAL | 2 | src/engine/ops.ts peopleCost · src/pages/PeopleCost.tsx · tests/sql/phase2_payroll.sql T114 |
 | REQ-1353 | XI | Tax | GROUP TAX VIEW | PLANNED | 1 |  |
 | REQ-1354 | XI | General | GROUP COMPLIANCE VIEW | PLANNED | 3 |  |
-| REQ-1355 | XI | Forward | GROUP FORWARD | PLANNED | 2 |  |
+| REQ-1355 | XI | Forward | GROUP FORWARD | PARTIAL | 2 | tests/forward.test.ts 'every event names its source, its certainty and how it was arrived at' · tests/numiOps.test.ts 'firm and uncertain amounts are never added into one unlabelled figure', 'names a source the person holds no permission for, even when the database is silent' · tests/forward.test.ts 'records that carry no exchange rate say which currency they are in' · src/lib/forwardData.ts · src/pages/Forward.tsx |
 | REQ-1356 | XI | Sentinel | GROUP SENTINEL | PLANNED | 1 |  |
 | REQ-1357 | XI | NUMI | GROUP NUMI | PLANNED | 1 |  |
 | REQ-1358 | XI | Digital Twin | GROUP DIGITAL TWIN | PLANNED | 3 |  |
@@ -1374,7 +1374,7 @@ Section numbers absent from the source document itself: none
 | REQ-1363 | XI | General | NUMERO GENESIS | PLANNED | 3 |  |
 | REQ-1364 | XI | Banking | OPENING FINANCIAL POSITION | PLANNED | 1 |  |
 | REQ-1365 | XI | Truth | OPENING BALANCE PROVENANCE | PLANNED | 1 |  |
-| REQ-1366 | XI | Documents | OPENING BALANCE CONTROL | PLANNED | 2 |  |
+| REQ-1366 | XI | Documents | OPENING BALANCE CONTROL | PARTIAL | 2 | tests/sql/engine_invariants.sql T07 T18 · tests/engine.test.ts 'an unbalanced journal can be drafted but never submitted or posted' · src/pages/JournalEditor.tsx |
 | REQ-1367 | XI | Reports | MIGRATION ENGINE | PLANNED | 1 |  |
 | REQ-1368 | XI | Reports | MIGRATION STAGING AREA | PLANNED | 1 |  |
 | REQ-1369 | XI | Reports | MIGRATION VALIDATION | PLANNED | 1 |  |
@@ -1386,17 +1386,17 @@ Section numbers absent from the source document itself: none
 | REQ-1375 | XI | Accounting | POSTED RECORD CORRECTION | TESTED | 1 | tests/sql/engine_invariants.sql T15 |
 | REQ-1376 | XI | Accounting | CORRECTION CHAIN | PLANNED | 1 |  |
 | REQ-1377 | XI | Accounting | WRONG-COMPANY ERROR | PLANNED | 1 |  |
-| REQ-1378 | XI | Incidents & Exceptions | DISPUTE UNIVERSE | PLANNED | 2 |  |
-| REQ-1379 | XI | Incidents & Exceptions | DISPUTE 360° | PLANNED | 2 |  |
-| REQ-1380 | XI | Incidents & Exceptions | DISPUTED MONEY | PLANNED | 2 |  |
-| REQ-1381 | XI | Incidents & Exceptions | RECOVERY UNIVERSE | PLANNED | 2 |  |
-| REQ-1382 | XI | Incidents & Exceptions | RECOVERY 360° | PLANNED | 2 |  |
-| REQ-1383 | XI | Incidents & Exceptions | WRITE-OFF GOVERNANCE | PLANNED | 2 |  |
-| REQ-1384 | XI | Incidents & Exceptions | POST-WRITE-OFF RECOVERY | PLANNED | 2 |  |
+| REQ-1378 | XI | Incidents & Exceptions | DISPUTE UNIVERSE | PARTIAL | 2 | src/engine/registerKinds.json dispute · src/pages/Registers.tsx |
+| REQ-1379 | XI | Incidents & Exceptions | DISPUTE 360° | PARTIAL | 2 | src/engine/registerKinds.json dispute · src/pages/Register360.tsx |
+| REQ-1380 | XI | Incidents & Exceptions | DISPUTED MONEY | PARTIAL | 2 | src/engine/registerKinds.json dispute · numero_private.flag_advance · src/pages/Advance360.tsx |
+| REQ-1381 | XI | Incidents & Exceptions | RECOVERY UNIVERSE | PARTIAL | 2 | src/engine/registerKinds.json recovery · src/pages/Registers.tsx · src/engine/forward.ts buildEvents |
+| REQ-1382 | XI | Incidents & Exceptions | RECOVERY 360° | PARTIAL | 2 | src/engine/registerKinds.json recovery · src/pages/Register360.tsx |
+| REQ-1383 | XI | Incidents & Exceptions | WRITE-OFF GOVERNANCE | PARTIAL | 2 | src/engine/registerKinds.json write_off · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-1384 | XI | Incidents & Exceptions | POST-WRITE-OFF RECOVERY | PARTIAL | 2 | src/engine/registerKinds.json write_off · src/pages/Register360.tsx · supabase/migrations/0006_workflow_registers_documents.sql |
 | REQ-1385 | XI | Reality | PHYSICAL VERIFICATION ENGINE | PLANNED | 3 |  |
-| REQ-1386 | XI | Assets | ASSET VERIFICATION | PLANNED | 2 |  |
+| REQ-1386 | XI | Assets | ASSET VERIFICATION | PARTIAL | 2 | supabase/migrations/0007_assets_purchasing.sql record_asset_event · src/pages/Asset360.tsx · tests/ops.test.ts 'a missing asset raises a factual alert and changes nothing in the books' |
 | REQ-1387 | XI | Inventory | INVENTORY VERIFICATION | PLANNED | 3 |  |
-| REQ-1388 | XI | Expenses | CASH COUNT | PLANNED | 2 |  |
+| REQ-1388 | XI | Expenses | CASH COUNT | TESTED | 2 | tests/sql/phase2_flow.sql T62 T63 · tests/ops.test.ts 'a cash count records the difference and cannot be altered' · src/pages/Cash.tsx · numero_private.record_cash_count |
 | REQ-1389 | XI | Reality | CONFIRMATION ENGINE | PLANNED | 3 |  |
 | REQ-1390 | XI | Accounts Receivable | CUSTOMER BALANCE CONFIRMATION | PLANNED | 1 |  |
 | REQ-1391 | XI | Accounts Payable | VENDOR CONFIRMATION | PLANNED | 1 |  |
@@ -1421,15 +1421,15 @@ Section numbers absent from the source document itself: none
 | REQ-1410 | XI | Banking | BANK EXPOSURE | PLANNED | 1 |  |
 | REQ-1411 | XI | Reports | CUSTOMER CONCENTRATION | PLANNED | 1 |  |
 | REQ-1412 | XI | Reports | VENDOR CONCENTRATION | PLANNED | 1 |  |
-| REQ-1413 | XI | Treasury | LIQUIDITY WATERFALL | PLANNED | 2 |  |
-| REQ-1414 | XI | Forward | PAYMENT CALENDAR | PLANNED | 2 |  |
+| REQ-1413 | XI | Treasury | LIQUIDITY WATERFALL | IMPLEMENTED | 2 | src/pages/Forward.tsx (Cash horizon) · src/engine/forward.ts cashHorizon · tests/forward.test.ts 'contingent amounts are reported beside the projection, never inside it' |
+| REQ-1414 | XI | Forward | PAYMENT CALENDAR | IMPLEMENTED | 2 | src/pages/Forward.tsx · src/engine/forward.ts calendarMonth, buildEvents · tests/forward.test.ts 'every event names its source, its certainty and how it was arrived at' |
 | REQ-1415 | XI | Accounts Receivable | COLLECTION CALENDAR | PLANNED | 1 |  |
 | REQ-1416 | XI | Reconciliation | CONTRACT-TO-CASH MAP | PLANNED | 1 |  |
 | REQ-1417 | XI | Accounts Payable | PROCURE-TO-PAY MAP | PLANNED | 1 |  |
 | REQ-1418 | XI | Accounts Receivable | REVENUE ASSURANCE | PLANNED | 1 |  |
-| REQ-1419 | XI | Expenses | EXPENSE ASSURANCE | PLANNED | 2 |  |
-| REQ-1420 | XI | Payroll | PAYROLL ASSURANCE | PLANNED | 2 |  |
-| REQ-1421 | XI | Assets | ASSET ASSURANCE | PLANNED | 2 |  |
+| REQ-1419 | XI | Expenses | EXPENSE ASSURANCE | PARTIAL | 2 | src/pages/ClaimEditor.tsx · tests/sql/phase2_flow.sql T48 T50 T51 T58 |
+| REQ-1420 | XI | Payroll | PAYROLL ASSURANCE | PARTIAL | 2 | src/pages/PayrollRun.tsx · supabase/migrations/0009_treasury_payroll.sql · tests/sql/phase2_payroll.sql T111, T113, T124 |
+| REQ-1421 | XI | Assets | ASSET ASSURANCE | PARTIAL | 2 | src/engine/ops.ts assetReconciliation · src/pages/Assets.tsx (Reconciliation) · tests/ops.test.ts 'the asset register agrees with the general ledger' |
 | REQ-1422 | XI | Tax | TAX ASSURANCE | PLANNED | 1 |  |
 | REQ-1423 | XI | Digital Twin | ACCOUNTING SANDBOX | PLANNED | 3 |  |
 | REQ-1424 | XI | Digital Twin | CONFIGURATION SANDBOX | PLANNED | 3 |  |
@@ -1449,7 +1449,7 @@ Section numbers absent from the source document itself: none
 | REQ-1438 | XI | Search & Command | UNIVERSAL REFERENCE NUMBER | PLANNED | 1 |  |
 | REQ-1439 | XI | Accounts Receivable | FINANCIAL OBJECT TIMELINE | PLANNED | 1 |  |
 | REQ-1440 | XI | Search & Command | UNIVERSAL FINANCIAL SEARCH | IMPLEMENTED | 1 | CommandPalette |
-| REQ-1441 | XI | Treasury | SEMANTIC FINANCIAL LAYER | PLANNED | 2 |  |
+| REQ-1441 | XI | Treasury | SEMANTIC FINANCIAL LAYER | PARTIAL | 2 | src/ui/kit.tsx Explain · src/engine/reports.ts · src/pages/PeopleCost.tsx |
 | REQ-1442 | XI | Budgeting | METRIC DICTIONARY | PLANNED | 1 |  |
 | REQ-1443 | XI | Engineering Governance | ONE NUMBER PRINCIPLE | PLANNED | 1 |  |
 | REQ-1444 | XI | NUMI | NUMI FORMULA BUILDER | PLANNED | 1 |  |
@@ -1488,22 +1488,22 @@ Section numbers absent from the source document itself: none
 | REQ-1477 | XII | UI/UX | DUPLICATION DOES NOT MEAN DELETION | PLANNED | 1 |  |
 | REQ-1478 | XII | UI/UX | CONFLICT RESOLUTION | PLANNED | 1 |  |
 | REQ-1479 | XII | UI/UX | MOST COMPLETE VERSION WINS FOR NON-CONFLICTING OVERLAP | PLANNED | 1 |  |
-| REQ-1480 | XII | Forward | NEVER SILENTLY DROP AN EDGE CASE | PLANNED | 2 |  |
+| REQ-1480 | XII | Forward | NEVER SILENTLY DROP AN EDGE CASE | PARTIAL | 2 | tests/sql/phase2_flow.sql T48 T52 T62 T75 T76 T77 · tests/ops.test.ts 'reversal keeps documents truthful' · src/engine/registerKinds.json · numero_private.create_payroll_run |
 | REQ-1481 | XII | UI/UX | EXAMPLES MAY CONTAIN REQUIREMENTS | PLANNED | 1 |  |
 | REQ-1482 | XII | UI/UX | PRESERVE NEGATIVE REQUIREMENTS | PLANNED | 1 |  |
 | REQ-1483 | XII | Accounting | PRESERVE ACCOUNTING INVARIANTS | PLANNED | 1 |  |
 | REQ-1484 | XII | Multi-Company | PRESERVE MULTI-COMPANY ARCHITECTURE | PLANNED | 1 |  |
 | REQ-1485 | XII | Security | PRESERVE COMPANY ISOLATION | PLANNED | 1 |  |
 | REQ-1486 | XII | NUMI | PRESERVE NUMI THROUGHOUT THE PRODUCT | PLANNED | 1 |  |
-| REQ-1487 | XII | Forward | PRESERVE FORWARD | PLANNED | 2 |  |
+| REQ-1487 | XII | Forward | PRESERVE FORWARD | TESTED | 2 | tests/forward.test.ts 'every event names its source, its certainty and how it was arrived at' · tests/numiOps.test.ts 'a projection is labelled FORECAST and INFERENCE, and starts from ACTUAL cash' · src/engine/forward.ts · src/pages/Forward.tsx |
 | REQ-1488 | XII | Sentinel | PRESERVE SENTINEL | PLANNED | 1 |  |
 | REQ-1489 | XII | Reality | PRESERVE REALITY ENGINE | PLANNED | 3 |  |
 | REQ-1490 | XII | Truth | PRESERVE TRUTH STATES | PLANNED | 1 |  |
 | REQ-1491 | XII | Black Vault | PRESERVE BLACK VAULT | PLANNED | 1 |  |
-| REQ-1492 | XII | People Cost | PRESERVE PEOPLE COST | PLANNED | 2 |  |
-| REQ-1493 | XII | Forward | PRESERVE CUSTOMIZATION | PLANNED | 2 |  |
+| REQ-1492 | XII | People Cost | PRESERVE PEOPLE COST | PARTIAL | 2 | tests/forward.test.ts 'people cost: salary is not the whole cost, and shared costs are not invented' · src/engine/ops.ts peopleCost, workforceOutside · src/pages/PeopleCost.tsx |
+| REQ-1493 | XII | Forward | PRESERVE CUSTOMIZATION | IMPLEMENTED | 2 | tests/sql/phase2_flow.sql T73 · tests/sql/phase2_payroll.sql T127 T128 · src/pages/Registers.tsx · src/engine/templates.ts · src/engine/registerKinds.json |
 | REQ-1494 | XII | Tax | PRESERVE GLOBAL ARCHITECTURE | PLANNED | 1 |  |
-| REQ-1495 | XII | Genesis Builder | PRESERVE CONFIGURABILITY | PLANNED | 2 |  |
+| REQ-1495 | XII | Genesis Builder | PRESERVE CONFIGURABILITY | PARTIAL | 2 | src/pages/Genesis.tsx · src/pages/Registers.tsx (Register kinds) · src/pages/Expenses.tsx (Categories) · src/pages/Assets.tsx (Categories) · src/pages/Companies.tsx · src/ui/ApprovalRuleEditor.tsx · src/pages/Approvals.tsx · tests/sql/phase2_payroll.sql T127–T128 |
 | REQ-1496 | XII | Engineering Governance | DO NOT REPLACE WORKING FEATURES UNNECESSARILY | PLANNED | 1 |  |
 | REQ-1497 | XII | Engineering Governance | NO DESTRUCTIVE REFACTORING | PLANNED | 1 |  |
 | REQ-1498 | XII | Reports | DATABASE MIGRATIONS MUST BE NON-DESTRUCTIVE BY DEFAULT | IMPLEMENTED | 1 | migrations are additive |
@@ -1528,10 +1528,10 @@ Section numbers absent from the source document itself: none
 | REQ-1517 | XII | UI/UX | TEST EVERY CRITICAL REQUIREMENT | PARTIAL | 1 | tests/ |
 | REQ-1518 | XII | Engineering Governance | REGRESSION PROTECTION | PLANNED | 1 |  |
 | REQ-1519 | XII | Multi-Company | MULTI-COMPANY REGRESSION TEST | TESTED | 1 | tests/sql/engine_invariants.sql |
-| REQ-1520 | XII | Security | PERMISSION REGRESSION TEST | PARTIAL | 1 | tests/sql/engine_invariants.sql |
+| REQ-1520 | XII | Security | PERMISSION REGRESSION TEST | PARTIAL | 1 | tests/sql/engine_invariants.sql · tests/sql/phase2_flow.sql T59–T61 T79 · tests/sql/phase2_payroll.sql T116–T119 · tests/sql/phase2_treasury_purchasing.sql T107 |
 | REQ-1521 | XII | Accounting | ACCOUNTING REGRESSION TEST | TESTED | 1 | tests/sql/engine_invariants.sql · tests/engine.test.ts |
 | REQ-1522 | XII | Security | AI PERMISSION REGRESSION | TESTED | 1 | tests/sql/engine_invariants.sql |
-| REQ-1523 | XII | Security | PROMPT-INJECTION RESISTANCE | PARTIAL | 1 | tests/commands.test.ts |
+| REQ-1523 | XII | Security | PROMPT-INJECTION RESISTANCE | PARTIAL | 1 | tests/commands.test.ts › an instruction embedded in dictated text cannot trigger an action · src/pages/Inbox.tsx |
 | REQ-1524 | XII | General | SAFE FAILURE | IMPLEMENTED | 1 | engine refusals are shown verbatim |
 | REQ-1525 | XII | Engineering Governance | CLAUDE CODE MAY SUGGEST BETTER ARCHITECTURE | PLANNED | 1 |  |
 | REQ-1526 | XII | UI/UX | CLAUDE CODE MAY IDENTIFY MISSING REQUIREMENTS | PLANNED | 1 |  |
@@ -1555,7 +1555,7 @@ Section numbers absent from the source document itself: none
 | REQ-1544 | XII | Black Vault | SECRETS | IMPLEMENTED | 1 | only the publishable key is in the client |
 | REQ-1545 | XII | Security | SECURITY IS NOT OPTIONAL FUNCTIONALITY | PLANNED | 1 |  |
 | REQ-1546 | XII | Audit | AUDITABILITY IS NOT OPTIONAL FUNCTIONALITY | PLANNED | 1 |  |
-| REQ-1547 | XII | Audit | NUMERO ZERO-OMISSION AUDIT | PARTIAL | 1 | scripts/ |
+| REQ-1547 | XII | Audit | NUMERO ZERO-OMISSION AUDIT | PARTIAL | 1 | scripts/build_requirement_ledger.py · scripts/check_status_part.py |
 | REQ-1548 | XII | Audit | ZERO-OMISSION AUDIT BY MODULE | PLANNED | 1 |  |
 | REQ-1549 | XII | NUMI | NUMI CAN ASSIST DEVELOPMENT VERIFICATION | PLANNED | 1 |  |
 | REQ-1550 | XII | Audit | REQUIREMENT EVIDENCE | PLANNED | 1 |  |
@@ -1568,23 +1568,23 @@ Section numbers absent from the source document itself: none
 | REQ-1557 | XIII | Reality | FUND MOVEMENT TYPES | PLANNED | 3 |  |
 | REQ-1558 | XIII | Accounts Payable | MONEY CAN HAVE A TEMPORARY STATE | PLANNED | 1 |  |
 | REQ-1559 | XIII | Expenses | ADVANCE IS NOT AUTOMATICALLY EXPENSE | IMPLEMENTED | 1 | Entry › Advance · Payments |
-| REQ-1560 | XIII | Expenses | ADVANCE 360° | PLANNED | 2 |  |
-| REQ-1561 | XIII | Expenses | ADVANCE STATUS | PLANNED | 2 |  |
+| REQ-1560 | XIII | Expenses | ADVANCE 360° | PARTIAL | 2 | src/pages/Advance360.tsx · src/pages/Expenses.tsx · supabase/migrations/0008_expenses_advances_cash.sql · tests/sql/phase2_flow.sql T43 T46 T52 T54 T55 |
+| REQ-1561 | XIII | Expenses | ADVANCE STATUS | IMPLEMENTED | 2 | src/pages/Advance360.tsx · src/pages/Expenses.tsx · numero_private.refresh_advance_status, flag_advance · tests/sql/phase2_flow.sql T43 T46 T52 T54 · tests/sql/phase2_payroll.sql T121 · tests/forward.test.ts 'advance ageing and advance memory' |
 | REQ-1562 | XIII | NUMI | NUMI ADVANCE MEMORY | PLANNED | 1 |  |
 | REQ-1563 | XIII | NUMI | NUMI REPEAT-ADVANCE WARNING | PLANNED | 1 |  |
 | REQ-1564 | XIII | Reports | ADVANCE AGEING | PLANNED | 1 |  |
-| REQ-1565 | XIII | Expenses | UNSETTLED ADVANCE COMMAND CENTRE | PLANNED | 2 |  |
-| REQ-1566 | XIII | Expenses | ADVANCE SETTLEMENT | PLANNED | 2 |  |
-| REQ-1567 | XIII | Incidents & Exceptions | PARTIAL SETTLEMENT | PLANNED | 2 |  |
-| REQ-1568 | XIII | Expenses | EXCESS EXPENSE | PLANNED | 2 |  |
-| REQ-1569 | XIII | Expenses | UNUSED ADVANCE RETURN | PLANNED | 2 |  |
+| REQ-1565 | XIII | Expenses | UNSETTLED ADVANCE COMMAND CENTRE | PARTIAL | 2 | src/pages/Expenses.tsx · src/engine/ops.ts · tests/forward.test.ts 'advance ageing and advance memory' · tests/numiOps.test.ts 'advances: the total agrees with the ageing engine and is not called an expense' |
+| REQ-1566 | XIII | Expenses | ADVANCE SETTLEMENT | PARTIAL | 2 | src/pages/ClaimEditor.tsx · src/ui/ops.tsx · tests/sql/phase2_flow.sql T51 T52 T66 · numero_private.save_claim, propose_claim_posting |
+| REQ-1567 | XIII | Incidents & Exceptions | PARTIAL SETTLEMENT | TESTED | 2 | tests/sql/phase2_flow.sql T51 T52 T53 T54 · tests/ops.test.ts 'partial settlement leaves a balance that is RETURN DUE, and the return settles it' · src/pages/Advance360.tsx · src/pages/ClaimEditor.tsx |
+| REQ-1568 | XIII | Expenses | EXCESS EXPENSE | TESTED | 2 | tests/sql/phase2_flow.sql T56 T58 · tests/ops.test.ts 'excess expense becomes a reimbursement due, then paid' · src/pages/ClaimEditor.tsx · numero_private.propose_claim_posting |
+| REQ-1569 | XIII | Expenses | UNUSED ADVANCE RETURN | TESTED | 2 | tests/sql/phase2_flow.sql T53 T54 · tests/sql/phase2_payroll.sql T121 · tests/sql/phase2_treasury_purchasing.sql T109 · tests/ops.test.ts 'a recovery cannot exceed the unsettled advance, and posting records it' · src/pages/Advance360.tsx · src/pages/Payroll.tsx · numero_private.return_advance |
 | REQ-1570 | XIII | Banking | INTERNAL FUND TRANSFER | IMPLEMENTED | 1 | Entry › Transfer |
 | REQ-1571 | XIII | Accounting | RECLASSIFICATION ENGINE | PLANNED | 1 |  |
-| REQ-1572 | XIII | Genesis Builder | DYNAMIC CLASSIFICATION DROPDOWN | PLANNED | 2 |  |
-| REQ-1573 | XIII | Genesis Builder | SEARCHABLE SMART DROPDOWN | PLANNED | 2 |  |
+| REQ-1572 | XIII | Genesis Builder | DYNAMIC CLASSIFICATION DROPDOWN | PARTIAL | 2 | src/pages/Expenses.tsx (Categories) · numero_private.save_expense_category · src/pages/ClaimEditor.tsx · tests/sql/phase2_flow.sql T48–T49 · tests/ops.test.ts 'policy flags inform the approver and never reject on their own' |
+| REQ-1573 | XIII | Genesis Builder | SEARCHABLE SMART DROPDOWN | PARTIAL | 2 | src/pages/Entry.tsx · src/pages/ClaimEditor.tsx · tests/engine.test.ts 'uses learned, explainable preferences first' |
 | REQ-1574 | XIII | NUMI | NUMI CLASSIFICATION SUGGESTION | PLANNED | 1 |  |
 | REQ-1575 | XIII | NUMI | DO NOT USE MISCELLANEOUS AS A DUMPING GROUND | PLANNED | 1 |  |
-| REQ-1576 | XIII | Reconciliation | SUSPENSE CONTROL | PARTIAL | 1 | suspense ledger |
+| REQ-1576 | XIII | Reconciliation | SUSPENSE CONTROL | PARTIAL | 1 | suspense ledger · src/pages/JournalDetail.tsx · src/ui/ops.tsx Attachments |
 | REQ-1577 | XIII | Reconciliation | SUSPENSE AGEING | PLANNED | 1 |  |
 | REQ-1578 | XIII | Tax | CHARITY / DONATION | PLANNED | 1 |  |
 | REQ-1579 | XIII | Sentinel | FRAUD IS NOT AN EXPENSE CATEGORY | IMPLEMENTED | 1 | no such category exists |
@@ -1593,13 +1593,13 @@ Section numbers absent from the source document itself: none
 | REQ-1582 | XIII | Accounting | RECLASSIFICATION HISTORY | PLANNED | 1 |  |
 | REQ-1583 | XIII | Budgeting | BUDGET TRANSFER | PLANNED | 1 |  |
 | REQ-1584 | XIII | Budgeting | BUDGET TRANSFER IS NOT CASH TRANSFER | PLANNED | 1 |  |
-| REQ-1585 | XIII | Forward | DEPARTMENT FINANCIAL WALLET | PLANNED | 2 |  |
+| REQ-1585 | XIII | Forward | DEPARTMENT FINANCIAL WALLET | PARTIAL | 2 | src/engine/registerKinds.json path · src/pages/Register360.tsx · src/pages/Expenses.tsx · src/pages/Cash.tsx |
 | REQ-1586 | XIII | Accounts Receivable | DEPARTMENT INVOICE CENTRE | PLANNED | 1 |  |
-| REQ-1587 | XIII | Documents | DEPARTMENT DOCUMENT UPLOAD | PLANNED | 2 |  |
-| REQ-1588 | XIII | Documents | DRAG AND DROP | PLANNED | 2 |  |
-| REQ-1589 | XIII | Documents | BULK UPLOAD | PLANNED | 2 |  |
+| REQ-1587 | XIII | Documents | DEPARTMENT DOCUMENT UPLOAD | PARTIAL | 2 | src/pages/Inbox.tsx · src/ui/ops.tsx · src/api/supabase.ts · tests/sql/phase2_flow.sql T66 T67 |
+| REQ-1588 | XIII | Documents | DRAG AND DROP | PARTIAL | 2 | src/pages/Inbox.tsx |
+| REQ-1589 | XIII | Documents | BULK UPLOAD | PARTIAL | 2 | src/pages/Inbox.tsx · src/api/supabase.ts |
 | REQ-1590 | XIII | Documents | MOBILE SCAN | PLANNED | 2 |  |
-| REQ-1591 | XIII | Documents | DOCUMENT QUALITY CHECK | PLANNED | 2 |  |
+| REQ-1591 | XIII | Documents | DOCUMENT QUALITY CHECK | PARTIAL | 2 | tests/sql/phase2_flow.sql T66 · tests/ops.test.ts 'an identical file is kept and flagged, never discarded' · src/pages/Inbox.tsx · numero_private.register_document |
 | REQ-1592 | XIII | Accounts Receivable | INVOICE OCR / VISION | PLANNED | 1 |  |
 | REQ-1593 | XIII | Accounts Receivable | LINE-ITEM EXTRACTION | PLANNED | 1 |  |
 | REQ-1594 | XIII | Accounts Receivable | MULTI-PAGE INVOICE | PLANNED | 1 |  |
@@ -1608,7 +1608,7 @@ Section numbers absent from the source document itself: none
 | REQ-1597 | XIII | Expenses | DOCUMENT ROUTING | PLANNED | 2 |  |
 | REQ-1598 | XIII | Approvals | DEPARTMENT APPROVAL | PLANNED | 1 |  |
 | REQ-1599 | XIII | Accounts Receivable | INVOICE STATUS | PLANNED | 1 |  |
-| REQ-1600 | XIII | Voice | VOICE FINANCE | PARTIAL | 1 | src/voice |
+| REQ-1600 | XIII | Voice | VOICE FINANCE | PARTIAL | 1 | src/voice/commands.ts · tests/commands.test.ts · tests/numiOps.test.ts › commands on operations |
 | REQ-1601 | XIII | Voice | VOICE INVOICE CREATION | PLANNED | 1 |  |
 | REQ-1602 | XIII | Voice | VOICE EXPENSE ENTRY | TESTED | 1 | tests/commands.test.ts |
 | REQ-1603 | XIII | Voice | VOICE ADVANCE REQUEST | PLANNED | 1 |  |
@@ -1647,7 +1647,7 @@ Section numbers absent from the source document itself: none
 | REQ-1636 | XIII | Reports | BASIC CALCULATORS | IMPLEMENTED | 1 | Calculators |
 | REQ-1637 | XIII | Reports | ACCOUNTING CALCULATORS | IMPLEMENTED | 1 | Calculators |
 | REQ-1638 | XIII | Tax | TAX CALCULATORS | IMPLEMENTED | 1 | Calculators |
-| REQ-1639 | XIII | Payroll | PAYROLL CALCULATORS | PLANNED | 2 |  |
+| REQ-1639 | XIII | Payroll | PAYROLL CALCULATORS | PARTIAL | 2 | src/pages/Calculators.tsx · src/pages/PeopleCost.tsx · src/pages/Payroll.tsx · tests/forward.test.ts 'new-hire cost model' |
 | REQ-1640 | XIII | Reports | INVESTMENT CALCULATORS | IMPLEMENTED | 1 | Calculators |
 | REQ-1641 | XIII | Reports | BUSINESS CALCULATORS | IMPLEMENTED | 1 | Calculators |
 | REQ-1642 | XIII | Reports | REAL ESTATE CALCULATORS | PLANNED | 1 |  |
@@ -1682,7 +1682,7 @@ Section numbers absent from the source document itself: none
 | REQ-1671 | XIII | NUMI | NUMI REPORT PACK | PLANNED | 1 |  |
 | REQ-1672 | XIII | Reports | ONE-COMMAND REPORT | PLANNED | 1 |  |
 | REQ-1673 | XIII | Sentinel | REPORT ANOMALY LINK | PLANNED | 1 |  |
-| REQ-1674 | XIII | Forward | REPORT FORWARD LINK | PLANNED | 2 |  |
+| REQ-1674 | XIII | Forward | REPORT FORWARD LINK | PARTIAL | 2 | tests/sql/phase2_treasury_purchasing.sql T97 · src/pages/Forward.tsx · src/pages/Purchasing.tsx |
 | REQ-1675 | XIII | Truth | REPORT TRUTH LINK | PLANNED | 1 |  |
 | REQ-1676 | XIII | Reality | REPORT REALITY LINK | PLANNED | 3 |  |
 | REQ-1677 | XIII | Reports | REPORT DATA QUALITY | PLANNED | 1 |  |
@@ -1711,10 +1711,10 @@ Section numbers absent from the source document itself: none
 | REQ-1700 | XIII | Accounts Receivable | UNINVOICED EXPENSE | PLANNED | 1 |  |
 | REQ-1701 | XIII | Accounts Receivable | UNINVOICED REVENUE | PLANNED | 1 |  |
 | REQ-1702 | XIII | Reconciliation | FUND MOVEMENT TIMELINE | PLANNED | 1 |  |
-| REQ-1703 | XIII | Expenses | "WHERE DID THIS ADVANCE GO?" | PLANNED | 2 |  |
+| REQ-1703 | XIII | Expenses | "WHERE DID THIS ADVANCE GO?" | PARTIAL | 2 | src/numi/ops.ts · src/pages/Advance360.tsx · tests/numiOps.test.ts 'advance memory for a named person states facts, not conclusions' |
 | REQ-1704 | XIII | NUMI | "WHAT MONEY IS STILL WITH PEOPLE?" | PLANNED | 1 |  |
-| REQ-1705 | XIII | Projects | ACCOUNTABLE MONEY | PLANNED | 2 |  |
-| REQ-1706 | XIII | Incidents & Exceptions | ACCOUNTABLE FUNDS OWNER | PLANNED | 2 |  |
+| REQ-1705 | XIII | Projects | ACCOUNTABLE MONEY | PARTIAL | 2 | src/pages/Expenses.tsx · src/engine/ops.ts · tests/sql/phase2_flow.sql T46 T47 · tests/numiOps.test.ts 'advances: the total agrees with the ageing engine and is not called an expense' |
+| REQ-1706 | XIII | Incidents & Exceptions | ACCOUNTABLE FUNDS OWNER | PARTIAL | 2 | tests/forward.test.ts 'early warnings state facts, rules and assumptions' · numero_private.save_advance · src/pages/Advance360.tsx · src/pages/Expenses.tsx · src/pages/Cash.tsx |
 | REQ-1707 | XIII | Approvals | HANDOVER OF ACCOUNTABLE FUNDS | PLANNED | 1 |  |
 | REQ-1708 | XIII | NUMI | NUMI BEFORE NEW FUND RELEASE | PLANNED | 1 |  |
 | REQ-1709 | XIII | NUMI | NUMI DOES NOT BLOCK BY PERSONAL OPINION | PLANNED | 1 |  |
@@ -1726,7 +1726,7 @@ Section numbers absent from the source document itself: none
 | REQ-1715 | XIII | NUMI | NUMI CONTEXTUAL APPROVAL | PLANNED | 1 |  |
 | REQ-1716 | XIII | Search & Command | UNIVERSAL FINANCIAL COMMAND BAR | IMPLEMENTED | 1 | CommandPalette |
 | REQ-1717 | XIII | NUMI | NUMI MULTIMODAL | PLANNED | 1 |  |
-| REQ-1718 | XIII | NUMI | NUMI SEES CURRENT SCREEN | PARTIAL | 1 | contextualPrompts |
+| REQ-1718 | XIII | NUMI | NUMI SEES CURRENT SCREEN | PARTIAL | 1 | contextualPrompts · src/numi/engine.ts · src/numi/ops.ts opsPrompts · tests/numiOps.test.ts › the operations screens suggest their own questions |
 | REQ-1719 | XIII | NUMI | NUMI REPORT MEMORY | PLANNED | 1 |  |
 | REQ-1720 | XIII | Reports | REPORT GOVERNANCE | PLANNED | 1 |  |
 | REQ-1721 | XIII | NUMI | NUMI REPORT EXPLANATION | PLANNED | 1 |  |
@@ -1739,37 +1739,37 @@ Section numbers absent from the source document itself: none
 | REQ-1728 | XIII | Voice | VOICE NUMBERS CONFIRMATION | IMPLEMENTED | 1 | draft shows the amount for confirmation |
 | REQ-1729 | XIII | Reality | NUMERO FLOW + REALITY | PLANNED | 3 |  |
 | REQ-1730 | XIII | Truth | NUMERO FLOW + TRUTH | PLANNED | 1 |  |
-| REQ-1731 | XIII | Forward | NUMERO FLOW + FORWARD | PLANNED | 2 |  |
+| REQ-1731 | XIII | Forward | NUMERO FLOW + FORWARD | IMPLEMENTED | 2 | src/engine/forward.ts buildEvents · src/pages/Forward.tsx · tests/forward.test.ts 'every event names its source, its certainty and how it was arrived at' |
 | REQ-1732 | XIII | Sentinel | NUMERO FLOW + SENTINEL | PLANNED | 1 |  |
 | REQ-1733 | XIII | NUMI | NUMERO FLOW + NUMI | PLANNED | 1 |  |
 | REQ-1734 | XIII | Engineering Governance | FINAL FUND MOVEMENT PRINCIPLE | PLANNED | 1 |  |
 | REQ-1735 | XIII | Reports | FINAL REPORTING PRINCIPLE | PLANNED | 1 |  |
 | REQ-1736 | XIII | NUMI | FINAL NUMI PRINCIPLE | PLANNED | 1 |  |
-| REQ-1737 | XIV | Genesis Builder | NUMERO DYNAMIC UNIVERSE | PLANNED | 2 |  |
+| REQ-1737 | XIV | Genesis Builder | NUMERO DYNAMIC UNIVERSE | PARTIAL | 2 | src/pages/Genesis.tsx · src/pages/Registers.tsx (Register kinds) · src/ui/AccountMapping.tsx · src/pages/Expenses.tsx · src/pages/Assets.tsx |
 | REQ-1738 | XIV | Treasury | SUPER ADMIN CAN CREATE DEPARTMENTS | IMPLEMENTED | 1 | Genesis › Structure |
 | REQ-1739 | XIV | NUMI | DEPARTMENT CREATION WIZARD | PARTIAL | 1 | Genesis |
 | REQ-1740 | XIV | UI/UX | NESTED DEPARTMENTS | IMPLEMENTED | 1 | org_units.parent_id |
 | REQ-1741 | XIV | Parties | DEPARTMENT-SPECIFIC FIELDS | PLANNED | 1 |  |
-| REQ-1742 | XIV | Genesis Builder | DYNAMIC FINANCIAL PATHS | PLANNED | 2 |  |
-| REQ-1743 | XIV | Genesis Builder | WHAT IS A PATH? | PLANNED | 2 |  |
-| REQ-1744 | XIV | Genesis Builder | PERSONAL PATH | PLANNED | 2 |  |
-| REQ-1745 | XIV | Genesis Builder | PERSONAL DOES NOT MEAN HIDDEN | PLANNED | 2 |  |
-| REQ-1746 | XIV | Genesis Builder | PETTY PATH | PLANNED | 2 |  |
-| REQ-1747 | XIV | Genesis Builder | TRAVEL PATH | PLANNED | 2 |  |
-| REQ-1748 | XIV | Genesis Builder | SITE PATH | PLANNED | 2 |  |
-| REQ-1749 | XIV | Genesis Builder | CHARITY PATH | PLANNED | 2 |  |
-| REQ-1750 | XIV | Genesis Builder | EMERGENCY PATH | PLANNED | 2 |  |
-| REQ-1751 | XIV | Genesis Builder | ADMIN CAN CREATE ANY PATH | PLANNED | 2 |  |
-| REQ-1752 | XIV | Genesis Builder | PATH TEMPLATE | PLANNED | 2 |  |
-| REQ-1753 | XIV | Genesis Builder | DYNAMIC FIELD ENGINE 2.0 | PARTIAL | 1 | custom_field_defs |
-| REQ-1754 | XIV | Voice | FIELD TYPES | PARTIAL | 1 | 27 field types |
+| REQ-1742 | XIV | Genesis Builder | DYNAMIC FINANCIAL PATHS | PARTIAL | 2 | src/engine/registerKinds.json (kind 'path') · src/pages/Registers.tsx · src/pages/Register360.tsx · supabase/migrations/0006_workflow_registers_documents.sql save_register_item · src/pages/ClaimEditor.tsx · src/pages/Expenses.tsx |
+| REQ-1743 | XIV | Genesis Builder | WHAT IS A PATH? | PARTIAL | 2 | src/engine/registerKinds.json (kind 'path') · src/pages/Register360.tsx · supabase/migrations/0006_workflow_registers_documents.sql save_register_item |
+| REQ-1744 | XIV | Genesis Builder | PERSONAL PATH | PARTIAL | 2 | src/engine/registerKinds.json (kind 'path', type Personal) · src/pages/Registers.tsx · src/ui/ops.tsx (Attachments) |
+| REQ-1745 | XIV | Genesis Builder | PERSONAL DOES NOT MEAN HIDDEN | PARTIAL | 2 | supabase/migrations/0006_workflow_registers_documents.sql propose_posting, register_items · tests/sql/phase2_flow.sql T47 · tests/sql/phase2_payroll.sql T122 |
+| REQ-1746 | XIV | Genesis Builder | PETTY PATH | PARTIAL | 2 | src/pages/Cash.tsx · supabase/migrations/0008_expenses_advances_cash.sql cash_boxes, record_cash_count · src/pages/ClaimEditor.tsx · tests/sql/phase2_flow.sql T62–T63 |
+| REQ-1747 | XIV | Genesis Builder | TRAVEL PATH | PARTIAL | 2 | src/engine/registerKinds.json (kind 'trip') · src/pages/Expenses.tsx · src/pages/ClaimEditor.tsx · src/pages/Advance360.tsx · tests/sql/phase2_flow.sql T42–T58 |
+| REQ-1748 | XIV | Genesis Builder | SITE PATH | PARTIAL | 2 | src/engine/registerKinds.json (kinds 'path', 'work_order') · src/pages/Registers.tsx · src/pages/Register360.tsx |
+| REQ-1749 | XIV | Genesis Builder | CHARITY PATH | PARTIAL | 2 | src/engine/registerKinds.json (kinds 'path', 'csr_donation') · src/pages/Registers.tsx |
+| REQ-1750 | XIV | Genesis Builder | EMERGENCY PATH | PARTIAL | 2 | src/engine/registerKinds.json (kinds 'path', 'incident', 'exception') · src/pages/Registers.tsx · src/pages/Tasks.tsx |
+| REQ-1751 | XIV | Genesis Builder | ADMIN CAN CREATE ANY PATH | PARTIAL | 2 | src/engine/registerKinds.json (kind 'path') · src/pages/Registers.tsx |
+| REQ-1752 | XIV | Genesis Builder | PATH TEMPLATE | PARTIAL | 2 | src/engine/registerKinds.json (kind 'path') · src/pages/Registers.tsx (Register kinds) · supabase/migrations/0006_workflow_registers_documents.sql register_items |
+| REQ-1753 | XIV | Genesis Builder | DYNAMIC FIELD ENGINE 2.0 | PARTIAL | 1 | custom_field_defs · numero_private.save_custom_values · src/pages/Genesis.tsx › Custom fields · src/ui/ops.tsx CustomFields · src/ui/PartyOperations.tsx · src/pages/Registers.tsx › Register kinds · tests/sql/phase2_payroll.sql T127 T128 · tests/sql/phase2_flow.sql T70 |
+| REQ-1754 | XIV | Voice | FIELD TYPES | PARTIAL | 1 | 27 field types · src/pages/Genesis.tsx › Custom fields · src/ui/ops.tsx CustomFields · src/pages/Registers.tsx |
 | REQ-1755 | XIV | NUMI | FIELD PROPERTIES | PLANNED | 1 |  |
 | REQ-1756 | XIV | Banking | CONDITIONAL FIELDS | PLANNED | 1 |  |
 | REQ-1757 | XIV | UI/UX | CONDITIONAL REQUIREMENTS | PLANNED | 1 |  |
-| REQ-1758 | XIV | Genesis Builder | DYNAMIC DROPDOWN BUILDER | PLANNED | 2 |  |
+| REQ-1758 | XIV | Genesis Builder | DYNAMIC DROPDOWN BUILDER | PARTIAL | 2 | src/pages/Registers.tsx (Register kinds, DynamicField) · src/pages/Genesis.tsx (Custom fields) · src/ui/ops.tsx (CustomFields) · src/ui/PartyOperations.tsx |
 | REQ-1759 | XIV | Genesis Builder | NESTED DROPDOWNS | PLANNED | 2 |  |
 | REQ-1760 | XIV | Genesis Builder | DEPENDENT DROPDOWNS | PLANNED | 2 |  |
-| REQ-1761 | XIV | Genesis Builder | ADMIN CAN ADD OPTION WITHOUT CODE | PLANNED | 2 |  |
+| REQ-1761 | XIV | Genesis Builder | ADMIN CAN ADD OPTION WITHOUT CODE | PARTIAL | 2 | src/pages/Registers.tsx (Register kinds) · src/pages/Genesis.tsx (Custom fields) · src/ui/ops.tsx (CustomFields) |
 | REQ-1762 | XIV | Genesis Builder | DROPDOWN GOVERNANCE | PLANNED | 2 |  |
 | REQ-1763 | XIV | Genesis Builder | DYNAMIC FORM BUILDER | PLANNED | 2 |  |
 | REQ-1764 | XIV | NUMI | FORM COMPONENTS | PLANNED | 1 |  |
@@ -1783,7 +1783,7 @@ Section numbers absent from the source document itself: none
 | REQ-1772 | XIV | Digital Twin | SCENARIO WORKFLOW | PLANNED | 3 |  |
 | REQ-1773 | XIV | Genesis Builder | DYNAMIC WORKFLOW BUILDER | PLANNED | 2 |  |
 | REQ-1774 | XIV | Approvals | WORKFLOW NODES | PLANNED | 1 |  |
-| REQ-1775 | XIV | Expenses | CONDITIONAL ROUTING | PLANNED | 2 |  |
+| REQ-1775 | XIV | Expenses | CONDITIONAL ROUTING | PARTIAL | 2 | src/pages/Approvals.tsx · src/ui/ApprovalRuleEditor.tsx · supabase/migrations/0006_workflow_registers_documents.sql · src/api/supabaseCore.ts · numero_private.open_request, decide_request · tests/sql/phase2_corrections.sql T139 T140 T141 · tests/ops.test.ts 'in an approval of several steps a later approver may lower the amount, not raise it' |
 | REQ-1776 | XIV | Security | ROLE-BASED ROUTING | PLANNED | 1 |  |
 | REQ-1777 | XIV | Approvals | PARALLEL APPROVAL | PLANNED | 1 |  |
 | REQ-1778 | XIV | Approvals | SEQUENTIAL APPROVAL | PLANNED | 1 |  |
@@ -1792,15 +1792,15 @@ Section numbers absent from the source document itself: none
 | REQ-1781 | XIV | Approvals | APPROVAL QUORUM | PLANNED | 1 |  |
 | REQ-1782 | XIV | Approvals | ESCALATION | PLANNED | 1 |  |
 | REQ-1783 | XIV | Genesis Builder | DYNAMIC STATUS BUILDER | PLANNED | 2 |  |
-| REQ-1784 | XIV | Expenses | STATUS RULES | PLANNED | 2 |  |
+| REQ-1784 | XIV | Expenses | STATUS RULES | PARTIAL | 2 | supabase/migrations/0008_expenses_advances_cash.sql · tests/sql/phase2_flow.sql T42 T50 T60 · tests/ops.test.ts 'a released advance cannot be cancelled' |
 | REQ-1785 | XIV | Genesis Builder | DYNAMIC TRANSACTION TYPE | PLANNED | 2 |  |
 | REQ-1786 | XIV | Reports | TRANSACTION TYPE CONFIGURATION | PLANNED | 1 |  |
-| REQ-1787 | XIV | Genesis Builder | DYNAMIC FINANCIAL OBJECT BUILDER | PLANNED | 2 |  |
+| REQ-1787 | XIV | Genesis Builder | DYNAMIC FINANCIAL OBJECT BUILDER | PARTIAL | 2 | src/pages/Registers.tsx (Register kinds) · supabase/migrations/0006_workflow_registers_documents.sql register_kinds · src/api/supabase.ts saveRegisterKind |
 | REQ-1788 | XIV | Parties | OBJECT RELATIONSHIPS | PLANNED | 1 |  |
-| REQ-1789 | XIV | Genesis Builder | DYNAMIC LEDGER MAPPING | PLANNED | 2 |  |
+| REQ-1789 | XIV | Genesis Builder | DYNAMIC LEDGER MAPPING | PARTIAL | 2 | src/ui/AccountMapping.tsx · numero_private.set_account_map · tests/sql/phase2_treasury_purchasing.sql T82–T83 · src/pages/Expenses.tsx (Categories) · src/pages/Assets.tsx (Categories) |
 | REQ-1790 | XIV | Accounting | LEDGER MAPPING GOVERNANCE | PLANNED | 1 |  |
 | REQ-1791 | XIV | NUMI | NUMI MAPPING ASSISTANT | PLANNED | 1 |  |
-| REQ-1792 | XIV | Genesis Builder | DYNAMIC EVIDENCE RULES | PLANNED | 2 |  |
+| REQ-1792 | XIV | Genesis Builder | DYNAMIC EVIDENCE RULES | PARTIAL | 2 | src/pages/Expenses.tsx (Categories) · numero_private.save_claim · tests/ops.test.ts 'policy flags inform the approver and never reject on their own' · tests/sql/phase2_flow.sql T70 |
 | REQ-1793 | XIV | Audit | EVIDENCE ALTERNATIVES | PLANNED | 1 |  |
 | REQ-1794 | XIV | Genesis Builder | DYNAMIC SETTLEMENT RULES | PLANNED | 2 |  |
 | REQ-1795 | XIV | NUMI | DYNAMIC NUMI RULES | PLANNED | 1 |  |
@@ -1810,13 +1810,13 @@ Section numbers absent from the source document itself: none
 | REQ-1799 | XIV | General | FALSE-POSITIVE REVIEW | PLANNED | 3 |  |
 | REQ-1800 | XIV | Genesis Builder | DYNAMIC NOTIFICATION RULES | PLANNED | 2 |  |
 | REQ-1801 | XIV | Genesis Builder | DYNAMIC REPORTS | PLANNED | 2 |  |
-| REQ-1802 | XIV | Genesis Builder | NO DEAD CUSTOM DATA | PLANNED | 2 |  |
+| REQ-1802 | XIV | Genesis Builder | NO DEAD CUSTOM DATA | PARTIAL | 2 | src/pages/Registers.tsx · src/pages/Register360.tsx · supabase/migrations/0006_workflow_registers_documents.sql audit_register_kinds, audit_custom_values · src/engine/forward.ts |
 | REQ-1803 | XIV | Genesis Builder | DYNAMIC CALCULATORS | PLANNED | 2 |  |
 | REQ-1804 | XIV | NUMI | NUMI CALCULATOR CREATOR | PLANNED | 1 |  |
 | REQ-1805 | XIV | Genesis Builder | DYNAMIC DASHBOARD | PLANNED | 2 |  |
 | REQ-1806 | XIV | Reports | DASHBOARD WIDGETS | PLANNED | 1 |  |
 | REQ-1807 | XIV | Genesis Builder | DEPARTMENT HOME PAGE | PLANNED | 2 |  |
-| REQ-1808 | XIV | Genesis Builder | PATH HOME PAGE | PLANNED | 2 |  |
+| REQ-1808 | XIV | Genesis Builder | PATH HOME PAGE | PARTIAL | 2 | src/pages/Register360.tsx · src/pages/Cash.tsx · tests/sql/phase2_corrections.sql T135 |
 | REQ-1809 | XIV | Digital Twin | SCENARIO DASHBOARD | PLANNED | 3 |  |
 | REQ-1810 | XIV | Genesis Builder | DYNAMIC MENU BUILDER | PLANNED | 2 |  |
 | REQ-1811 | XIV | Reconciliation | MENU BY ROLE | PLANNED | 1 |  |
@@ -1829,9 +1829,9 @@ Section numbers absent from the source document itself: none
 | REQ-1818 | XIV | Black Vault | DYNAMIC CONFIDENTIALITY | PLANNED | 1 |  |
 | REQ-1819 | XIV | Genesis Builder | DYNAMIC DOCUMENT TYPES | PLANNED | 2 |  |
 | REQ-1820 | XIV | Digital Twin | DOCUMENT REQUIREMENT BY SCENARIO | PLANNED | 3 |  |
-| REQ-1821 | XIV | Genesis Builder | DYNAMIC NUMBERING | PLANNED | 2 |  |
+| REQ-1821 | XIV | Genesis Builder | DYNAMIC NUMBERING | PARTIAL | 2 | src/pages/Registers.tsx (Register kinds) · supabase/migrations/0006_workflow_registers_documents.sql register_sequences · tests/sql/phase2_flow.sql T71 |
 | REQ-1822 | XIV | UI/UX | NUMBERING BY COMPANY | PLANNED | 1 |  |
-| REQ-1823 | XIV | Genesis Builder | DYNAMIC COMPANY TEMPLATE BUILDER | PLANNED | 2 |  |
+| REQ-1823 | XIV | Genesis Builder | DYNAMIC COMPANY TEMPLATE BUILDER | PARTIAL | 2 | src/pages/Companies.tsx · src/engine/templates.ts |
 | REQ-1824 | XIV | NUMI | TEMPLATE MAY INCLUDE | PLANNED | 1 |  |
 | REQ-1825 | XIV | Multi-Company | TEMPLATE MARKETPLACE INTERNAL | PLANNED | 1 |  |
 | REQ-1826 | XIV | General | CLONE DEPARTMENT | PLANNED | 3 |  |
@@ -1841,7 +1841,7 @@ Section numbers absent from the source document itself: none
 | REQ-1830 | XIV | Reports | CONFIGURATION VERSIONING | PARTIAL | 1 | version columns |
 | REQ-1831 | XIV | Reports | DRAFT CONFIGURATION | PLANNED | 1 |  |
 | REQ-1832 | XIV | Reports | PUBLISH CONFIGURATION | PLANNED | 1 |  |
-| REQ-1833 | XIV | Forward | EFFECTIVE DATE | PLANNED | 2 |  |
+| REQ-1833 | XIV | Forward | EFFECTIVE DATE | PARTIAL | 2 | tests/sql/phase2_payroll.sql T125 · tests/forward.test.ts 'rent escalation: 10 lakh a month, 5% from April (spec 675)' · numero_private.create_payroll_run · src/pages/Payroll.tsx |
 | REQ-1834 | XIV | Reports | ROLLBACK | PLANNED | 1 |  |
 | REQ-1835 | XIV | Reports | HISTORICAL CONFIGURATION PRESERVATION | PLANNED | 1 |  |
 | REQ-1836 | XIV | Audit | CONFIGURATION AUDIT | PLANNED | 1 |  |
@@ -1861,17 +1861,17 @@ Section numbers absent from the source document itself: none
 | REQ-1850 | XIV | Genesis Builder | DYNAMIC PATH ROUTING | PLANNED | 2 |  |
 | REQ-1851 | XIV | NUMI | NUMI PATH SUGGESTION | PLANNED | 1 |  |
 | REQ-1852 | XIV | NUMI | NUMI DOES NOT FORCE PATH | PLANNED | 1 |  |
-| REQ-1853 | XIV | Genesis Builder | PATH CHANGE HISTORY | PLANNED | 2 |  |
-| REQ-1854 | XIV | Genesis Builder | DYNAMIC FINANCIAL TREE | PLANNED | 2 |  |
+| REQ-1853 | XIV | Genesis Builder | PATH CHANGE HISTORY | PARTIAL | 2 | supabase/migrations/0006_workflow_registers_documents.sql audit_register_items · supabase/migrations/0008_expenses_advances_cash.sql audit_advances, audit_expense_claims · src/pages/Register360.tsx · src/pages/Audit.tsx |
+| REQ-1854 | XIV | Genesis Builder | DYNAMIC FINANCIAL TREE | PARTIAL | 2 | src/pages/Accounts.tsx · src/pages/Genesis.tsx (Structure) |
 | REQ-1855 | XIV | Multi-Company | UNLIMITED CATEGORY DEPTH | PLANNED | 1 |  |
 | REQ-1856 | XIV | NUMI | NUMI CATEGORY CREATOR | PLANNED | 1 |  |
 | REQ-1857 | XIV | Sentinel | DUPLICATE CATEGORY PREVENTION | PLANNED | 1 |  |
 | REQ-1858 | XIV | Sentinel | MERGE CATEGORY | PLANNED | 1 |  |
-| REQ-1859 | XIV | Forward | DEACTIVATE CATEGORY | PLANNED | 2 |  |
-| REQ-1860 | XIV | Genesis Builder | DYNAMIC OWNER | PLANNED | 2 |  |
-| REQ-1861 | XIV | Genesis Builder | DYNAMIC SLA | PLANNED | 2 |  |
+| REQ-1859 | XIV | Forward | DEACTIVATE CATEGORY | IMPLEMENTED | 2 | src/pages/Expenses.tsx · numero_private.save_expense_category · src/pages/ClaimEditor.tsx · src/pages/Assets.tsx · src/pages/Accounts.tsx |
+| REQ-1860 | XIV | Genesis Builder | DYNAMIC OWNER | PARTIAL | 2 | supabase/migrations/0006_workflow_registers_documents.sql register_items.owner_name, tasks · src/pages/Registers.tsx · src/pages/Tasks.tsx |
+| REQ-1861 | XIV | Genesis Builder | DYNAMIC SLA | PARTIAL | 2 | src/engine/forward.ts earlyWarnings · src/pages/Expenses.tsx · tests/forward.test.ts 'early warnings state facts, rules and assumptions' |
 | REQ-1862 | XIV | Approvals | SLA ESCALATION | PLANNED | 1 |  |
-| REQ-1863 | XIV | Genesis Builder | DYNAMIC HELP TEXT | PLANNED | 2 |  |
+| REQ-1863 | XIV | Genesis Builder | DYNAMIC HELP TEXT | PARTIAL | 2 | src/pages/Expenses.tsx (Categories) · src/pages/ClaimEditor.tsx |
 | REQ-1864 | XIV | NUMI | NUMI CONTEXTUAL HELP | PLANNED | 1 |  |
 | REQ-1865 | XIV | Genesis Builder | DYNAMIC TRAINING | PLANNED | 2 |  |
 | REQ-1866 | XIV | Genesis Builder | CUSTOM BUSINESS LANGUAGE | PLANNED | 2 |  |
@@ -1885,7 +1885,7 @@ Section numbers absent from the source document itself: none
 | REQ-1874 | XIV | NUMI | NUMI BUILD WITH ME | PLANNED | 1 |  |
 | REQ-1875 | XIV | NUMI | NUMI CREATE FROM DESCRIPTION | PLANNED | 1 |  |
 | REQ-1876 | XIV | NUMI | NUMI NEVER INVENTS ACCOUNTING POLICY | PLANNED | 1 |  |
-| REQ-1877 | XIV | Genesis Builder | DYNAMIC DOES NOT MEAN UNCONTROLLED | PLANNED | 2 |  |
+| REQ-1877 | XIV | Genesis Builder | DYNAMIC DOES NOT MEAN UNCONTROLLED | PARTIAL | 2 | supabase/migrations/0006_workflow_registers_documents.sql register_kinds_write policy, save_custom_values, audit triggers · tests/sql/phase2_payroll.sql T127–T128 · tests/sql/phase2_treasury_purchasing.sql T82 · tests/sql/phase2_flow.sql T80 |
 | REQ-1878 | XIV | Digital Twin | CUSTOMIZATION CANNOT BREAK DOUBLE ENTRY | TESTED | 1 | tests/sql/engine_invariants.sql |
 | REQ-1879 | XIV | Security | CUSTOMIZATION CANNOT BYPASS COMPANY ISOLATION | TESTED | 1 | tests/sql/engine_invariants.sql |
 | REQ-1880 | XIV | Black Vault | CUSTOMIZATION CANNOT BYPASS BLACK VAULT | TESTED | 1 | tests/sql/engine_invariants.sql |
@@ -1906,22 +1906,22 @@ Section numbers absent from the source document itself: none
 | REQ-1895 | XIV | Genesis Builder | DYNAMIC REPORTING | PLANNED | 2 |  |
 | REQ-1896 | XIV | NUMI | DYNAMIC NUMI | PLANNED | 1 |  |
 | REQ-1897 | XIV | Sentinel | DYNAMIC SENTINEL | PLANNED | 1 |  |
-| REQ-1898 | XIV | Forward | DYNAMIC FORWARD | PLANNED | 2 |  |
+| REQ-1898 | XIV | Forward | DYNAMIC FORWARD | IMPLEMENTED | 2 | src/pages/Registers.tsx · src/engine/forward.ts buildEvents, earlyWarnings · src/api/supabase.ts saveRegisterKind |
 | REQ-1899 | XIV | Reality | DYNAMIC REALITY | PLANNED | 3 |  |
 | REQ-1900 | XIV | Truth | DYNAMIC TRUTH | PLANNED | 1 |  |
 | REQ-1901 | XIV | Digital Twin | DYNAMIC DIGITAL TWIN | PLANNED | 3 |  |
 | REQ-1902 | XIV | Engineering Governance | UNIVERSAL BUSINESS OBJECT PRINCIPLE | PLANNED | 1 |  |
-| REQ-1903 | XIV | Genesis Builder | UNIVERSAL MONEY PATH PRINCIPLE | PLANNED | 2 |  |
+| REQ-1903 | XIV | Genesis Builder | UNIVERSAL MONEY PATH PRINCIPLE | PARTIAL | 2 | src/engine/registerKinds.json (kind 'path') · src/pages/Registers.tsx · src/pages/Register360.tsx · src/pages/ClaimEditor.tsx |
 | REQ-1904 | XIV | Engineering Governance | UNIVERSAL FORM PRINCIPLE | PLANNED | 1 |  |
 | REQ-1905 | XIV | Approvals | UNIVERSAL WORKFLOW PRINCIPLE | PLANNED | 1 |  |
 | REQ-1906 | XIV | Reports | UNIVERSAL REPORTING PRINCIPLE | PLANNED | 1 |  |
 | REQ-1907 | XIV | Engineering Governance | UNIVERSAL AI PRINCIPLE | PLANNED | 1 |  |
 | REQ-1908 | XIV | NUMI | NUMERO SELF-DESCRIBING ARCHITECTURE | PLANNED | 1 |  |
-| REQ-1909 | XIV | Genesis Builder | NO-CODE WITHOUT GOVERNANCE | PLANNED | 2 |  |
+| REQ-1909 | XIV | Genesis Builder | NO-CODE WITHOUT GOVERNANCE | IMPLEMENTED | 2 | supabase/migrations/0006_workflow_registers_documents.sql propose_posting, set_account_map, save_custom_values · tests/sql/phase2_treasury_purchasing.sql T82–T83, T86 · tests/sql/phase2_flow.sql T33 · tests/sql/phase2_payroll.sql T128 |
 | REQ-1910 | XIV | UI/UX | THE SUPER ADMIN QUESTION | PLANNED | 1 |  |
 | REQ-1911 | XIV | Engineering Governance | CLAUDE CODE IMPLEMENTATION PRINCIPLE | PLANNED | 1 |  |
 | REQ-1912 | XIV | NUMI | ARCHITECTURAL TARGET | PLANNED | 1 |  |
 | REQ-1913 | XIV | Accounts Receivable | TEMPLATE OVER ENGINE | PLANNED | 1 |  |
 | REQ-1914 | XIV | Multi-Company | WHY THIS MATTERS | PLANNED | 1 |  |
-| REQ-1915 | XIV | Genesis Builder | FINAL DYNAMIC NUMERO TEST | PLANNED | 2 |  |
+| REQ-1915 | XIV | Genesis Builder | FINAL DYNAMIC NUMERO TEST | PARTIAL | 2 | src/pages/Companies.tsx · src/pages/Genesis.tsx · src/pages/Registers.tsx · src/pages/Expenses.tsx · src/pages/Assets.tsx · src/ui/ApprovalRuleEditor.tsx |
 | REQ-1916 | XIV | Engineering Governance | FINAL PRINCIPLE | PLANNED | 1 |  |

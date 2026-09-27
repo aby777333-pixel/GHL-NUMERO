@@ -9,8 +9,18 @@ Two suites cover the two implementations of the engine.
 | `tests/sql/engine_invariants.sql` | The real Postgres database, inside a transaction that always rolls back | Run the file in the Supabase SQL editor. Results arrive in the error message; every line must start with `PASS`. |
 | `tests/engine.test.ts` | The TypeScript ledger engine and the seeded demo universe | `npm test` |
 | `tests/commands.test.ts` | Voice / command interpreter | `npm test` |
+| `tests/sql/phase2_flow.sql` (T29–T81) | The real database: proposal engine, assets, advances, claims, cash, transfers, documents, registers, privileges | as above |
+| `tests/sql/phase2_treasury_purchasing.sql` (T82–T109) | The real database: account mapping, loans, deposits, purchase-to-pay, vendor selection, salary approval | as above |
+| `tests/sql/phase2_payroll.sql` (T110–T129) | The real database: payroll, privacy, follow-ups, custom values | as above |
+| `tests/sql/phase2_corrections.sql` (T130–T149) | The real database: the corrections found in the requirement review | as above |
+| `tests/sql/phase2_corrections_2.sql` (T150–T155) | The real database: what the review of those corrections found | as above |
+| `tests/ops.test.ts` | The operations engine in TypeScript and the seeded demo universe | `npm test` |
+| `tests/forward.test.ts` | Forward: events, horizons, warnings, advance memory | `npm test` |
+| `tests/numiOps.test.ts` | NUMI on operations, permission handling, commands on operations | `npm test` |
 
-Last run: database 44 of 44 passed · application 97 of 97 passed.
+Last run (27 September 2026): database 175 of 175 passed, every run rolled back, database verified empty afterwards · application 262 of 262 passed. All seven database scripts were re-run after the last migration (0013).
+
+The database suites create their own users and companies inside one transaction and end by raising an exception that carries the results, so nothing they do can remain. Posted journals and audit rows cannot be deleted; a test that committed would leave them for ever.
 
 ## Accounting
 
@@ -122,6 +132,170 @@ Last run: database 44 of 44 passed · application 97 of 97 passed.
 | Spoken amounts | 1607 | application |
 | Every template maps only to accounts it contains | 83 | application (12 templates) |
 
+## Operations never write to the ledger
+
+| Requirement | Database test | Application test |
+|---|---|---|
+| An operation only proposes; nothing reaches the ledger before approval | T31, T120 | ops: proposal is pending, ledger unchanged |
+| The proposer cannot approve the proposed entry | T32, T86 | ops |
+| A proposed entry cannot be edited by hand | T33 | ops |
+| Final approval posts the entry and updates the source record | T35, T88 | ops |
+| Reversing the entry reverses the source record | T38, T76, T77 | ops |
+| One pending entry per record | T87 | ops |
+| Nobody approves what they cannot read | T116 | engine: clearance check |
+| Internal posting functions cannot be called by a signed-in user, nor anything anonymously | T78, T79 | — |
+| Every table has Row Level Security; every policy names a permission | T80, T81 | — |
+| Every posted journal balances, including all proposed entries | T36, T113, T129 | every posted journal balances |
+| Account mapping accepts only active posting ledgers | T82, T83 | ops |
+| Money moves only through bank or cash ledgers | T39, T45 | ops |
+
+## Advances and expenses
+
+| Requirement | Spec | Database test | Application test |
+|---|---|---|---|
+| An advance is not an expense | 1556–1560 | T46, T47 | ops; NUMI states it |
+| Approval moves no money; a lower amount may be approved | 1558 | T42, T43 | ops |
+| Release cannot exceed the approved amount | 1558 | T44 | ops |
+| Partial settlement leaves RETURN DUE; return cannot exceed the balance | 1561 | T52, T53, T54 | ops |
+| Excess expense becomes a reimbursement due | 678 | T56, T58 | ops |
+| Policy flags are recorded and never reject | 1568 | T48, T49 | ops |
+| Approving a flagged line needs the approver's comment | 1568 | T50 | ops |
+| Advance memory: facts shown before another advance is approved | 1562–1563 | T55 | forward: advance memory; numiOps |
+| An employee sees only their own claims, and cannot approve | 43 | T59, T60, T61 | — |
+| A claim cannot be reversed while its reimbursement is pending | — | T57 | ops |
+| Recovery through payroll cannot exceed the unsettled advance | — | T109, T121 | ops |
+
+## Cash, transfers, documents, registers
+
+| Requirement | Database test | Application test |
+|---|---|---|
+| A cash count records the difference and never changes the books | T62 | ops |
+| A cash count cannot be altered afterwards | T63 | — |
+| A transfer touches neither income nor expense | T64 | ops |
+| A transfer between companies has two entries; one side alone raises an alert | T65 | ops |
+| An identical file is kept and flagged, never discarded | T66 | ops |
+| A document sits in its own company, cannot be deleted, facts cannot be altered | T67, T68, T69 | — |
+| Required fields of a register kind are enforced | T70 | ops |
+| Reference numbers, default certainty, cost-tracking dimension | T71, T72, T73 | ops |
+| Credit limit: recorded and flagged, not blocked | T74 | ops |
+| Closing a follow-up requires its outcome | T126 | — |
+| Custom values: required fields enforced, only defined fields stored | T127, T128 | — |
+
+## Fixed assets
+
+| Requirement | Database test | Application test |
+|---|---|---|
+| Straight-line and written-down-value depreciation, part month | T30 | ops |
+| Months are depreciated in order; an earlier month cannot be reversed while a later one stands | T34, T37 | ops |
+| Depreciation carries the department | T36 | ops |
+| Disposal removes cost and accumulated depreciation; gain or loss = proceeds − book value | T40, T41 | ops |
+| Register agrees with the ledger | — | ops: reconciliation on the seeded company |
+
+## Purchase-to-pay
+
+| Requirement | Spec | Database test | Application test |
+|---|---|---|---|
+| A requisition needs its reason; the requester cannot approve it | 522 | T94, T96 | ops |
+| An order needs an approved requisition or the selected quotation | 524 | T95, T106 | ops |
+| An approved order is a commitment: no journal | 526, 672 | T97 | forward: commitments |
+| Receipts cannot exceed the order | 527 | T98 | ops |
+| A bill links only to an order of the same vendor; lines are traceable | 521 | T99, T101 | ops |
+| Three-way comparison flags, never blocks | 529 | T100, T102 | ops: threeWayMatch |
+| A receipt cannot be cancelled once a bill stands | — | T103 | — |
+| A person chooses the vendor and records why; the record says whether it was the lowest | 525 | T104, T105 | ops: compareQuotations |
+
+## Treasury
+
+| Requirement | Database test | Application test |
+|---|---|---|
+| A loan taken sits in a liability ledger | T84 | ops |
+| Schedule: instalments, interest, principal sums to the loan, closes at zero | T85 | ops |
+| Instalments in order; interest as actually charged | T89, T90 | ops |
+| Deposit maturity value by compounding | T91 | ops |
+| A deposit under lien cannot be closed until release is confirmed | T92 | ops |
+| Interest on closure = proceeds + tax deducted − principal | T93 | ops |
+
+## Payroll and privacy
+
+| Requirement | Spec | Database test | Application test |
+|---|---|---|---|
+| Payroll permissions are not given to finance roles by default | 32 | T29, T117 | — |
+| Calculation from approved salaries, pro-rata, adjustments | 1619 | T110 | ops |
+| Nobody is dropped silently | 1623 | T111 | ops |
+| One regular payroll per month | — | T112 | ops |
+| Journal is confidential, by department, balanced | 1197 | T113, T114, T115 | ops |
+| Entering and approving a salary are separate | — | T107 | ops |
+| An approved salary is never overwritten; a revision is a new record | — | T108, T125 | ops |
+| The audit trail hides payroll rows | — | T118 | — |
+| The confidential journal is invisible without clearance | 331 | T119 | — |
+| Private is not false: totals include payroll | 330 | T122 | — |
+| Payroll cannot be reversed once paid or while payment is pending | — | T123, T124 | ops |
+| NUMI never states an individual's pay | 916 | — | numiOps |
+
+## Forward
+
+| Requirement | Spec | Test |
+|---|---|---|
+| Every event carries a certainty; firm and uncertain are separated | 666–671 | forward |
+| Contingent amounts are beside the projection, not inside it | 671 | forward; numiOps |
+| Overdue items move to today; nothing unrecorded is included | 700 | forward |
+| Estimated collection dates are labelled and optional | 687 | forward |
+| Escalation, frequency, end date and auto-renewal of register items | 675 | forward |
+| Early warnings state facts and assumptions, never a conclusion | 722 | forward |
+| Sources a person may not read are named | 916 | numiOps |
+
+## NUMI and commands on operations
+
+| Requirement | Test |
+|---|---|
+| Figures agree with the engines, to the rupee | numiOps (advances, commitments, debt, assets) |
+| A refusal is reported as a refusal, with no figures | numiOps |
+| An empty answer from the database is never read as "none exist" | numiOps |
+| Partial permission: the answer says what is left out | numiOps |
+| 22 new navigation phrases; 5 earlier ones keep their meaning | numiOps |
+| 14 sensitive phrasings are never executed (release, settle, reimburse, run payroll, dispose, repay, break a deposit, place an order, select a vendor, approve) | numiOps |
+| Every workflow source has a label, a rule and a link | numiOps |
+
+## Corrections found in the requirement review
+
+Every requirement of Phase 2 was assessed against the code. The assessment found defects; each was corrected and given a test.
+
+| Requirement | Database test | Application test |
+|---|---|---|
+| A loan recovered through payroll reaches its instalment schedule; nothing changes before approval | T130, T131 | ops: corrections |
+| An instalment takes only the principal not yet recovered; principal repaid never exceeds the amount disbursed | T132 | ops; forward |
+| Reversing a payroll takes the recovery back, and refuses past a later instalment | T133 | ops (two tests) |
+| An advance to a vendor sits in the vendor advances ledger; an employee's in employee advances | T134, T138 | ops |
+| A claim linked to a trip carries the trip into its entry | T135 | ops |
+| A payment from a cash box above its limit is raised for review, still recorded, and nothing is raised within the limit | T136, T137 | ops |
+| Several approvals: the amount authorised is kept; a later step may lower it, not raise it; rejection keeps nothing | T139–T142 | ops |
+| A follow-up is as confidential as its record; a payroll follow-up needs the payroll permission | T143–T146 | ops |
+| Only a stored file that never became a document can be removed | T147 | — |
+| The new internal functions cannot be called by a signed-in user | T148 | — |
+| A scheduled occurrence already billed is not counted twice; an unrelated bill covers nothing | — | forward (two tests) |
+| A guarantee given is contingent, beside the projection | — | forward |
+| Records without an exchange rate say which currency they are in | — | forward |
+| Notices rise at 60, 30 and 7 days | — | forward |
+| Dependence on one vendor is stated | — | forward |
+| People cost follows the department on the payroll line | — | forward |
+| The wording of the specification's example questions is recognised (13 questions) | — | numiOps |
+| A narrower question gets the narrower figure | — | numiOps |
+
+## Found when the corrections were reviewed
+
+The corrections were reviewed in their turn. What that found was corrected in migration 0013 and in the application.
+
+| Requirement | Database test | Application test |
+|---|---|---|
+| A required field of one sub-type does not block a record of another, and is still required where it belongs | T150, T151 | ops: second review |
+| A field required of one party type is asked of that type only | T154 | ops: second review |
+| When a record is reclassified its follow-ups follow | T152 | ops: second review |
+| A claim or an advance is at least as confidential as the item it is linked to | T153 | ops: second review |
+| The new internal functions cannot be called by a signed-in user | T155 | — |
+| A claim linked to a property or an incident carries that record into its entry | — | ops: second review |
+| Only the bill itself stands for the period: a debit note or a credit note covers nothing | — | forward: second review |
+| NUMI matches whole words; a question about overspending is a budget question; a named category is still found | — | numiOps: whole words only (three tests) |
+
 ## Not yet covered by automated tests
 
-Interface behaviour in the browser · concurrency under load · migration and import · consolidation with minority interests · currency translation. These are verified manually or not yet built; none is marked TESTED.
+Interface behaviour in the browser · concurrency under load · migration and import · consolidation with minority interests · currency translation · file upload to live storage · impairment and loans given (engine exists, no dedicated test) · permission refusals in the application (the demo gives every user every permission; refusals are tested against the database). These are verified manually or not yet built; none is marked TESTED.

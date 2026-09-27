@@ -6,6 +6,8 @@ import { useAction, useAsync } from '@/hooks/useAsync'
 import { D, sum } from '@/lib/money'
 import { fmtDate, fmtDateTime, today } from '@/lib/dates'
 import { ledgerLink } from '@/lib/data'
+import { workflowSource } from '@/lib/workflow'
+import { Attachments } from '@/ui/ops'
 import { cx, Empty, ErrorBox, Field, Loading, Modal, Money, Note, PageHeader, Panel, ReasonDialog, Section, StatusChip } from '@/ui/kit'
 
 /** One journal, with its full responsibility chain and the answers to WHAT / WHO / WHERE / WHY / WHEN / HOW / PROOF. */
@@ -26,8 +28,11 @@ export default function JournalDetail() {
     if (j.source === 'invoice') { const i = await api.getInvoice(j.source_id); return { label: `${i.doc_type === 'sales_invoice' || i.doc_type === 'credit_note' ? 'Invoice' : 'Bill'} ${i.doc_no ?? ''}`, to: (i.doc_type === 'sales_invoice' || i.doc_type === 'credit_note' ? '/invoices/' : '/bills/') + i.id } }
     if (j.source === 'payment' || j.source === 'receipt') return { label: j.source === 'receipt' ? 'Receipt record' : 'Payment record', to: '/payments?open=' + j.source_id }
     if (j.source === 'reversal') return { label: 'Original journal', to: '/journals/' + j.source_id }
+    // an entry proposed by an operation: the source record is its proof
+    const w = (await api.listWorkflowPostings({ companyIds: [j.company_id], journalId: j.id }))[0]
+    if (w) { const o = workflowSource(w); return { label: o.label, to: o.to ?? undefined, rule: o.rule, onApproval: o.onApproval, workflow: w.status } }
     return null
-  }, [api, res.data?.id, res.data?.source_id])
+  }, [api, res.data?.id, res.data?.source_id, res.data?.status])
 
   if (res.error) return <ErrorBox message={res.error} retry={res.reload} />
   if (!res.data) return <Panel><Loading rows={7} /></Panel>
@@ -46,6 +51,7 @@ export default function JournalDetail() {
   const who = (uid?: string | null) => (uid ? j.people[uid] ?? 'Unknown user' : null)
   const co = j.company_id
   const done = (msg: string) => () => { setDlg(''); setComment(''); return msg }
+  const wf = src.data && 'workflow' in src.data ? src.data : null
 
   const chain: { label: string; who: string | null; at?: string | null; icon: ReactNode; done: boolean }[] = [
     { label: 'Created by', who: who(j.created_by), at: j.created_at, icon: <PenLine size={14} />, done: true },
@@ -63,7 +69,7 @@ export default function JournalDetail() {
         actions={<>
           <button className="btn ghost" onClick={() => nav(-1)}><ArrowLeft size={15} /> Back</button>
           <button className="btn" onClick={() => askNumi(`Explain journal ${j.voucher_no ?? ''}: ${j.narration ?? ''}`)}><Sparkles size={15} className="text-gold" /> Ask NUMI</button>
-          {(j.status === 'draft' || j.status === 'rejected') && <button className="btn" disabled={!can('journal.create', co)} onClick={() => nav(`/journals/${j.id}/edit`)}><PenLine size={15} /> Edit</button>}
+          {(j.status === 'draft' || j.status === 'rejected') && !wf && <button className="btn" disabled={!can('journal.create', co)} onClick={() => nav(`/journals/${j.id}/edit`)}><PenLine size={15} /> Edit</button>}
           {j.status === 'draft' && <button className="btn primary" disabled={busy || !can('journal.submit', co) || !dr.eq(cr) || dr.isZero()} title={!dr.eq(cr) ? 'An unbalanced journal cannot be submitted' : undefined}
             onClick={() => void act(() => api.submitJournal(j.id), 'Submitted for approval')}><Send size={15} /> Submit for approval</button>}
           {j.status === 'submitted' && <>
@@ -85,7 +91,16 @@ export default function JournalDetail() {
       </div>
 
       {j.status === 'posted' && <Note kind="good" className="mb-4">This entry is posted and permanent. It cannot be edited or deleted. If it is wrong, reverse it and post a correct entry — both remain visible.</Note>}
-      {j.status === 'rejected' && <Note kind="warn" className="mb-4">This journal was rejected. It can be edited and submitted again.</Note>}
+      {j.status === 'rejected' && !wf && <Note kind="warn" className="mb-4">This journal was rejected. It can be edited and submitted again.</Note>}
+      {wf && (
+        <Note className="mb-4">
+          <strong className="text-ink">Proposed by an operation: {wf.label}.</strong> This entry was prepared from a source record and cannot be edited by hand.
+          {wf.workflow === 'pending' && <> On its final approval it is posted immediately and {wf.onApproval}.</>}
+          {wf.workflow === 'voided' && <> It was rejected or cancelled: nothing was posted. It can be issued again from the source record.</>}
+          {wf.workflow === 'reversed' && <> It was posted and later reversed; the source record was updated to match.</>}
+          {wf.to && <> <button className="link" onClick={() => nav(wf.to!)}>Open the source record</button></>}
+        </Note>
+      )}
 
       <div className="grid gap-4 xl:grid-cols-[1.6fr_1fr]">
         <div className="space-y-4">
@@ -127,11 +142,13 @@ export default function JournalDetail() {
                 <Why q="When?" a={`Dated ${fmtDate(j.journal_date)}${j.posted_at ? ' · posted ' + fmtDateTime(j.posted_at) : ''}`} />
                 <Why q="How — through which account?" a={j.lines.filter((l) => /bank|cash/i.test(l.account_name)).map((l) => l.account_name).join(', ') || 'No bank or cash account involved'} />
                 <Why q="Proof — source document?" a={src.data ? src.data.label : j.source === 'manual' ? 'Manual entry — no source document linked' : `Source: ${j.source}`} missing={!src.data && j.source === 'manual'} to={src.data?.to} nav={nav} />
-                <Why q="Rule applied?" a={j.source === 'invoice' ? 'InvoiceApproved → control account, revenue or expense, tax' : j.source === 'receipt' ? 'PaymentReceived → debit bank, credit receivable' : j.source === 'payment' ? 'PaymentMade → debit payable, credit bank' : j.source === 'reversal' ? 'Reversal → equal and opposite of the original' : 'Entered directly as a journal'} />
+                <Why q="Rule applied?" a={wf?.rule ? wf.rule : j.source === 'invoice' ? 'InvoiceApproved → control account, revenue or expense, tax' : j.source === 'receipt' ? 'PaymentReceived → debit bank, credit receivable' : j.source === 'payment' ? 'PaymentMade → debit payable, credit bank' : j.source === 'reversal' ? 'Reversal → equal and opposite of the original' : 'Entered directly as a journal'} />
               </div>
-              {(!j.purpose || (!src.data && j.source === 'manual')) && <div className="mt-3 text-[11.5px] text-muted">Document attachment is planned for the next phase; until then, record the reference of the supporting document in the narration.</div>}
+              {!src.data && j.source === 'manual' && <div className="mt-3 text-[11.5px] text-muted">A manual entry has no source record. Attach the supporting document below so the entry can be evidenced.</div>}
             </Panel>
           </Section>
+
+          <Attachments companyId={co} entity="journals" entityId={j.id} title="Evidence attached to this entry" />
         </div>
 
         <div className="space-y-4">
@@ -188,9 +205,9 @@ export default function JournalDetail() {
       </div>
 
       <Modal open={dlg === 'approve'} onClose={() => setDlg('')} title="Approve this journal" width={500}
-        footer={<><button className="btn ghost" onClick={() => setDlg('')}>Cancel</button><button className="btn good" disabled={busy} onClick={() => void act(async () => { const r = await api.approveJournal(j.id, comment.trim() || undefined); setDlg(''); setComment(''); return r }, (r) => (r === 'approved' ? 'Approved — ready to post' : 'Approved this step; a further approval is required'))}><Check size={15} /> Approve</button></>}>
+        footer={<><button className="btn ghost" onClick={() => setDlg('')}>Cancel</button><button className="btn good" disabled={busy} onClick={() => void act(async () => { const r = await api.approveJournal(j.id, comment.trim() || undefined); setDlg(''); setComment(''); return r }, (r) => (r !== 'approved' ? 'Approved this step; a further approval is required' : wf ? 'Approved and posted to the ledger' : 'Approved — ready to post'))}><Check size={15} /> Approve</button></>}>
         <div className="mb-3 text-[13px] text-ink2">You are approving <b className="text-ink">{j.narration}</b> for <Money value={dr} />. Your name and the time are recorded permanently.</div>
-        <Note className="mb-3">The person who created an entry cannot approve it, unless the Owner has explicitly enabled Owner self-approval. The engine enforces this.</Note>
+        <Note className="mb-3">The person who created an entry cannot approve it, unless the Owner has explicitly enabled Owner self-approval. The engine enforces this.{wf ? ` This entry was proposed by an operation: on its final approval it is posted immediately and ${wf.onApproval}.` : ''}</Note>
         <Field label="Comment (optional)"><textarea className="field" rows={2} value={comment} onChange={(e) => setComment(e.target.value)} /></Field>
       </Modal>
       <ReasonDialog open={dlg === 'reject'} title="Reject this journal" confirm="Reject" danger onCancel={() => setDlg('')} onConfirm={(r) => void act(() => api.rejectJournal(j.id, r).then(done('')), 'Rejected')} body="The maker will see your reason and can correct and resubmit the entry." />

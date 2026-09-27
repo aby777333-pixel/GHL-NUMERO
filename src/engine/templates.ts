@@ -18,7 +18,7 @@ export const BASE_CHART: A[] = [
   a('1130', 'Accounts Receivable', 'asset', 'receivable', '1100', 'receivable'),
   a('1140', 'Inventory', 'asset', 'inventory', '1100'),
   a('1150', 'Vendor Advances', 'asset', 'advance', '1100', 'advance_paid'),
-  a('1155', 'Employee Advances', 'asset', 'advance', '1100'),
+  a('1155', 'Employee Advances', 'asset', 'advance', '1100', 'advance_paid'),
   a('1160', 'Security Deposits Paid', 'asset', 'deposit', '1000'),
   a('1170', 'Prepaid Expenses', 'asset', 'prepaid', '1100'),
   g('1180', 'Input Tax Credit', 'asset', 'tax_receivable', '1100'),
@@ -27,6 +27,7 @@ export const BASE_CHART: A[] = [
   a('1183', 'Input IGST', 'asset', 'tax_receivable', '1180', 'tax'),
   a('1185', 'TDS Receivable', 'asset', 'tax_receivable', '1100', 'tax'),
   a('1190', 'Intercompany Receivables', 'asset', 'intercompany_receivable', '1100', 'intercompany'),
+  a('1195', 'Loans Given', 'asset', 'other_current_asset', '1100'),
   g('1200', 'Investments', 'asset', 'investment', '1000'),
   a('1205', 'Investments — General', 'asset', 'investment', '1200'),
   a('1210', 'Fixed Deposits', 'asset', 'investment', '1200'),
@@ -129,6 +130,8 @@ export const BASE_CHART: A[] = [
   g('7300', 'Exceptional Items', 'expense', 'exceptional'),
   a('7310', 'Write-offs', 'expense', 'exceptional', '7300'),
   a('7320', 'Losses & Incidents', 'expense', 'exceptional', '7300'),
+  a('7350', 'Gain or Loss on Disposal of Assets', 'expense', 'exceptional', '7300'),
+  a('7360', 'Impairment Loss', 'expense', 'exceptional', '7300'),
 ].map((x) => (x.parent_code === '' ? { ...x, parent_code: undefined } : x))
 
 export const BASE_ACCOUNT_MAP: Record<string, string> = {
@@ -141,6 +144,18 @@ export const BASE_ACCOUNT_MAP: Record<string, string> = {
   suspense: '2190',
   intercompany_receivable: '1190',
   intercompany_payable: '2180',
+  // operations (phase 2)
+  employee_advances: '1155',
+  employee_payable: '2165',
+  salaries_payable: '2160',
+  salary_expense: '6110',
+  bonus_expense: '6140',
+  employer_contribution_expense: '6120',
+  statutory_payable: '2170',
+  tds_payable: '2150',
+  tds_receivable: '1185',
+  asset_disposal: '7350',
+  asset_impairment: '7360',
 }
 
 export const INDIA_GST_CODES: CompanyCreatePayload['tax_codes'] = [5, 12, 18, 28].flatMap((r) => [

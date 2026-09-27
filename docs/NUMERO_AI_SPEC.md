@@ -60,6 +60,33 @@ followUps[]  the next sensible questions
 
 Company names and periods mentioned in the question override the current selection, within what the person is authorised to see.
 
+### Operations (Phase 2) — `src/numi/ops.ts`
+
+| Question | Answer comes from | Label |
+|---|---|---|
+| Who holds unsettled advances? Which advances are overdue? | advances and claims; ageing by days held | ACTUAL. States that an advance is not an expense |
+| Show the advances of *a named person* | advance memory: open advances, late settlements, frequency, rising amounts, whether a claim exists | FACT, with the assumption "not a conclusion about anyone" |
+| Which expense claims are waiting? | claims by stage: CLAIM PENDING, PAYABLE | ACTUAL |
+| How much is committed on purchase orders? | approved orders less what has been billed against them | COMMITTED. States that a commitment is not a cost |
+| How much debt do we have? | loans and schedules: outstanding principal, next instalment, overdue, maturity ladder | ACTUAL; scheduled interest is contracted, indicative on floating rates |
+| Show fixed deposits | deposits, maturity dates, lien | ACTUAL; maturity value is calculated, not confirmed by the bank |
+| What is the book value of our assets? | asset register, and its agreement with the ledger | ACTUAL; a difference between register and ledger is shown |
+| What was the payroll cost last month? | posted payroll runs — **totals only** | ACTUAL |
+| What is the salary of *a person*? Who is the highest paid? | — | Declined, for everyone. Points to the payroll screens |
+| How much cash will we have in *N* days? What is coming? | Forward: recorded documents, registers, schedules | FORECAST, INFERENCE. Firm and uncertain amounts are shown separately; contingent amounts are beside the projection, never inside it |
+| Which renewals are coming up? What is expiring? | register items, documents, deposits | dates as recorded |
+| Which follow-ups are open? | tasks | ACTUAL |
+
+Rules specific to these answers:
+
+* **Permission first.** The database returns no rows to a person without the permission; it does not raise an error. NUMI therefore checks the permission before reading. Without it the answer is "You are not authorised to see …", with no figures and no statement about whether records exist.
+* **Partial scope is stated.** If the person holds the permission in some of the selected companies, the answer covers those and says how many were left out and why.
+* **Own records.** A person who may enter expenses but not view them is told that only the records they entered are counted.
+* **Forward names its gaps.** Sources the person may not read are listed under the answer; the projection does not pretend to be complete.
+* **A narrower question gets the narrower figure.** Fuel, hotel, airfare and local conveyance are answered for that category, not for all travel.
+* **Periods a person says.** Today, yesterday, this week and last week are understood, as well as months, quarters and years.
+* **A question about why a figure changed** ("why did salary expense increase?") is answered by the comparison engine, not by these.
+
 ## Natural-language transactions
 
 `src/engine/nlp.ts` turns a sentence into a **proposal**:
@@ -81,5 +108,8 @@ NUMI's memory is never the accounting record. The books are the books.
 Voice is an input method. It can navigate, change appearance, switch company and period, ask NUMI, and open a draft. It cannot approve, post, reverse, lock or pay. Voice identity is not treated as authentication. Each command is logged with transcript, intent, action and result.
 
 ## Not built yet
+
+Reading documents (extraction, OCR) · forecasting by statistical or learned models · scenario simulation · proactive messages (NUMI speaks only when asked) · memory of earlier conversations · any action: NUMI cannot create, approve, release, pay or post.
+
 
 Language-model reasoning · document reading (OCR) · proactive briefs · memory of decisions, promises and goals · scenario simulation · multi-agent verification · Sarvam speech. All are tracked in the requirement ledger.

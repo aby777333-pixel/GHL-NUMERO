@@ -84,9 +84,89 @@ Statuses: unmatched, suggested, matched, partial, duplicate, needs_review.
 | `requirement_ledger` | The specification index, visible to Group Super Admins |
 | `app_config` | Deployment settings; no client access |
 
+## Operations (Phase 2)
+
+Every table below carries `company_id`, has Row Level Security enabled, and has **no client write policy** unless stated: records change only through the functions listed at the end.
+
+### The proposal engine and approvals
+
+| Table | Purpose |
+|---|---|
+| `workflow_postings` | Ties a proposed journal to the operational record that proposed it: `source`, `source_id`, `payload`, status `pending`, `posted`, `voided`, `reversed`. One pending proposal per source record |
+| `approval_requests`, `approval_actions` | Now serve journals, advances, expense claims, requisitions and purchase orders |
+| `company_account_map` | Which ledger plays which role for the posting engines (20 roles), per company |
+
+### Registers, follow-ups, documents
+
+| Table | Purpose |
+|---|---|
+| `register_kinds` | What can be registered. Data, not code: category, direction, default certainty, reference prefix, optional dimension type, and the field schema. 50 system kinds; a group may add its own or make its own version of a system kind |
+| `register_sequences` | Gap-free reference numbers per company and prefix (`SUB-00001`, `EMP-00001`) |
+| `register_items` | One obligation, income stream, exposure, asset, incident or path: party, ledger, amount, frequency, dates, renewal, escalation, certainty, confidentiality, kind-specific `data`, optional `org_unit_id` for cost tracking |
+| `tasks` | Follow-ups linked to any record. Closing requires the outcome. A follow-up takes the confidentiality of the record it is linked to, keeps to it when the record is reclassified, and is read under the same rule |
+| `documents` | One stored file: name, size, SHA-256 fingerprint, storage path, kind, party, date, amount, reference, expiry, `duplicate_of`, status. Never deleted; recorded facts cannot be altered |
+| `document_links` | A document attached to any record (`entity`, `entity_id`) |
+| `custom_field_values` | Values of the fields defined in `custom_field_defs`, per record |
+
+Storage bucket `numero-documents` is private. Paths begin with the company id; storage policies apply `document.view` and `document.upload` to that company.
+
+### Fixed assets
+
+| Table | Purpose |
+|---|---|
+| `asset_categories` | Asset, accumulated-depreciation and expense ledgers; default method, life, rate, residual value |
+| `fixed_assets` | The register: cost, residual value, method (straight line, written down value, none), life or rate, accumulated depreciation, impairment, department, custodian, location, serial number, tag, vendor, source bill, warranty, status |
+| `depreciation_runs`, `depreciation_lines` | One run per company and month, in order. Each line keeps the opening book value, the amount and the basis of the calculation |
+| `asset_events` | Assignment, transfer, maintenance, physical verification, impairment, disposal, note |
+
+### Purchase-to-pay
+
+| Table | Purpose |
+|---|---|
+| `purchase_docs`, `purchase_doc_lines` | Requisition, request for quotation, quotation, purchase order, goods receipt, service receipt — one table, linked by `parent_id`; receipt lines point to order lines through `source_line_id` |
+| `invoices.po_id`, `invoice_lines.po_line_id` | The vendor's bill linked to the order and its lines |
+
+None of these writes to the ledger.
+
+### Expenses, advances, cash
+
+| Table | Purpose |
+|---|---|
+| `expense_categories` | Ledger and policy per category: limit per item, limit per day, receipt required above, maximum age, guidance |
+| `advances` | Requested, approved, released, settled and returned amounts, kept separately; expected settlement date; review flag; last follow-up. An advance that names a register item is at least as confidential as that item (so is an expense claim) |
+| `expense_claims`, `expense_claim_lines` | Claim header and lines. Each line keeps the claimed and the approved amount, who paid, whether a receipt is attached, the policy flags and the approver's note |
+| `cash_boxes`, `cash_counts` | Petty cash boxes with custodian, float and limits; a payment above the limit for a single payment is raised for review. Counts are append-only: counted, book balance at that moment, difference, denominations, witness |
+| `fund_transfers` | Movement between the company's own ledgers, or between two group companies (two journals) |
+| `collection_promises` | What a customer said they would pay, and when; and whether it was kept |
+
+### Treasury
+
+| Table | Purpose |
+|---|---|
+| `loans`, `loan_schedule` | Loans taken and given; schedule by equal instalment, equal principal or bullet; each instalment keeps its journal, and `recovered`: the principal already recovered through payroll |
+| `fixed_deposits` | Principal, rate, compounding, maturity value (calculated), lien, auto-renewal, placement and closure journals, proceeds and tax deducted |
+
+Guarantees, credit facilities, letters of credit and covenants are register items, not tables of their own.
+
+### Payroll
+
+| Table | Purpose |
+|---|---|
+| `employees` | Employment record of a party: number, designation, department, office, type, dates, status, confidentiality |
+| `salary_structures` | Components with an effective date. Draft → approved or rejected. An approved structure can never be changed; a revision is a new row |
+| `payroll_runs`, `payroll_lines` | One regular run per company and month. Lines keep days paid, components and their origin. People left out are listed in `exceptions` with the reason |
+
+Payroll tables are readable only with `payroll.view`. Payroll rows of the audit trail are hidden from everyone else.
+
 ## Functions callable by the application
 
 `bootstrap_group` · `grant_membership` · `create_company` · `create_party` · `add_party_role` · `set_party_status` · `add_party_bank` · `verify_party_bank` · `save_journal_draft` · `submit_journal` · `approve_journal` · `reject_journal` · `cancel_journal` · `post_journal` · `reverse_journal` · `set_period_status` · `save_invoice` · `approve_invoice` · `save_payment` · `approve_payment` · `import_bank_transactions` · `suggest_bank_matches` · `set_bank_match` · `ledger_balances` · `ledger_monthly` · `ledger_lines` · `party_ledger_balances` · `open_journal` · `integrity_check` · `run_sentinel` · `review_alert` · `numi_learn`
+
+Added in Phase 2:
+
+`set_account_map` · `save_register_kind` · `save_register_item` · `save_task` · `register_document` · `classify_document` · `link_document` · `save_custom_values` · `save_asset_category` · `save_asset` · `record_asset_event` · `create_depreciation_run` · `propose_depreciation_run` · `cancel_depreciation_run` · `propose_asset_disposal` · `propose_asset_impairment` · `save_purchase_doc` · `submit_purchase_doc` · `approve_purchase_doc` · `reject_purchase_doc` · `select_quotation` · `cancel_purchase_doc` · `link_bill_to_po` · `save_expense_category` · `save_advance` · `submit_advance` · `approve_advance` · `reject_advance` · `release_advance` · `return_advance` · `flag_advance` · `save_claim` · `submit_claim` · `approve_claim` · `reject_claim` · `cancel_claim` · `pay_claim` · `save_cash_box` · `record_cash_count` · `propose_fund_transfer` · `save_promise` · `save_loan` · `disburse_loan` · `pay_loan_instalment` · `save_fixed_deposit` · `place_fixed_deposit` · `close_fixed_deposit` · `save_employee` · `save_salary_structure` · `decide_salary_structure` · `create_payroll_run` · `propose_payroll_run` · `cancel_payroll_run` · `pay_payroll_run`
+
+Functions that must never be called by a client — `propose_posting`, `wf_dispatch`, every `wf_<source>` handler, `open_request`, `decide_request`, `apply_loan_recovery`, `advance_account`, `item_dims`, `record_scopes`, `follow_ups_follow_record`, `inherit_item_confidentiality` — are listed in `numero_private.internal_functions`; `lock_internals()` removes execute rights on them at the end of every migration. Tests T78, T79 and T148 verify it.
 
 Each is a thin wrapper in `public` around the implementation in `numero_private`.
 

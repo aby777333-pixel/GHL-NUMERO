@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Decimal from 'decimal.js'
 import { ChevronDown, ChevronRight, ChevronsDownUp, ChevronsUpDown, Download, ListTree, Pencil, Plus, Search } from 'lucide-react'
 import { can, useApp, useScopeIds } from '@/store/app'
@@ -8,7 +8,8 @@ import { downloadCsv, ledgerLink } from '@/lib/data'
 import { D, ZERO } from '@/lib/money'
 import { fmtDate, today } from '@/lib/dates'
 import type { Account, AccountType, Company, ID } from '@/engine/types'
-import { cx, Empty, ErrorBox, Field, Loading, Modal, Money, Note, PageHeader, Panel, Truth } from '@/ui/kit'
+import { cx, Empty, ErrorBox, Field, Loading, Modal, Money, Note, PageHeader, Panel, Tabs, Truth } from '@/ui/kit'
+import { AccountMapping } from '@/ui/AccountMapping'
 
 const TYPES: { key: AccountType; label: string; hint: string }[] = [
   { key: 'asset', label: 'Assets', hint: 'What the company owns or is owed' },
@@ -40,6 +41,8 @@ export default function Accounts() {
   const companies = useApp((s) => s.companies)
   const accounts = useApp((s) => s.accounts)
   const ids = useScopeIds()
+  const [params, setParams] = useSearchParams()
+  const view: 'chart' | 'mapping' = params.get('tab') === 'mapping' ? 'mapping' : 'chart'
 
   const scoped = companies.filter((c) => ids.includes(c.id))
   const [companyId, setCompanyId] = useState<ID>('')
@@ -145,9 +148,14 @@ export default function Accounts() {
           <button className="btn primary" disabled={!mayConfigure} title={mayConfigure ? 'Add an account to this company' : whyNot} onClick={() => setAdding(true)}><Plus size={15} /> Add account</button>
         </>} />
 
-      {bal.error && <ErrorBox message={bal.error} retry={bal.reload} />}
+      <Tabs<'chart' | 'mapping'> tabs={[{ key: 'chart', label: 'Chart of accounts' }, { key: 'mapping', label: 'Account mapping' }]} value={view}
+        onChange={(k) => setParams(k === 'chart' ? {} : { tab: k }, { replace: true })} />
 
-      <Panel lit={false} className="overflow-hidden">
+      {view === 'mapping' && company && <AccountMapping key={company.id} company={company} />}
+
+      {view === 'chart' && bal.error && <ErrorBox message={bal.error} retry={bal.reload} />}
+
+      {view === 'chart' && <Panel lit={false} className="overflow-hidden">
         <div className="no-print flex flex-wrap items-center gap-2 border-b border-line px-3.5 py-2.5">
           <div className="relative">
             <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
@@ -239,9 +247,9 @@ export default function Accounts() {
           </div>
         )}
         {bal.loading && !balances && !bal.error && <Loading rows={2} label="Loading balances" />}
-      </Panel>
+      </Panel>}
 
-      <Note className="mt-4">Accounts are never deleted. An account that is no longer needed is deactivated: it stops accepting new entries, while its history, balance and audit trail remain exactly as they were.</Note>
+      {view === 'chart' && <Note className="mt-4">Accounts are never deleted. An account that is no longer needed is deactivated: it stops accepting new entries, while its history, balance and audit trail remain exactly as they were.</Note>}
 
       {adding && company && <AccountModal key="new" company={company} own={own} onClose={() => setAdding(false)} />}
       {editing && company && <AccountModal key={editing.id} company={company} own={own} account={editing} balance={tree.flatMap((t) => find(t.nodes, editing.id)).map((n) => natural(n.account.type, n.account.is_group ? n.total : n.own))[0]} onClose={() => setEditing(null)} />}

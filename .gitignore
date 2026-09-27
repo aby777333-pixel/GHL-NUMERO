@@ -13,3 +13,6 @@ dist
 # They are never copied into a production build (see vite.config.ts).
 
 tsconfig.tsbuildinfo
+
+# Python bytecode
+__pycache__/

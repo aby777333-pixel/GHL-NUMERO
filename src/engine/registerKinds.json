@@ -1,0 +1,300 @@
+[
+  { "key": "subscription", "name": "Subscription", "category": "obligation", "direction": "out", "certainty": "scheduled", "prefix": "SUB", "dimension_type": null, "sort": 10,
+    "fields": [
+      { "key": "plan", "label": "Plan", "type": "text" },
+      { "key": "seats", "label": "Seats / licences", "type": "number" },
+      { "key": "used_by", "label": "Used by (team or person)", "type": "text" },
+      { "key": "payment_method", "label": "Paid through", "type": "select", "options": ["Bank transfer", "Corporate card", "Auto-debit", "UPI", "Other"] },
+      { "key": "login_owner", "label": "Account owner", "type": "text" }
+    ] },
+  { "key": "software_licence", "name": "Software Licence", "category": "obligation", "direction": "out", "certainty": "contracted", "prefix": "LIC", "dimension_type": null, "sort": 20,
+    "fields": [
+      { "key": "licence_key_ref", "label": "Licence reference", "type": "text" },
+      { "key": "seats", "label": "Seats", "type": "number" },
+      { "key": "used_by", "label": "Used by", "type": "text" }
+    ] },
+  { "key": "domain_hosting", "name": "Domain & Hosting", "category": "obligation", "direction": "out", "certainty": "scheduled", "prefix": "DOM", "dimension_type": null, "sort": 30,
+    "fields": [
+      { "key": "domain", "label": "Domain / service", "type": "text", "required": true },
+      { "key": "registrar", "label": "Registrar / host", "type": "text" },
+      { "key": "expiry", "label": "Expiry date", "type": "date", "alert": true }
+    ] },
+  { "key": "insurance", "name": "Insurance Policy", "category": "obligation", "direction": "out", "certainty": "contracted", "prefix": "INS", "dimension_type": null, "sort": 40,
+    "fields": [
+      { "key": "policy_no", "label": "Policy number", "type": "text", "required": true },
+      { "key": "cover_type", "label": "Cover", "type": "select", "options": ["Vehicle", "Office", "Equipment", "Marine", "Liability", "Health", "Life", "Fire", "Other"] },
+      { "key": "sum_insured", "label": "Sum insured", "type": "money" },
+      { "key": "insured_object", "label": "What is insured", "type": "text" },
+      { "key": "expiry", "label": "Policy expiry", "type": "date", "alert": true }
+    ] },
+  { "key": "rent", "name": "Rent (premises we occupy)", "category": "obligation", "direction": "out", "certainty": "contracted", "prefix": "RNT", "dimension_type": null, "sort": 50,
+    "fields": [
+      { "key": "premises", "label": "Premises", "type": "text", "required": true },
+      { "key": "deposit", "label": "Security deposit paid", "type": "money" },
+      { "key": "lock_in_until", "label": "Lock-in until", "type": "date" },
+      { "key": "notice_days", "label": "Notice period (days)", "type": "number" }
+    ] },
+  { "key": "lease", "name": "Lease", "category": "obligation", "direction": "out", "certainty": "contracted", "prefix": "LSE", "dimension_type": null, "sort": 60,
+    "fields": [
+      { "key": "leased_object", "label": "What is leased", "type": "text", "required": true },
+      { "key": "deposit", "label": "Deposit", "type": "money" },
+      { "key": "lock_in_until", "label": "Lock-in until", "type": "date" }
+    ] },
+  { "key": "amc", "name": "Service / AMC Contract", "category": "obligation", "direction": "out", "certainty": "contracted", "prefix": "AMC", "dimension_type": null, "sort": 70,
+    "fields": [
+      { "key": "covered_object", "label": "What is covered", "type": "text" },
+      { "key": "visits_per_year", "label": "Visits per year", "type": "number" },
+      { "key": "expiry", "label": "Cover ends", "type": "date", "alert": true }
+    ] },
+  { "key": "retainer", "name": "Retainer / Professional Fees", "category": "obligation", "direction": "out", "certainty": "contracted", "prefix": "RET", "dimension_type": null, "sort": 80,
+    "fields": [ { "key": "scope", "label": "Scope of work", "type": "text" } ] },
+  { "key": "utility", "name": "Utility (estimate)", "category": "obligation", "direction": "out", "certainty": "expected", "prefix": "UTL", "dimension_type": null, "sort": 90,
+    "fields": [
+      { "key": "connection_no", "label": "Connection / consumer number", "type": "text" },
+      { "key": "premises", "label": "Premises", "type": "text" }
+    ] },
+  { "key": "contract_expense", "name": "Contract — we pay", "category": "obligation", "direction": "out", "certainty": "contracted", "prefix": "CTE", "dimension_type": "contract", "sort": 100,
+    "fields": [
+      { "key": "milestones", "label": "Milestones", "type": "text" },
+      { "key": "retention_pct", "label": "Retention %", "type": "number" },
+      { "key": "penalty_clause", "label": "Penalty clause", "type": "text" }
+    ] },
+  { "key": "credit_card", "name": "Credit / Corporate Card", "category": "obligation", "direction": "out", "certainty": "expected", "prefix": "CRD", "dimension_type": null, "sort": 110,
+    "fields": [
+      { "key": "card_last4", "label": "Card (last 4 digits)", "type": "text" },
+      { "key": "holder", "label": "Card holder", "type": "text" },
+      { "key": "credit_limit", "label": "Limit", "type": "money" },
+      { "key": "statement_day", "label": "Statement day of month", "type": "number" },
+      { "key": "due_day", "label": "Payment due day of month", "type": "number" }
+    ] },
+  { "key": "compliance", "name": "Tax / Compliance Deadline", "category": "obligation", "direction": "out", "certainty": "expected", "prefix": "CMP", "dimension_type": null, "sort": 120,
+    "fields": [
+      { "key": "requirement", "label": "Requirement", "type": "select", "options": ["GST", "TDS", "Income Tax", "Payroll statutory", "Corporate filing", "Audit", "Licence", "Other"], "required": true },
+      { "key": "period_covered", "label": "Period covered", "type": "text" },
+      { "key": "reviewer", "label": "Reviewer", "type": "text" },
+      { "key": "estimate_basis", "label": "How the amount was estimated", "type": "text" }
+    ] },
+  { "key": "csr_donation", "name": "CSR / Donation Commitment", "category": "obligation", "direction": "out", "certainty": "committed", "prefix": "CSR", "dimension_type": null, "sort": 130,
+    "fields": [ { "key": "beneficiary_purpose", "label": "Purpose", "type": "text" }, { "key": "approval_ref", "label": "Approval reference", "type": "text" } ] },
+  { "key": "dividend", "name": "Dividend / Distribution", "category": "obligation", "direction": "out", "certainty": "expected", "prefix": "DIV", "dimension_type": null, "sort": 140,
+    "fields": [ { "key": "declared_on", "label": "Declared on", "type": "date" }, { "key": "approval_ref", "label": "Board / approval reference", "type": "text" } ] },
+
+  { "key": "contract_revenue", "name": "Contract — we receive", "category": "income", "direction": "in", "certainty": "contracted", "prefix": "CTR", "dimension_type": "contract", "sort": 200,
+    "fields": [
+      { "key": "milestones", "label": "Milestones", "type": "text" },
+      { "key": "retention_pct", "label": "Retention %", "type": "number" },
+      { "key": "recognition_basis", "label": "Approved revenue recognition basis", "type": "text" }
+    ] },
+  { "key": "sales_order", "name": "Sales Order", "category": "income", "direction": "in", "certainty": "committed", "prefix": "SO", "dimension_type": null, "sort": 210,
+    "fields": [ { "key": "items", "label": "Products / services", "type": "text" }, { "key": "delivery_date", "label": "Delivery date", "type": "date" } ] },
+  { "key": "tenant_lease", "name": "Tenant Lease (we are landlord)", "category": "income", "direction": "in", "certainty": "contracted", "prefix": "TEN", "dimension_type": "property", "sort": 220,
+    "fields": [
+      { "key": "unit", "label": "Unit / premises", "type": "text", "required": true },
+      { "key": "deposit", "label": "Deposit received", "type": "money" },
+      { "key": "cam", "label": "Maintenance (CAM) per period", "type": "money" }
+    ] },
+  { "key": "capital_call", "name": "Capital Call / Contribution", "category": "income", "direction": "in", "certainty": "expected", "prefix": "CAP", "dimension_type": null, "sort": 230,
+    "fields": [ { "key": "commitment", "label": "Total commitment", "type": "money" }, { "key": "called_to_date", "label": "Called to date", "type": "money" } ] },
+  { "key": "capital_infusion", "name": "Capital Infusion", "category": "income", "direction": "in", "certainty": "expected", "prefix": "CIN", "dimension_type": null, "sort": 240,
+    "fields": [ { "key": "instrument", "label": "Instrument", "type": "select", "options": ["Equity", "Preference", "Convertible", "Shareholder loan", "Other"] } ] },
+
+  { "key": "quotation", "name": "Quotation (sent to customer)", "category": "pipeline", "direction": "in", "certainty": "possible", "prefix": "QUO", "dimension_type": null, "sort": 300,
+    "fields": [ { "key": "items", "label": "Products / services", "type": "text" }, { "key": "valid_until", "label": "Valid until", "type": "date", "alert": true } ] },
+  { "key": "negotiation", "name": "Negotiation", "category": "pipeline", "direction": "none", "certainty": "possible", "prefix": "NEG", "dimension_type": null, "sort": 310,
+    "fields": [
+      { "key": "proposed_value", "label": "Proposed value", "type": "money" },
+      { "key": "commercial_terms", "label": "Commercial terms", "type": "text" },
+      { "key": "decision_date", "label": "Expected decision date", "type": "date" }
+    ] },
+  { "key": "asset_purchase", "name": "Planned Asset Purchase", "category": "pipeline", "direction": "out", "certainty": "expected", "prefix": "APP", "dimension_type": null, "sort": 320,
+    "fields": [ { "key": "asset_description", "label": "Asset", "type": "text" }, { "key": "justification", "label": "Justification", "type": "text" } ] },
+  { "key": "asset_sale", "name": "Planned Asset Sale", "category": "pipeline", "direction": "in", "certainty": "possible", "prefix": "ASL", "dimension_type": null, "sort": 330,
+    "fields": [ { "key": "asset_description", "label": "Asset", "type": "text" } ] },
+  { "key": "customer_refund", "name": "Customer Refund Due", "category": "pipeline", "direction": "out", "certainty": "committed", "prefix": "RFD", "dimension_type": null, "sort": 340,
+    "fields": [ { "key": "refund_reason", "label": "Reason", "type": "text" }, { "key": "original_reference", "label": "Original invoice / receipt", "type": "text" } ] },
+  { "key": "commission", "name": "Commission Entitlement", "category": "pipeline", "direction": "out", "certainty": "possible", "prefix": "COM", "dimension_type": null, "sort": 350,
+    "fields": [ { "key": "basis", "label": "Basis", "type": "text" }, { "key": "stage", "label": "Stage", "type": "select", "options": ["Potential", "Earned", "Pending approval", "Approved", "Payable", "Paid", "Clawed back"] } ] },
+
+  { "key": "bank_guarantee", "name": "Bank Guarantee", "category": "exposure", "direction": "none", "certainty": "contingent", "prefix": "BG", "dimension_type": null, "sort": 400,
+    "fields": [
+      { "key": "guarantee_type", "label": "Type", "type": "select", "options": ["Performance", "Financial", "Bid bond", "Advance payment", "Other"] },
+      { "key": "beneficiary", "label": "Beneficiary", "type": "text", "required": true },
+      { "key": "issuing_bank", "label": "Issuing bank", "type": "text" },
+      { "key": "margin_amount", "label": "Margin money held", "type": "money" },
+      { "key": "commission", "label": "Commission / fees", "type": "money" },
+      { "key": "expiry", "label": "Expiry", "type": "date", "alert": true },
+      { "key": "claim_expiry", "label": "Claim expiry", "type": "date", "alert": true }
+    ] },
+  { "key": "corporate_guarantee", "name": "Corporate Guarantee", "category": "exposure", "direction": "none", "certainty": "contingent", "prefix": "CG", "dimension_type": null, "sort": 410,
+    "fields": [
+      { "key": "beneficiary", "label": "In favour of", "type": "text", "required": true },
+      { "key": "on_behalf_of", "label": "On behalf of", "type": "text" },
+      { "key": "expiry", "label": "Expiry", "type": "date", "alert": true }
+    ] },
+  { "key": "letter_of_credit", "name": "Letter of Credit", "category": "exposure", "direction": "out", "certainty": "committed", "prefix": "LC", "dimension_type": null, "sort": 420,
+    "fields": [
+      { "key": "lc_no", "label": "LC number", "type": "text" },
+      { "key": "issuing_bank", "label": "Issuing bank", "type": "text" },
+      { "key": "margin_amount", "label": "Margin", "type": "money" },
+      { "key": "settlement_date", "label": "Settlement date", "type": "date", "alert": true },
+      { "key": "expiry", "label": "Expiry", "type": "date", "alert": true }
+    ] },
+  { "key": "credit_facility", "name": "Credit Facility", "category": "exposure", "direction": "none", "certainty": "contracted", "prefix": "FAC", "dimension_type": null, "sort": 430,
+    "fields": [
+      { "key": "facility_type", "label": "Type", "type": "select", "options": ["Overdraft", "Cash credit", "Working capital", "Term loan limit", "Bill discounting", "Other"] },
+      { "key": "sanctioned_limit", "label": "Sanctioned limit", "type": "money", "required": true },
+      { "key": "drawn", "label": "Drawn (as last updated)", "type": "money" },
+      { "key": "security", "label": "Security", "type": "text" },
+      { "key": "review_date", "label": "Renewal / review date", "type": "date", "alert": true }
+    ] },
+  { "key": "covenant", "name": "Loan Covenant", "category": "exposure", "direction": "none", "certainty": "contracted", "prefix": "COV", "dimension_type": null, "sort": 440,
+    "fields": [
+      { "key": "covenant", "label": "Covenant", "type": "text", "required": true },
+      { "key": "threshold", "label": "Threshold", "type": "text" },
+      { "key": "test_date", "label": "Next test date", "type": "date", "alert": true }
+    ] },
+  { "key": "legal_claim", "name": "Legal Case / Claim", "category": "exposure", "direction": "out", "certainty": "contingent", "prefix": "LGL", "dimension_type": null, "sort": 450,
+    "fields": [
+      { "key": "case_no", "label": "Case number", "type": "text" },
+      { "key": "forum", "label": "Court / forum", "type": "text" },
+      { "key": "legal_status", "label": "Legal status", "type": "text" },
+      { "key": "probability_class", "label": "Probability (as assessed by counsel)", "type": "select", "options": ["Not assessed", "Remote", "Possible", "Probable"] },
+      { "key": "assessed_by", "label": "Assessed by", "type": "text" },
+      { "key": "accounting_treatment", "label": "Approved accounting treatment", "type": "text" },
+      { "key": "next_hearing", "label": "Next hearing", "type": "date", "alert": true }
+    ] },
+  { "key": "contingent_liability", "name": "Contingent Liability", "category": "exposure", "direction": "out", "certainty": "contingent", "prefix": "CNT", "dimension_type": null, "sort": 460,
+    "fields": [
+      { "key": "nature", "label": "Nature", "type": "select", "options": ["Lawsuit", "Guarantee", "Disputed tax", "Warranty claim", "Contract dispute", "Other"] },
+      { "key": "accounting_treatment", "label": "Approved accounting treatment", "type": "text" }
+    ] },
+  { "key": "warranty", "name": "Warranty Given", "category": "exposure", "direction": "out", "certainty": "contingent", "prefix": "WAR", "dimension_type": null, "sort": 470,
+    "fields": [ { "key": "product", "label": "Product", "type": "text" }, { "key": "known_claims", "label": "Known claims", "type": "money" } ] },
+  { "key": "security_deposit_paid", "name": "Security Deposit Paid", "category": "exposure", "direction": "in", "certainty": "expected", "prefix": "SDP", "dimension_type": null, "sort": 480,
+    "fields": [ { "key": "held_by", "label": "Held by", "type": "text" }, { "key": "refund_conditions", "label": "Refund conditions", "type": "text" } ] },
+  { "key": "security_deposit_received", "name": "Security Deposit Received", "category": "exposure", "direction": "out", "certainty": "expected", "prefix": "SDR", "dimension_type": null, "sort": 490,
+    "fields": [ { "key": "refund_conditions", "label": "Refund conditions", "type": "text" } ] },
+  { "key": "retention", "name": "Retention Money", "category": "exposure", "direction": "out", "certainty": "contracted", "prefix": "RTN", "dimension_type": null, "sort": 495,
+    "fields": [ { "key": "release_conditions", "label": "Release conditions", "type": "text" }, { "key": "released", "label": "Released to date", "type": "money" } ] },
+
+  { "key": "vehicle", "name": "Vehicle", "category": "asset", "direction": "none", "certainty": "scheduled", "prefix": "VEH", "dimension_type": "vehicle", "sort": 500,
+    "fields": [
+      { "key": "registration_no", "label": "Registration number", "type": "text", "required": true },
+      { "key": "make_model", "label": "Make and model", "type": "text" },
+      { "key": "fuel_type", "label": "Fuel", "type": "select", "options": ["Petrol", "Diesel", "CNG", "Electric", "Hybrid"] },
+      { "key": "ownership", "label": "Ownership", "type": "select", "options": ["Owned", "Leased", "Hired", "Employee-owned"] },
+      { "key": "driver", "label": "Driver / assigned to", "type": "text" },
+      { "key": "fastag_id", "label": "FASTag / toll tag", "type": "text" },
+      { "key": "fuel_card", "label": "Fuel card", "type": "text" },
+      { "key": "odometer", "label": "Odometer (km, as last updated)", "type": "number" },
+      { "key": "insurance_expiry", "label": "Insurance expiry", "type": "date", "alert": true },
+      { "key": "puc_expiry", "label": "Pollution certificate expiry", "type": "date", "alert": true },
+      { "key": "fitness_expiry", "label": "Fitness certificate expiry", "type": "date", "alert": true },
+      { "key": "permit_expiry", "label": "Permit expiry", "type": "date", "alert": true },
+      { "key": "road_tax_expiry", "label": "Road tax valid until", "type": "date", "alert": true },
+      { "key": "next_service", "label": "Next service due", "type": "date", "alert": true }
+    ] },
+  { "key": "property", "name": "Property", "category": "asset", "direction": "none", "certainty": "scheduled", "prefix": "PRP", "dimension_type": "property", "sort": 510,
+    "fields": [
+      { "key": "property_type", "label": "Type", "type": "select", "options": ["Owned", "Leased", "Rental", "Office", "Warehouse", "Land", "Commercial unit", "Guest house"] },
+      { "key": "address", "label": "Address", "type": "text" },
+      { "key": "area", "label": "Area", "type": "text" },
+      { "key": "property_tax_due", "label": "Property tax due", "type": "date", "alert": true }
+    ] },
+
+  { "key": "incident", "name": "Incident", "category": "incident", "direction": "none", "certainty": "possible", "prefix": "INC", "dimension_type": "event", "sort": 600,
+    "fields": [
+      { "key": "incident_type", "label": "Type", "type": "select", "options": ["Accident", "Damage", "Theft", "Loss", "Emergency", "Disaster", "Cyber", "Extortion / coercion reported", "Improper payment reported", "Off-book transaction reported", "Whistleblower report", "Other"], "required": true },
+      { "key": "incident_date", "label": "Date of incident", "type": "date", "required": true },
+      { "key": "location", "label": "Location", "type": "text" },
+      { "key": "reported_by", "label": "Reported by", "type": "text" },
+      { "key": "estimated_loss", "label": "Estimated financial loss", "type": "money" },
+      { "key": "recovered", "label": "Recovered to date", "type": "money" },
+      { "key": "insurance_claim_ref", "label": "Insurance claim reference", "type": "text" },
+      { "key": "authority_report_ref", "label": "Report to authorities (reference)", "type": "text" },
+      { "key": "reviewed_by", "label": "Reviewed by", "type": "text" }
+    ] },
+  { "key": "insurance_claim", "name": "Insurance Claim", "category": "incident", "direction": "in", "certainty": "possible", "prefix": "ICL", "dimension_type": null, "sort": 610,
+    "fields": [
+      { "key": "policy_no", "label": "Policy number", "type": "text" },
+      { "key": "claim_no", "label": "Claim number", "type": "text" },
+      { "key": "claimed", "label": "Amount claimed", "type": "money" },
+      { "key": "approved_by_insurer", "label": "Approved by insurer", "type": "money" },
+      { "key": "received", "label": "Received", "type": "money" }
+    ] },
+  { "key": "dispute", "name": "Dispute", "category": "incident", "direction": "none", "certainty": "possible", "prefix": "DSP", "dimension_type": null, "sort": 620,
+    "fields": [
+      { "key": "disputed_document", "label": "Disputed document / reference", "type": "text" },
+      { "key": "disputed_amount", "label": "Disputed amount", "type": "money" },
+      { "key": "raised_by", "label": "Raised by", "type": "select", "options": ["Us", "Counterparty"] },
+      { "key": "position", "label": "Our position", "type": "text" },
+      { "key": "resolution", "label": "Resolution", "type": "text" }
+    ] },
+  { "key": "recovery", "name": "Recovery Case", "category": "incident", "direction": "in", "certainty": "possible", "prefix": "REC", "dimension_type": null, "sort": 630,
+    "fields": [
+      { "key": "recovering_from", "label": "What is being recovered", "type": "text" },
+      { "key": "recovered", "label": "Recovered to date", "type": "money" },
+      { "key": "method", "label": "Method", "type": "select", "options": ["Follow-up", "Negotiation", "Legal", "Insurance", "Payroll recovery", "Other"] }
+    ] },
+  { "key": "write_off", "name": "Write-off Request", "category": "incident", "direction": "none", "certainty": "possible", "prefix": "WOF", "dimension_type": null, "sort": 640,
+    "fields": [
+      { "key": "what", "label": "What is proposed to be written off", "type": "text", "required": true },
+      { "key": "justification", "label": "Justification", "type": "text", "required": true },
+      { "key": "efforts", "label": "Recovery efforts made", "type": "text" },
+      { "key": "approved_by", "label": "Approved by", "type": "text" },
+      { "key": "journal_ref", "label": "Write-off journal (voucher no.)", "type": "text" },
+      { "key": "recovered_after", "label": "Recovered after write-off", "type": "money" }
+    ] },
+  { "key": "bad_debt", "name": "Doubtful / Bad Debt", "category": "incident", "direction": "none", "certainty": "possible", "prefix": "BDT", "dimension_type": null, "sort": 650,
+    "fields": [
+      { "key": "invoice_refs", "label": "Invoices concerned", "type": "text" },
+      { "key": "provision", "label": "Provision recorded", "type": "money" },
+      { "key": "assessment", "label": "Assessment (by finance)", "type": "text" }
+    ] },
+  { "key": "exception", "name": "Exceptional Transaction", "category": "incident", "direction": "none", "certainty": "possible", "prefix": "EXC", "dimension_type": null, "sort": 660,
+    "fields": [
+      { "key": "nature", "label": "Nature", "type": "select", "options": ["Emergency expenditure", "Unplanned expense", "Settlement", "Fine / penalty", "Cancellation loss", "No-show cost", "Wastage", "Other"], "required": true },
+      { "key": "voucher_ref", "label": "Voucher reference", "type": "text" },
+      { "key": "approved_by", "label": "Approved by", "type": "text" },
+      { "key": "explanation", "label": "Explanation", "type": "text", "required": true }
+    ] },
+
+  { "key": "path", "name": "Financial Path", "category": "path", "direction": "none", "certainty": "scheduled", "prefix": "PTH", "dimension_type": "path", "sort": 700,
+    "fields": [
+      { "key": "path_type", "label": "Path type", "type": "select", "options": ["Personal", "Petty", "Travel", "Site", "Charity", "Emergency", "Department wallet", "Project", "Other"], "required": true },
+      { "key": "purpose", "label": "Purpose", "type": "text", "required": true },
+      { "key": "monthly_limit", "label": "Monthly limit", "type": "money" },
+      { "key": "evidence_rule", "label": "Evidence required", "type": "select", "options": ["Receipt for every spend", "Receipt above a limit", "Summary statement", "As per company policy"] },
+      { "key": "settlement_rule", "label": "Settlement rule", "type": "select", "options": ["Settle monthly", "Settle per trip / event", "Settle on completion", "Imprest — top up to float"] },
+      { "key": "settle_within_days", "label": "Settle within (days)", "type": "number" }
+    ] },
+  { "key": "trip", "name": "Trip", "category": "path", "direction": "out", "certainty": "expected", "prefix": "TRP", "dimension_type": "trip", "sort": 710,
+    "fields": [
+      { "key": "traveller", "label": "Traveller", "type": "text", "required": true },
+      { "key": "from_place", "label": "From", "type": "text" },
+      { "key": "to_place", "label": "To", "type": "text", "required": true },
+      { "key": "purpose", "label": "Business purpose", "type": "text", "required": true },
+      { "key": "travel_mode", "label": "Mode", "type": "select", "options": ["Air", "Train", "Road", "Mixed"] },
+      { "key": "international", "label": "Foreign travel", "type": "boolean" },
+      { "key": "per_diem", "label": "Daily allowance", "type": "money" },
+      { "key": "client", "label": "Client / project", "type": "text" }
+    ] },
+  { "key": "event", "name": "Event / Meeting / Conference", "category": "path", "direction": "out", "certainty": "expected", "prefix": "EVT", "dimension_type": "event", "sort": 720,
+    "fields": [
+      { "key": "event_type", "label": "Type", "type": "select", "options": ["Conference", "Seminar", "Board meeting", "Client event", "Team outing", "Training", "Exhibition", "Other"] },
+      { "key": "venue", "label": "Venue", "type": "text" },
+      { "key": "attendees", "label": "Attendees", "type": "number" },
+      { "key": "purpose", "label": "Purpose", "type": "text" }
+    ] },
+  { "key": "work_order", "name": "Work Order (construction / project)", "category": "path", "direction": "out", "certainty": "contracted", "prefix": "WO", "dimension_type": "project", "sort": 730,
+    "fields": [
+      { "key": "work_completed", "label": "Work completed (value)", "type": "money" },
+      { "key": "certified", "label": "Certified", "type": "money" },
+      { "key": "retention_pct", "label": "Retention %", "type": "number" },
+      { "key": "retention_held", "label": "Retention held", "type": "money" },
+      { "key": "estimated_remaining", "label": "Estimated cost to complete", "type": "money" },
+      { "key": "estimate_by", "label": "Estimate prepared by", "type": "text" }
+    ] },
+
+  { "key": "other", "name": "Other", "category": "other", "direction": "none", "certainty": "expected", "prefix": "REG", "dimension_type": null, "sort": 900, "fields": [] }
+]

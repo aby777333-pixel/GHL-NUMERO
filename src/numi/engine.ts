@@ -5,6 +5,7 @@ import { intercompanyEliminations, joinBalances, isCash } from '@/engine/reports
 import { D, ZERO, parseAmount, pctChange, fmtPct } from '@/lib/money'
 import { addDays, fmtDate, previousPeriod, resolvePeriod, today, type Period } from '@/lib/dates'
 import { companyFigures, ledgerLink, openDocuments, statements, sumBase } from '@/lib/data'
+import { askOps, OPS_PROMPTS, opsPrompts } from './ops'
 
 // =====================================================================
 // NUMI — evidence-linked answers from the authorised books.
@@ -42,6 +43,8 @@ export interface NumiContext {
   period: Period
   screen: string
   money: (v: Decimal.Value, compact?: boolean) => string
+  /** the person's permissions. Without it NUMI relies on the data layer alone, which is enough only where a refusal is an error. */
+  can?: (perm: string, companyId?: ID) => boolean
 }
 
 const lc = (s: string) => s.toLowerCase()
@@ -57,6 +60,12 @@ function scopeFrom(q: string, c: NumiContext): { ids: ID[]; label: string; named
 }
 function periodFrom(q: string, c: NumiContext): Period {
   const t = lc(q), m = c.companies[0]?.fy_start_month ?? 4
+  const day = today()
+  const monday = addDays(day, -((new Date(day + 'T00:00:00Z').getUTCDay() + 6) % 7))
+  if (/\btoday\b/.test(t)) return { key: 'custom', from: day, to: day, label: 'Today' }
+  if (/\byesterday\b/.test(t)) return { key: 'custom', from: addDays(day, -1), to: addDays(day, -1), label: 'Yesterday' }
+  if (/\bthis week\b/.test(t)) return { key: 'custom', from: monday, to: addDays(monday, 6), label: 'This week' }
+  if (/\b(last|previous) week\b/.test(t)) return { key: 'custom', from: addDays(monday, -7), to: addDays(monday, -1), label: 'Last week' }
   if (/\bthis month\b/.test(t)) return resolvePeriod('this_month', m)
   if (/\b(last|previous) month\b/.test(t)) return resolvePeriod('last_month', m)
   if (/\bthis quarter\b/.test(t)) return resolvePeriod('this_quarter', m)
@@ -68,18 +77,22 @@ function periodFrom(q: string, c: NumiContext): Period {
 const periodText = (p: Period) => `${p.label} (${fmtDate(p.from)} – ${fmtDate(p.to > today() ? today() : p.to)})`
 
 const CATEGORY: [RegExp, RegExp, string][] = [
-  [/\bmarketing|advertis\w*|ads?\b/, /advertis|agency|events|print|marketing/i, 'Marketing'],
-  [/\btravel|trip|hotel|flight|airfare|taxi|fuel\b/, /airfare|hotel|conveyance|fuel|meals|toll|travel/i, 'Travel'],
-  [/\bsalar\w*|payroll|staff|employee cost|people cost\b/, /salaries|employer|welfare|bonus/i, 'Employee cost'],
-  [/\brent\b/, /^rent$/i, 'Rent'],
-  [/\blegal\b/, /legal/i, 'Legal'],
-  [/\bprofessional|consult\w*|audit fee\b/, /legal|audit|consultancy/i, 'Professional fees'],
-  [/\bsoftware|subscription|saas|cloud|technology|it\b/, /software|cloud/i, 'Technology'],
-  [/\belectricity|utilit\w*|water\b/, /electricity|water/i, 'Utilities'],
-  [/\blogistics|freight|courier|transport\w*\b/, /freight|courier|clearing/i, 'Logistics'],
-  [/\binterest|finance cost\b/, /interest/i, 'Finance cost'],
-  [/\bcommission|brokerage\b/, /commission|brokerage/i, 'Commission'],
-  [/\bfood|meal|pantry|lunch\b/, /meals|pantry|welfare/i, 'Food'],
+  [/\b(marketing|advertis\w*|ads?)\b/, /advertis|agency|events|print|marketing/i, 'Marketing'],
+  [/\b(fuel|petrol|diesel)\b/, /fuel/i, 'Fuel'],
+  [/\b(hotels?|accommodation|lodging)\b/, /hotel|accommodation/i, 'Hotel and accommodation'],
+  [/\b(flights?|airfare|air travel)\b/, /airfare/i, 'Airfare'],
+  [/\b(taxi|cab|conveyance)\b/, /conveyance/i, 'Local conveyance'],
+  [/\b(travel|trip)\b/, /airfare|hotel|conveyance|fuel|meals|toll|travel/i, 'Travel'],
+  [/\b(salar\w*|payroll|staff|employee cost|people cost)\b/, /salaries|employer|welfare|bonus/i, 'Employee cost'],
+  [/\b(rent)\b/, /^rent$/i, 'Rent'],
+  [/\b(legal)\b/, /legal/i, 'Legal'],
+  [/\b(professional|consult\w*|audit fee)\b/, /legal|audit|consultancy/i, 'Professional fees'],
+  [/\b(software|subscription|saas|cloud|technology|it)\b/, /software|cloud/i, 'Technology'],
+  [/\b(electricity|utilit\w*|water)\b/, /electricity|water/i, 'Utilities'],
+  [/\b(logistics|freight|courier|transport\w*)\b/, /freight|courier|clearing/i, 'Logistics'],
+  [/\b(interest|finance cost)\b/, /interest/i, 'Finance cost'],
+  [/\b(commission|brokerage)\b/, /commission|brokerage/i, 'Commission'],
+  [/\b(food|meal|pantry|lunch)\b/, /meals|pantry|welfare/i, 'Food'],
 ]
 
 const base = (intent: string, scope: string, p?: Period): Pick<NumiAnswer, 'intent' | 'scope' | 'assumptions' | 'followUps' | 'evidence' | 'facts' | 'basis' | 'truth'> => ({
@@ -110,8 +123,15 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
     }
   }
 
+  // ---------------------------------------------------------------- operations: advances, claims, commitments, debt, deposits, assets, payroll, what is coming
+  // questions about why a figure changed belong to the comparison below, whatever they mention
+  if (!/^why\b|\bcompar\w+|\b(increase|decrease|chang)\w*\b/.test(t)) {
+    const ops = await askOps(q, c, sc)
+    if (ops) return ops
+  }
+
   // ---------------------------------------------------------------- integrity
-  if (/\b(books|accounts)\b.*\bbalanc\w*|\bdebits?\b.*\bcredits?\b|\bintegrity\b/.test(t)) {
+  if (/\b(books|accounts)\b.*\bbalanc\w*|\bdebits?\b.*\bcredits?\b|\bintegrity\b|\bunreconciled\b|\bnot reconciled\b/.test(t)) {
     const r = await c.api.integrityCheck(sc.ids)
     const ok = r.unbalanced_journals === 0 && D(r.total_debits).eq(r.total_credits)
     return {
@@ -124,7 +144,7 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
   }
 
   // ---------------------------------------------------------------- anomalies / duplicates
-  if (/\bunusual|anomal\w*|suspicious|duplicate|odd\b/.test(t)) {
+  if (/\bunusual|anomal\w*|suspicious|duplicate|odd\b|\baudit exceptions?\b|\bexceptions?\b/.test(t)) {
     const all = (await c.api.listAlerts(sc.ids)).filter((a) => a.status === 'open' || a.status === 'reviewing')
     const dup = /duplicate/.test(t)
     const list = dup ? all.filter((a) => a.kind.startsWith('duplicate')) : all
@@ -142,7 +162,7 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
     const r = (await c.api.listApprovalRequests(sc.ids)).filter((x) => x.status === 'pending')
     return {
       ...base('approvals', sc.label), headline: r.length ? `${r.length} item${r.length === 1 ? ' is' : 's are'} waiting for approval.` : 'Nothing is waiting for approval.',
-      facts: r.slice(0, 8).map((x) => ({ label: x.summary ?? x.entity, amount: x.amount, to: `/journals/${x.entity_id}`, note: `Step ${x.current_step} of ${x.steps.length} · ${c.companies.find((k) => k.id === x.company_id)?.name ?? ''}` })),
+      facts: r.slice(0, 8).map((x) => ({ label: x.summary ?? x.entity, amount: x.amount, to: x.entity === 'journal' ? `/journals/${x.entity_id}` : '/approvals', note: `Step ${x.current_step} of ${x.steps.length} · ${c.companies.find((k) => k.id === x.company_id)?.name ?? ''}` })),
       evidence: [{ label: 'Approval inbox', to: '/approvals' }], followUps: ['Show unusual transactions'],
       assumptions: ['I can show and explain these. Approving them is your decision and requires your own action on the approval screen.'],
       speak: r.length ? `${r.length} items are waiting for approval.` : 'Nothing is waiting for approval.',
@@ -225,7 +245,7 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
   }
 
   // ---------------------------------------------------------------- cash
-  if (/\bcash\b|\bmoney (do )?we have\b|\bbank balance\b|\bliquidity\b/.test(t) && !/flow|forecast|runway/.test(t)) {
+  if (/\bcash\b|\bmoney (do |did )?we (actually |really )?have\b|\bbank balance\b|\bliquidity\b/.test(t) && !/flow|forecast|runway/.test(t)) {
     const consuming = /consum|burn|using/.test(t)
     const figs = await companyFigures(c.api, c.companies, c.accounts, sc.ids, p.from, p.to)
     if (consuming) {
@@ -253,7 +273,7 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
 
   // ---------------------------------------------------------------- compare periods / why did X change
   const cat = CATEGORY.find(([re]) => re.test(t))
-  if (/\bcompare|versus|vs\b|\bwhy\b|\bincrease|decrease|rise|fall|fell|drop|changed?\b/.test(t)) {
+  if (/\bcompare|versus|vs\b|\bwhy\b|\bincrease|decrease|rise|fall|fell|drop|changed?\b/.test(t) && !/\bbudget/.test(t)) {
     const prev = previousPeriod(p)
     const [now, was] = await Promise.all([statements(c.api, c.companies, accs, sc.ids, p.from, p.to), statements(c.api, c.companies, accs, sc.ids, prev.from, prev.to)])
     if (cat || /expense|cost|spend/.test(t)) {
@@ -289,7 +309,7 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
   }
 
   // ---------------------------------------------------------------- expenses above / spend
-  if (/\bexpenses?|spend|spent|cost\b/.test(t)) {
+  if (/\b(expenses?|spend|spent|costs?)\b|\bwhere\b.*\b(went|go|gone)\b/.test(t) && !/\boverspen\w*|\bbudget/.test(t)) {
     const min = /\babove|over|more than|greater than|exceed\w*\b/.test(t) ? parseAmount(t.split(/above|over|more than|greater than|exceed\w*/)[1] ?? '') : null
     const ids = accs.filter((a) => a.type === 'expense' && !a.is_group && (!cat || cat[1].test(a.name))).map((a) => a.id)
     if (min) {
@@ -320,7 +340,7 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
   }
 
   // ---------------------------------------------------------------- balance sheet in plain English
-  if (/\bbalance sheet\b|\bfinancial position\b|\bwhat do we own\b|\bassets?\b|\bliabilit\w*\b/.test(t)) {
+  if (/\bbalance sheet\b|\bfinancial position\b|\bwhat do we own\b|\bassets?\b|\bliabilit\w*\b|\bworking capital\b/.test(t)) {
     const s = await statements(c.api, c.companies, accs, sc.ids, p.from, p.to)
     const b = s.bs
     return {
@@ -333,7 +353,7 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
   }
 
   // ---------------------------------------------------------------- profit / revenue / margin
-  if (/\bprofit\w*|revenue|sales|income|margin|loss|earn\w*\b/.test(t)) {
+  if (/\bprofit\w*|revenue|sales|income|margin|loss|earn\w*\b|\bp ?(&|and|n) ?l\b|\bmoney (did )?we ma(k|d)e\b|\bhow much (money )?did we make\b/.test(t)) {
     const figs = await companyFigures(c.api, c.companies, c.accounts, sc.ids, p.from, p.to)
     const s = await statements(c.api, c.companies, accs, sc.ids, p.from, p.to)
     const pl = s.pl
@@ -350,7 +370,7 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
   }
 
   // ---------------------------------------------------------------- budget
-  if (/\bbudget|overspen\w*\b/.test(t)) {
+  if (/\bbudget|overspen\w*\b/.test(t)) { // also reached by "compare actual with budget"
     const budgets = (await c.api.listBudgets(sc.ids)).filter((b) => b.status === 'approved')
     if (!budgets.length) return { ...base('budget', sc.label), headline: 'No approved budget exists for the selected companies.', evidence: [{ label: 'Budgets', to: '/budgets' }], followUps: [], speak: 'No approved budget exists.' }
     const rows = await c.api.ledgerBalances(sc.ids, p.from, to)
@@ -378,13 +398,15 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
     ...base('unknown', sc.label), basis: 'SUGGESTION', truth: 'ACTUAL',
     headline: 'I cannot answer that from the books yet.',
     narrative: 'I only answer from recorded, authorised accounting data and I will not guess. Here is what I can answer today.',
-    followUps: ['How much cash do we have across the group?', 'Which company owes us the most money?', 'What payments are due this week?', 'Show expenses above ₹1 lakh', 'Compare this quarter with last quarter', 'Why did marketing expense increase?', 'Which company is consuming the most cash?', 'Show intercompany balances', 'Show unusual transactions', 'Find duplicate invoices', 'Explain this balance sheet in simple English', 'Are the books balanced?'],
+    followUps: ['How much cash do we have across the group?', 'Which company owes us the most money?', 'What payments are due this week?', 'Show expenses above ₹1 lakh', 'Compare this quarter with last quarter', 'Why did marketing expense increase?', 'Which company is consuming the most cash?', 'Show intercompany balances', 'Show unusual transactions', 'Find duplicate invoices', 'Explain this balance sheet in simple English', 'Are the books balanced?', ...OPS_PROMPTS],
     speak: 'I cannot answer that from the books yet.',
   }
 }
 
 /** Questions that make sense on the current screen (spec 87, 1718). */
 export function contextualPrompts(screen: string): string[] {
+  const ops = opsPrompts(screen)
+  if (ops) return ops
   if (screen.startsWith('/reports/pnl')) return ['Why did expenses increase?', 'What changed in gross margin?', 'Compare this quarter with last quarter']
   if (screen.startsWith('/reports/balance-sheet')) return ['Explain this balance sheet in simple English', 'Which company owes us the most money?']
   if (screen.startsWith('/reports/cash-flow') || screen.startsWith('/banking')) return ['How much cash do we have across the group?', 'Which company is consuming the most cash?']

@@ -2,23 +2,25 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  Activity, BadgeCheck, Banknote, BookOpen, BookText, Building2, Calculator, CalendarClock, ChevronDown, ChevronsLeft, ClipboardList, Compass, Eye, EyeOff,
-  FileBarChart2, FileInput, FileOutput, Gauge, History, Landmark, LayoutDashboard, ListTree, Lock, LogOut, Moon, Network, PenLine, Radar, Receipt,
-  ScrollText, Search, Settings, ShieldAlert, Sparkles, Sun, Users, Vault, Wallet, Wand2, X,
+  Activity, ArrowLeftRight, BadgeCheck, Banknote, BookOpen, BookText, Boxes, Building2, Calculator, CalendarClock, ChevronDown, ChevronsLeft, ClipboardList, Coins, Compass, Eye, EyeOff,
+  FileBarChart2, FileInput, FileOutput, FolderKanban, Gauge, HandCoins, History, Inbox, Landmark, LayoutDashboard, ListChecks, ListTree, Lock, LogOut, Moon, Network, PenLine, PiggyBank, Radar, Receipt,
+  ScrollText, Search, Settings, ShieldAlert, ShoppingCart, Sparkles, Sun, Users, UsersRound, Vault, Wallet, Wand2, X,
 } from 'lucide-react'
-import { useApp, usePeriod, useScopeIds } from '@/store/app'
+import { can, useApp, usePeriod, useScopeIds } from '@/store/app'
 import { useAsync } from '@/hooks/useAsync'
 import { fmtDate, today, type PeriodKey } from '@/lib/dates'
 import { cx, KeyHint, Logo, Wordmark } from './kit'
 import { VoiceOrb } from '@/voice/VoiceControl'
 
-interface Item { to: string; label: string; icon: ReactNode; badge?: 'approvals' | 'alerts'; end?: boolean }
+// `perm`: the entry is shown only to people who hold that permission in a company they can see.
+interface Item { to: string; label: string; icon: ReactNode; badge?: 'approvals' | 'alerts' | 'tasks'; end?: boolean; perm?: string | string[] }
 const NAV: { group: string; items: Item[] }[] = [
   { group: 'Command', items: [
     { to: '/', label: 'Command Centre', icon: <LayoutDashboard size={16} />, end: true },
     { to: '/cockpit', label: 'Cockpit', icon: <Gauge size={16} /> },
     { to: '/money-map', label: 'Money Map', icon: <Network size={16} /> },
     { to: '/forward', label: 'Forward', icon: <Compass size={16} /> },
+    { to: '/registers', label: 'Registers', icon: <FolderKanban size={16} />, perm: 'register.view' },
   ] },
   { group: 'Transact', items: [
     { to: '/entry', label: 'Transaction Centre', icon: <Wand2 size={16} /> },
@@ -27,6 +29,15 @@ const NAV: { group: string; items: Item[] }[] = [
     { to: '/bills', label: 'Purchase Bills', icon: <FileInput size={16} /> },
     { to: '/payments', label: 'Payments & Receipts', icon: <Banknote size={16} /> },
     { to: '/banking', label: 'Banking', icon: <Landmark size={16} /> },
+  ] },
+  { group: 'Operate', items: [
+    { to: '/expenses', label: 'Expenses & Advances', icon: <HandCoins size={16} />, perm: ['expense.view', 'expense.approve', 'expense.create'] },
+    { to: '/purchasing', label: 'Purchasing', icon: <ShoppingCart size={16} />, perm: ['purchase.view', 'purchase.create'] },
+    { to: '/cash', label: 'Cash & Transfers', icon: <ArrowLeftRight size={16} />, perm: ['treasury.view', 'expense.approve'] },
+    { to: '/treasury', label: 'Treasury', icon: <PiggyBank size={16} />, perm: 'treasury.view' },
+    { to: '/assets', label: 'Fixed Assets', icon: <Boxes size={16} />, perm: 'asset.view' },
+    { to: '/payroll', label: 'Payroll', icon: <Coins size={16} />, perm: 'payroll.view' },
+    { to: '/people-cost', label: 'People Cost', icon: <UsersRound size={16} />, perm: 'payroll.view' },
   ] },
   { group: 'Books', items: [
     { to: '/ledger', label: 'General Ledger', icon: <BookText size={16} /> },
@@ -40,6 +51,8 @@ const NAV: { group: string; items: Item[] }[] = [
   ] },
   { group: 'Control', items: [
     { to: '/approvals', label: 'Approvals', icon: <BadgeCheck size={16} />, badge: 'approvals' },
+    { to: '/tasks', label: 'Follow-ups', icon: <ListChecks size={16} />, badge: 'tasks' },
+    { to: '/inbox', label: 'Document Inbox', icon: <Inbox size={16} />, perm: ['document.view', 'document.upload'] },
     { to: '/sentinel', label: 'Sentinel', icon: <Radar size={16} />, badge: 'alerts' },
     { to: '/audit', label: 'Audit Trail', icon: <ScrollText size={16} /> },
     { to: '/vault', label: 'Black Vault', icon: <Vault size={16} /> },
@@ -218,9 +231,13 @@ export function Shell({ children }: { children: ReactNode }) {
   const [mobile, setMobile] = useState(false)
 
   const counts = useAsync(async () => {
-    if (!api || !ids.length) return { approvals: 0, alerts: 0 }
-    const [a, b] = await Promise.all([api.listApprovalRequests(ids), api.listAlerts(ids)])
-    return { approvals: a.filter((x) => x.status === 'pending').length, alerts: b.filter((x) => x.status === 'open' || x.status === 'reviewing').length }
+    if (!api || !ids.length) return { approvals: 0, alerts: 0, tasks: 0 }
+    const [a, b, t] = await Promise.all([api.listApprovalRequests(ids), api.listAlerts(ids), api.listTasks({ companyIds: ids }).catch(() => [])])
+    return {
+      approvals: a.filter((x) => x.status === 'pending').length,
+      alerts: b.filter((x) => x.status === 'open' || x.status === 'reviewing').length,
+      tasks: t.filter((x) => (x.status === 'open' || x.status === 'in_progress') && !!x.due_date && x.due_date < today()).length,
+    }
   }, [api, ids.join(',')])
 
   useEffect(() => { setMobile(false) }, [loc.pathname])
@@ -248,7 +265,15 @@ export function Shell({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', k)
   }, [nav, setPalette, askNumi])
 
-  const groups = useMemo(() => (uiMode === 'accounting' ? [NAV[1], NAV[2], NAV[3], NAV[4], NAV[0], NAV[5]] : NAV), [uiMode])
+  const session = useApp((s) => s.session)
+  const groups = useMemo(() => {
+    const order = uiMode === 'accounting' ? ['Transact', 'Books', 'Operate', 'People', 'Control', 'Command', 'Build'] : NAV.map((g) => g.group)
+    return order
+      .map((name) => NAV.find((g) => g.group === name)!)
+      .map((g) => ({ ...g, items: g.items.filter((i) => !i.perm || [i.perm].flat().some((p) => can(p))) }))
+      .filter((g) => g.items.length)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uiMode, session, ids.join(',')])
 
   const side = (
     <aside className={cx('no-print relative z-20 flex h-full flex-none flex-col border-r border-line bg-[color-mix(in_srgb,var(--bg)_72%,transparent)] backdrop-blur-xl transition-[width] duration-300', collapsed ? 'w-[68px]' : 'w-[244px]')}>
@@ -268,7 +293,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 <NavLink key={i.to} to={i.to} end={i.end} title={collapsed ? i.label : undefined} className={({ isActive }) => cx('navlink', isActive && 'active', collapsed && 'justify-center px-0')}>
                   <span className="relative">{i.icon}{collapsed && n > 0 && <span className="lamp warn pulse absolute -right-1 -top-1" style={{ width: 6, height: 6 }} />}</span>
                   {!collapsed && <span className="flex-1 truncate">{i.label}</span>}
-                  {!collapsed && n > 0 && <span className={cx('num rounded-full px-1.5 text-[10.5px] font-semibold', i.badge === 'alerts' ? 'bg-warnsoft text-warn' : 'bg-goldsoft text-gold')}>{n}</span>}
+                  {!collapsed && n > 0 && <span title={i.badge === 'tasks' ? 'Follow-ups past their due date' : undefined} className={cx('num rounded-full px-1.5 text-[10.5px] font-semibold', i.badge === 'approvals' ? 'bg-goldsoft text-gold' : 'bg-warnsoft text-warn')}>{n}</span>}
                 </NavLink>
               )
             })}
