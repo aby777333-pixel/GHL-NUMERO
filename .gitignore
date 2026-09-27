@@ -8,13 +8,8 @@ dist
 .netlify
 ~$*
 
-# The master specification is a confidential business document. This repository is public,
-# so the specification and everything generated from its text stay on the owner's machine.
-# Remove these lines only if the repository is made private.
-GHL NUMERO PROMPT.docx
-docs/NUMERO_MASTER_SPEC.md
-docs/NUMERO_REQUIREMENTS.md
-docs/NUMERO_SPEC_INDEX.md
-docs/requirements.json
+# The master specification and the requirement ledger ARE tracked: this repository is private.
+# If the repository is ever made public again, remove them from history first.
+# They are never copied into a production build (see vite.config.ts).
 
 tsconfig.tsbuildinfo

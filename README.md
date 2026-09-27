@@ -69,7 +69,7 @@ Voice can navigate, answer questions and prepare drafts. It can never approve, p
 | [Test matrix](docs/NUMERO_TEST_MATRIX.md) | Which requirement is covered by which test |
 | [Implementation status](docs/NUMERO_IMPLEMENTATION_STATUS.md) | Built, partial, planned — and known limitations |
 
-The master specification and the requirement ledger generated from it are kept on the owner's machine and are deliberately excluded from this repository.
+The master specification (`GHL NUMERO PROMPT.docx`, `docs/NUMERO_MASTER_SPEC.md`) and the requirement ledger generated from it are tracked in this private repository. They are served to the application by the development server only and are never part of a production build.
 
 ## Principles
 
