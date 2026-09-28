@@ -93,6 +93,20 @@ export default function Register360() {
   }, [item, t, horizon])
   const scheduleTotal = sum(schedule.map((x) => x.amount))
 
+  // every hook runs on every draw, before the page may return early while it loads
+  const split = useMemo(() => {
+    const byId = new Map(accounts.map((a) => [a.id, a]))
+    let cost = D(0), held = D(0), other = D(0)
+    for (const b of byLedger.data ?? []) {
+      const a = byId.get(b.account_id)
+      const net = D(b.opening_debit).plus(b.period_debit).minus(b.opening_credit).minus(b.period_credit)
+      if (a?.type === 'expense') cost = cost.plus(net)
+      else if (a?.control_type === 'advance_paid') held = held.plus(net)
+      else other = other.plus(net)
+    }
+    return { cost, held, other }
+  }, [byLedger.data, accounts])
+
   if (main.error) return <ErrorBox message={main.error} retry={main.reload} />
   if (!item) return <Panel><Loading rows={7} label="Loading the register item" /></Panel>
 
@@ -119,18 +133,6 @@ export default function Register360() {
   const debit = l ? D(l.sum_debit).plus(l.restricted.debit) : D(0)
   const credit = l ? D(l.sum_credit).plus(l.restricted.credit) : D(0)
   const entries = l ? l.total + l.restricted.count : 0
-  const split = useMemo(() => {
-    const byId = new Map(accounts.map((a) => [a.id, a]))
-    let cost = D(0), held = D(0), other = D(0)
-    for (const b of byLedger.data ?? []) {
-      const a = byId.get(b.account_id)
-      const net = D(b.opening_debit).plus(b.period_debit).minus(b.opening_credit).minus(b.period_credit)
-      if (a?.type === 'expense') cost = cost.plus(net)
-      else if (a?.control_type === 'advance_paid') held = held.plus(net)
-      else other = other.plus(net)
-    }
-    return { cost, held, other }
-  }, [byLedger.data, accounts])
   const lineColumns: Column<LedgerLine>[] = [
     { key: 'date', header: 'Date', sort: (r) => r.journal_date, csv: (r) => r.journal_date, render: (r) => <span className="num text-[12.5px]">{fmtDate(r.journal_date)}</span> },
     { key: 'voucher', header: 'Voucher', sort: (r) => r.voucher_no ?? '', csv: (r) => r.voucher_no ?? '', render: (r) => <span className="num text-[12.5px] text-gold">{r.voucher_no ?? '—'}</span> },

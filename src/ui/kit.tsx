@@ -335,12 +335,14 @@ export function ErrorBox({ message, retry }: { message: string; retry?: () => vo
   const demo = useApp((s) => s.mode) === 'demo'
   // the sample data is built afresh each day, and what a person adds to it lasts until the page is reloaded
   const stale = demo && /not found/i.test(message)
+  const missingLive = !demo && /not found/i.test(message)
   return (
     <div className="m-4 flex items-start gap-3 rounded-xl border border-neg/30 bg-negsoft p-4 text-[13px]">
       <AlertTriangle size={18} className="mt-0.5 flex-none text-neg" />
       <div className="min-w-0 flex-1">
         <div className="font-medium text-ink">This could not be loaded</div>
         <div className="mt-0.5 break-words text-ink2">{message}</div>
+        {missingLive && <div className="mt-1.5 text-[12px] text-muted">Nothing in your books answers to this link. A link saved while exploring the demo universe points to its sample data, which is not in your live books; a record you cannot see, or one in a company outside your access, is not shown either. Open the record from its list.</div>}
         {stale && <div className="mt-1.5 text-[12px] text-muted">This is the demo: its sample data is built afresh each day, and what you add to it lasts only until the page is reloaded. A link to a record of another day, or to one you added before reloading, leads nowhere. Open the record again from its list.</div>}
       </div>
       {retry && <button className="btn sm" onClick={retry}>Try again</button>}
