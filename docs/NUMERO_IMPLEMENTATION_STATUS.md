@@ -337,7 +337,7 @@ The corrections were then reviewed in their turn. That second review found eight
 | **Uploading a file to live storage** | Same reason. The bucket, its policies and the registration function exist and are tested at the database level. |
 | **Permission refusals in the screens** | In the demo every user holds every permission. Refusals are tested against the database (for example T59–T61, T117–T119); the screens that depend on them are type-checked only. |
 | **Microphone capture** | The build environment has no microphone. |
-| **Email confirmation** | Depends on the Site URL configured in your Supabase project. |
+| **Email confirmation and password links** | The screens that read what a link brings back (confirmed, expired, password to set) are tested with links made by hand and with unit tests. A real e-mail was not sent: that needs an account, which only you may create, and the Site URL of step 1. |
 | **Behaviour on a phone** | Widths were measured in a desktop browser set to 375 px. No screen was used on a telephone. |
 | **Load** | No load test was run. No figure exists for large volumes, and none is claimed. |
 
@@ -347,7 +347,7 @@ One list for all three phases, in the order in which they are taken. Nothing in 
 
 **To enter the live system**
 
-1. **Supabase → Authentication → URL Configuration.** Set *Site URL* to the address where the application runs (for use on this computer, `http://localhost:5177`) and add the same address to *Redirect URLs*. Without it the confirmation e-mail leads nowhere.
+1. **Supabase → Authentication → URL Configuration.** Set *Site URL* to `https://ghlnumero.netlify.app`, and add `https://ghlnumero.netlify.app/**` and `http://localhost:5177/**` to *Redirect URLs*. Without it the confirmation and password e-mails lead nowhere. The e-mail sender built into Supabase sends only a few e-mails an hour; for more people, set your own SMTP under Authentication → Emails.
 2. **Create your account** on the welcome screen of the application, with the owner e-mail recorded in the database, confirm it from the e-mail, sign in, and initialise the group. That account becomes Group Super Admin. Only one group can be initialised.
 3. **Supabase → Authentication.** Enable multi-factor authentication and leaked-password protection, and set the password rules you want.
 4. **Supabase → Settings → API.** Leave *Max rows* as it is. The application measures it in every session and reads lists in pages of that size, so any value works; a very small one makes every list slow.
@@ -367,7 +367,7 @@ One list for all three phases, in the order in which they are taken. Nothing in 
 
 13. **Backups.** Backups are made by Supabase, according to the plan of your project; NUMERO makes none and sees none. Check in the Supabase dashboard that backups exist for your plan, restore one into a test project once, and record both under System Health → Backups. Until a restore has been tested, NUMERO reports recovery as unproven.
 14. **Keep the repository private.** It holds the specification. If it is ever to be made public, the specification must first be removed from its history.
-15. **Where the application is hosted**, give it only the address of the project and the publishable key (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`). The service-role key never belongs in the application or in its hosting.
+15. **Where the application is hosted**, give it only the address of the project and the publishable key (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`). On Netlify both are set. The service-role key never belongs in the application or in its hosting.
 
 **Only if you want them**
 

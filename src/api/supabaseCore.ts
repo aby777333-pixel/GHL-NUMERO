@@ -119,13 +119,15 @@ export class SupabaseCore implements CoreApi {
     if (error) throw new NumeroError(error.message)
   }
   async signUp(email: string, password: string, name: string) {
-    const { data, error } = await sb().auth.signUp({ email, password, options: { data: { full_name: name }, emailRedirectTo: window.location.origin } })
+    const { data, error } = await sb().auth.signUp({ email, password, options: { data: { full_name: name }, emailRedirectTo: window.location.origin + '/' } })
     if (error) throw new NumeroError(error.message)
+    // an address that already has an account comes back without error and without identities: say so, instead of "created"
+    if (data.user && !data.session && Array.isArray(data.user.identities) && data.user.identities.length === 0) throw new NumeroError('User already registered')
     return { needsEmailConfirmation: !data.session }
   }
   async signOut() { await sb().auth.signOut(); this.session = null }
-  onAuthChange(cb: () => void) {
-    const { data } = sb().auth.onAuthStateChange((event) => { if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') cb() })
+  onAuthChange(cb: (event?: string) => void) {
+    const { data } = sb().auth.onAuthStateChange((event) => { if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED' || event === 'PASSWORD_RECOVERY') cb(event) })
     return () => data.subscription.unsubscribe()
   }
   async bootstrapGroup(name: string, currency: string, makerChecker: 'enforced' | 'owner_override') {

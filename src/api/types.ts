@@ -52,7 +52,8 @@ export interface CoreApi {
   signIn(email: string, password: string): Promise<void>
   signUp(email: string, password: string, name: string): Promise<{ needsEmailConfirmation: boolean }>
   signOut(): Promise<void>
-  onAuthChange(cb: () => void): () => void
+  /** `event` names what changed where the engine knows it, such as PASSWORD_RECOVERY */
+  onAuthChange(cb: (event?: string) => void): () => void
   bootstrapGroup(name: string, currency: string, makerChecker: 'enforced' | 'owner_override'): Promise<ID>
   updateGroupSettings(patch: Partial<Group['settings']>): Promise<void>
 

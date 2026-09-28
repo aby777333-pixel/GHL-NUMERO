@@ -8,7 +8,7 @@ import { Shell } from '@/ui/Shell'
 import { CommandPalette } from '@/ui/CommandPalette'
 import { NumiPanel } from '@/numi/NumiPanel'
 import { Empty, ErrorBox, Loading, Logo, PageHeader, Panel, Toasts } from '@/ui/kit'
-import Welcome from '@/pages/Welcome'
+import Welcome, { SetPassword } from '@/pages/Welcome'
 import Onboarding from '@/pages/Onboarding'
 
 const Home = lazy(() => import('@/pages/Home'))
@@ -165,6 +165,8 @@ export default function App() {
   const leave = useApp((s) => s.leave)
   const effects = useApp((s) => s.effects)
   const uiMode = useApp((s) => s.uiMode)
+  const recovery = useApp((s) => s.recovery)
+  const signedIn = useApp((s) => !!s.session)
 
   useEffect(() => { void init() }, [init])
   useEffect(() => { document.documentElement.classList.toggle('fx-off', effects === 'off') }, [effects])
@@ -179,6 +181,8 @@ export default function App() {
       </div>
     </div>
   )
+  // a person back from a password link sets the new password before anything else
+  else if (recovery && signedIn) body = <SetPassword />
   else if (status === 'signed_out') body = <Welcome />
   else if (status === 'needs_bootstrap') body = <Onboarding />
   else body = (

@@ -6,8 +6,8 @@ import { ROUTES } from '@/voice/commands'
 import { cx, KeyHint, Note, PageHeader, Panel } from '@/ui/kit'
 
 const EFFECTS: { key: Effects; label: string; text: string }[] = [
-  { key: 'full', label: 'Full', text: 'Every effect: the ambient backdrop at full density, moving light on panels, flowing particles on the money map, the cockpit scan line and figures that count up.' },
-  { key: 'subtle', label: 'Subtle', text: 'A sparser backdrop and no flowing particles on the money map. Highlights, the cockpit scan line and figures that count up stay.' },
+  { key: 'full', label: 'Full', text: 'Every effect: the ambient backdrop, moving light on panels, flowing particles on the money map, the cockpit scan line and figures that count up.' },
+  { key: 'subtle', label: 'Subtle', text: 'No flowing particles on the money map. Highlights, the cockpit scan line and figures that count up stay.' },
   { key: 'off', label: 'Off', text: 'Decorative animation is switched off: the backdrop is still, lamps do not pulse, there is no scan line and figures appear at their final value. Dialogs still slide into place.' },
 ]
 

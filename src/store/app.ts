@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { NumeroApi } from '@/api/types'
 import { SupabaseApi, liveConfigured } from '@/api/supabase'
+import { authLinkIn, clearAuthLinkFromAddress } from '@/api/auth'
 import type { Account, Company, ID, OrgUnit, Party, SessionInfo } from '@/engine/types'
 import type { FeatureFlag } from '@/engine/p3Types'
 import { capabilityOn } from '@/engine/features'
@@ -28,6 +29,10 @@ interface AppState {
   session: SessionInfo | null
   /** set while the person works in the sandbox: the real books wait here, untouched, until they leave */
   sandbox: { real: NumeroApi; scope: ID[]; report: SandboxReport } | null
+  /** the person came back through a link to set a new password, and has not set it yet */
+  recovery: boolean
+  /** what an email link brought back that the sign-in page should say: an expired link, for instance */
+  authMessage: string | null
 
   companies: Company[]
   accounts: Account[]
@@ -69,6 +74,7 @@ interface AppState {
   sandboxActAs(person: ID): Promise<void>
   refreshSession(): Promise<void>
   refreshMaster(): Promise<void>
+  endRecovery(): void
   touch(): void
   setScope(ids: ID[]): void
   setPeriod(k: PeriodKey, custom?: { from: string; to: string }): void
@@ -90,7 +96,7 @@ let toastId = 0
 let unsub: (() => void) | null = null
 
 export const useApp = create<AppState>((set, get) => ({
-  api: null, mode: null, status: 'boot', error: null, session: null, sandbox: null,
+  api: null, mode: null, status: 'boot', error: null, session: null, sandbox: null, recovery: false, authMessage: null,
   companies: [], accounts: [], parties: [], orgUnits: [], flags: [], roles: {},
   scope: [], periodKey: (ls.get('period', 'fy') as PeriodKey), custom: { from: today().slice(0, 8) + '01', to: today() },
   asOf: null, knownAt: null,
@@ -106,6 +112,13 @@ export const useApp = create<AppState>((set, get) => ({
   async init() {
     const want = ls.get('mode', '')
     try {
+      // a link from a confirmation or password email opens the live system, whatever this browser did before
+      const link = liveConfigured ? authLinkIn(window.location.href) : null
+      if (link?.present) {
+        set({ recovery: link.recovery && !link.error, authMessage: link.error })
+        if (link.error) { clearAuthLinkFromAddress(); ls.set('mode', 'live'); return set({ status: 'signed_out' }) }
+        return await get().enterLive()
+      }
       if (want === 'demo') return await get().enterDemo()
       if (want === 'live' && liveConfigured) return await get().enterLive()
       set({ status: 'signed_out' })
@@ -130,10 +143,12 @@ export const useApp = create<AppState>((set, get) => ({
     if (!liveConfigured) throw new Error('The live database is not configured.')
     const api = new SupabaseApi()
     unsub?.()
-    unsub = api.onAuthChange(() => { void get().refreshSession() })
+    unsub = api.onAuthChange((event) => { if (event === 'PASSWORD_RECOVERY') set({ recovery: true }); void get().refreshSession() })
     ls.set('mode', 'live')
     set({ api, mode: 'live', scope: [] })
     await get().refreshSession()
+    // the session an email link carried has been read: the link leaves the address bar
+    if (authLinkIn(window.location.href).present) clearAuthLinkFromAddress()
   },
 
   async leave() {
@@ -142,7 +157,7 @@ export const useApp = create<AppState>((set, get) => ({
     unsub?.(); unsub = null
     ls.set('mode', '')
     setExportMark('')
-    set({ api: null, mode: null, session: null, sandbox: null, status: 'signed_out', companies: [], accounts: [], parties: [], orgUnits: [], scope: [], numiOpen: false })
+    set({ api: null, mode: null, session: null, sandbox: null, status: 'signed_out', companies: [], accounts: [], parties: [], orgUnits: [], scope: [], numiOpen: false, recovery: false, authMessage: null })
   },
 
   /**
@@ -188,6 +203,8 @@ export const useApp = create<AppState>((set, get) => ({
       set({ status: 'error', error: e instanceof Error ? e.message : String(e) })
     }
   },
+
+  endRecovery() { set({ recovery: false }) },
 
   async refreshMaster() {
     const { api } = get()

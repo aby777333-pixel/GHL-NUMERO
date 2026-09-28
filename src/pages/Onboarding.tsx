@@ -44,6 +44,9 @@ export default function Onboarding() {
           <p className="mt-0 text-[13.5px] leading-relaxed text-ink2">
             You are signed in as <b className="text-ink">{session?.user.email}</b>. The person who completes this step becomes the <b className="text-gold">Group Super Admin</b>. This can be done once.
           </p>
+          <p className="mb-0 mt-2 text-[12.5px] leading-relaxed text-muted">
+            Only the owner's email address can complete it. If NUMERO is already set up, this step is not for you: ask the Group Super Admin to add you under Team &amp; Access, then sign in again.
+          </p>
           <form onSubmit={go} className="mt-5 space-y-4">
             <div className="grid gap-4 sm:grid-cols-[1fr_160px]">
               <Field label="Group name"><input className="field" value={name} onChange={(e) => setName(e.target.value)} required /></Field>
