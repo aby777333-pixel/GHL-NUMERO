@@ -28,8 +28,20 @@ function ledgerDevOnly(): Plugin {
   }
 }
 
+/** The service worker of the installable app, written into the build with a version of its own, so that each release replaces the files kept by the last. */
+function serviceWorker(): Plugin {
+  return {
+    name: 'numero-service-worker',
+    apply: 'build',
+    generateBundle() {
+      const source = fs.readFileSync(path.join(root, 'src', 'pwa', 'sw.template.js'), 'utf8')
+      this.emitFile({ type: 'asset', fileName: 'sw.js', source: source.replace('__NUMERO_BUILD__', Date.now().toString(36)) })
+    },
+  }
+}
+
 export default defineConfig({
-  plugins: [react(), tailwindcss(), ledgerDevOnly()],
+  plugins: [react(), tailwindcss(), ledgerDevOnly(), serviceWorker()],
   resolve: { alias: { '@': path.resolve(root, 'src') } },
   server: { port: 5177, strictPort: false },
   build: { chunkSizeWarningLimit: 1500 },

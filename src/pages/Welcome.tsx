@@ -4,6 +4,7 @@ import { ArrowLeft, ArrowRight, Building2, Eye, EyeOff, KeyRound, Lock, LogOut, 
 import { useApp } from '@/store/app'
 import { liveConfigured } from '@/api/supabase'
 import { friendlyAuthError, resendConfirmation, sendPasswordReset, setNewPassword } from '@/api/auth'
+import { InstallAppItem } from '@/ui/InstallApp'
 import { cx, Field, Logo, Note, Panel, Spinner } from '@/ui/kit'
 
 const PILLARS = [
@@ -154,6 +155,7 @@ export default function Welcome() {
             <div className="mt-3 text-center text-[11.5px] leading-relaxed text-muted">
               Five sample companies with a year of fictional transactions, running on the real accounting engine inside your browser. Nothing is saved.
             </div>
+            <div className="mt-3"><InstallAppItem variant="button" /></div>
           </Panel>
         </motion.div>
       </div>

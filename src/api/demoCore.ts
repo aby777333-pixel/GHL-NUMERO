@@ -5,7 +5,7 @@ import type {
   Account, Alert, ApprovalRequest, ApprovalRule, AuditEntry, BankAccount, BankSuggestion, BankTxn, BankTxnStatus, Budget, BudgetLine,
   Company, CompanyCreatePayload, Confidentiality, CustomFieldDef, DocType, FiscalPeriod, Group, ID, IntegrityReport, Invoice, InvoiceInput,
   Journal, JournalDetail, JournalInput, JournalLineInput, LedgerBalanceRow, LedgerFilter, LedgerLine, LedgerLinesResult, LedgerMonthlyRow,
-  Member, NumiRule, OrgUnit, Party, PartyBalanceRow, PartyBank, Payment, PaymentInput, Requirement, Role, SessionInfo, TaxCode, TypeDef,
+  Member, NumiRule, SuperAdmin, OrgUnit, Party, PartyBalanceRow, PartyBank, Payment, PaymentInput, Requirement, Role, SessionInfo, TaxCode, TypeDef,
 } from '@/engine/types'
 import { NumeroError } from '@/engine/types'
 import type { CoreApi, CreatePartyResult, JournalFilter, PartyInput } from './types'
@@ -1056,6 +1056,31 @@ export class DemoCore implements CoreApi {
   async grantMembership(email: string, companyId: ID, roleKey: string, validFrom?: string, validTo?: string) {
     this.members.push({ id: uid(), user_id: uid(), email, full_name: email.split('@')[0], company_id: companyId, role_key: roleKey, valid_from: validFrom ?? null, valid_to: validTo ?? null })
     this.log(companyId, 'memberships', null, 'insert', null, { email, role: roleKey, valid_to: validTo ?? null }, null)
+  }
+  /** named in the demo; nobody signs up in the demo, so a name stays pending */
+  superAdminGrants: { email: string; since: string }[] = []
+  async listSuperAdmins(): Promise<SuperAdmin[]> {
+    if (!this.isAdmin()) return []
+    const o = DEMO_USERS['demo-owner']
+    return [{ email: o.email, full_name: o.name, status: 'active', since: this.now(), is_owner: true },
+      ...this.superAdminGrants.map((g) => ({ email: g.email, full_name: null, status: 'pending' as const, since: g.since, is_owner: false }))]
+  }
+  async grantSuperAdmin(email: string): Promise<'active' | 'pending'> {
+    if (!this.isAdmin()) fail('only a Group Super Admin can name another.')
+    const e = email.trim().toLowerCase()
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)) fail('that is not an email address.')
+    if (e === DEMO_USERS['demo-owner'].email) return 'active'
+    if (!this.superAdminGrants.some((g) => g.email === e)) this.superAdminGrants.push({ email: e, since: this.now() })
+    this.log(null, 'group_super_admin_grants', null, 'grant', null, { email: e }, 'Named Group Super Admin')
+    return 'pending'
+  }
+  async revokeSuperAdmin(email: string) {
+    if (!this.isAdmin()) fail('only a Group Super Admin can withdraw this.')
+    const e = email.trim().toLowerCase()
+    if (e === DEMO_USERS['demo-owner'].email) fail("the owner's authority cannot be withdrawn.")
+    if (!this.superAdminGrants.some((g) => g.email === e)) fail(`${e} is not a Group Super Admin.`)
+    this.superAdminGrants = this.superAdminGrants.filter((g) => g.email !== e)
+    this.log(null, 'group_super_admin_grants', null, 'revoke', { email: e }, null, 'Group Super Admin withdrawn')
   }
   async revokeMembership(id: ID) {
     const m = this.members.find((x) => x.id === id)

@@ -3,7 +3,7 @@ import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   Activity, ArrowLeftRight, BadgeCheck, Banknote, BarChart3, Bell, BookOpen, BookText, Boxes, Building2, Calculator, CalendarClock, ChevronDown, ChevronsLeft, ClipboardList, Coins, Compass, Eye, EyeOff,
-  FileBarChart2, FileInput, FileOutput, FileUp, FlaskConical, FolderKanban, Gauge, HandCoins, HeartPulse, History, Inbox, Landmark, LayoutDashboard, LayoutList, ListChecks, ListTree, Lock, LogOut, Mail, Moon, Network,
+  FileBarChart2, FileInput, FileOutput, FileUp, FlaskConical, FolderKanban, Gauge, HandCoins, HeartPulse, History, Inbox, Landmark, LayoutDashboard, LayoutList, ListChecks, ListTree, Lock, LogOut, Mail, Moon, MoreHorizontal, Network,
   Orbit, Package, PenLine, PiggyBank, Radar, Receipt, ScanSearch, ScrollText, Search, Settings, ShieldAlert, ShoppingCart, Sparkles, Split, Sun, TrendingUp, Users, UsersRound, Vault, Wallet, Wand2, Workflow, X,
 } from 'lucide-react'
 import { can, capOn, useApp, usePeriod, useScopeIds } from '@/store/app'
@@ -13,6 +13,7 @@ import { useAsync } from '@/hooks/useAsync'
 import { fmtDate, today, type PeriodKey } from '@/lib/dates'
 import { cx, KeyHint, Logo, Wordmark } from './kit'
 import { VoiceOrb } from '@/voice/VoiceControl'
+import { InstallAppItem } from './InstallApp'
 
 // `perm`: the entry is shown only to people who hold that permission in a company they can see.
 // `cap`: the capability a Group Super Admin can switch off for the group, a company or a role (System Health → Capabilities).
@@ -104,9 +105,11 @@ function usePopover() {
   return { open, setOpen, ref }
 }
 
+// on a phone a menu of the top bar spans the width of the screen just below the bar, so that it never runs off the edge
 const Pop = ({ children, align = 'left', width = 300 }: { children: ReactNode; align?: 'left' | 'right'; width?: number }) => (
   <motion.div initial={{ opacity: 0, y: -6, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -6, scale: 0.98 }} transition={{ duration: 0.16 }}
-    className={cx('panel absolute top-[calc(100%+8px)] z-50 overflow-hidden p-1.5', align === 'right' ? 'right-0' : 'left-0')} style={{ width, background: 'var(--surface-solid)' }}>
+    className={cx('panel absolute top-[calc(100%+8px)] z-50 w-[var(--pop-w)] overflow-hidden p-1.5 max-sm:fixed max-sm:inset-x-2 max-sm:top-[68px] max-sm:max-h-[calc(100dvh-84px)] max-sm:w-auto max-sm:overflow-y-auto', align === 'right' ? 'right-0' : 'left-0')}
+    style={{ '--pop-w': `${width}px`, background: 'var(--surface-solid)' } as React.CSSProperties}>
     {children}
   </motion.div>
 )
@@ -123,8 +126,8 @@ function CompanySwitcher() {
   const label = scope.length === 0 ? `${group?.name ?? 'Group'} · all companies` : scope.length === 1 ? companies.find((c) => c.id === scope[0])?.name ?? '' : `${scope.length} companies`
   const toggle = (id: string) => setScope(scope.includes(id) ? scope.filter((x) => x !== id) : [...scope, id])
   return (
-    <div className="relative" ref={ref}>
-      <button className="btn max-w-[260px] min-w-0" onClick={() => setOpen(!open)} aria-haspopup="listbox" aria-expanded={open} title="Choose which companies you are looking at">
+    <div className="relative min-w-0" ref={ref}>
+      <button className="btn w-full min-w-0 max-w-[260px]" onClick={() => setOpen(!open)} aria-haspopup="listbox" aria-expanded={open} title="Choose which companies you are looking at">
         <span className={cx('lamp', scope.length ? 'cyan' : 'gold')} />
         <span className="truncate">{label}</span>
         <ChevronDown size={14} className="flex-none text-muted" />
@@ -192,6 +195,69 @@ function PeriodPicker() {
               </div>
               <div className="mt-1.5 text-[11px] text-muted">Reconstructs every figure from the entries that existed on that date.</div>
             </div>
+          </Pop>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+/** On screens narrower than a desktop, what the top bar has no room for: period, time machine, interface, privacy, theme, search. */
+function HeaderMore() {
+  const key = useApp((s) => s.periodKey)
+  const custom = useApp((s) => s.custom)
+  const setPeriod = useApp((s) => s.setPeriod)
+  const asOf = useApp((s) => s.asOf)
+  const setAsOf = useApp((s) => s.setAsOf)
+  const uiMode = useApp((s) => s.uiMode)
+  const setUiMode = useApp((s) => s.setUiMode)
+  const privacy = useApp((s) => s.privacy)
+  const setPrivacy = useApp((s) => s.setPrivacy)
+  const theme = useApp((s) => s.theme)
+  const setTheme = useApp((s) => s.setTheme)
+  const setPalette = useApp((s) => s.setPalette)
+  const { open, setOpen, ref } = usePopover()
+  return (
+    <div className="relative flex-none xl:hidden" ref={ref}>
+      <button className={cx('btn icon ghost relative', (privacy || asOf) && 'text-gold')} onClick={() => setOpen(!open)} aria-label="More options" title="Period, view and display" aria-haspopup="menu" aria-expanded={open}>
+        <MoreHorizontal size={17} />
+        {(privacy || asOf) && <span className="lamp gold absolute right-1.5 top-1.5" style={{ width: 5, height: 5 }} />}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <Pop align="right" width={310}>
+            <div className="px-1.5 pb-1.5 pt-1 md:hidden">
+              <label className="block"><span className="label">Period</span>
+                <select className="field sm" value={key} onChange={(e) => setPeriod(e.target.value as PeriodKey)} aria-label="Period">
+                  {PERIODS.map((p) => <option key={p.key} value={p.key}>{p.label}</option>)}
+                </select>
+              </label>
+              {key === 'custom' && (
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <label><span className="label">From</span><input type="date" className="field sm" value={custom.from} max={custom.to} onChange={(e) => setPeriod('custom', { ...custom, from: e.target.value })} /></label>
+                  <label><span className="label">To</span><input type="date" className="field sm" value={custom.to} min={custom.from} onChange={(e) => setPeriod('custom', { ...custom, to: e.target.value })} /></label>
+                </div>
+              )}
+              <label className="mt-2 block"><span className="label flex items-center gap-1.5"><History size={12} className="text-violet" /> Time machine — the books as of</span>
+                <div className="flex items-center gap-2">
+                  <input type="date" className="field sm" value={asOf ?? ''} max={today()} onChange={(e) => setAsOf(e.target.value || null, e.target.value ? e.target.value + 'T23:59:59' : null)} aria-label="Show the books as of" />
+                  {asOf && <button className="btn sm ghost" onClick={() => setAsOf(null)}>Clear</button>}
+                </div>
+              </label>
+              <div className="hairline mb-1 mt-2.5" />
+            </div>
+            <div className="px-1.5 pb-1.5 pt-1">
+              <span className="label">Interface</span>
+              <div className="flex rounded-[10px] border border-line bg-surface p-[3px]" role="group" aria-label="Interface mode">
+                {(['command', 'accounting'] as const).map((m) => (
+                  <button key={m} onClick={() => setUiMode(m)} aria-pressed={uiMode === m} className={cx('h-[30px] flex-1 rounded-lg text-[11.5px] font-medium uppercase tracking-[0.08em]', uiMode === m ? 'border border-line2 bg-surface2 text-ink' : 'text-muted')}>{m}</button>
+                ))}
+              </div>
+            </div>
+            <div className="hairline my-1" />
+            <button className="navlink w-full" onClick={() => setPrivacy(!privacy)} aria-pressed={privacy}>{privacy ? <EyeOff size={15} className="text-gold" /> : <Eye size={15} />} <span className="flex-1 text-left">{privacy ? 'Show figures' : 'Hide figures (privacy mode)'}</span></button>
+            <button className="navlink w-full" onClick={(e) => setTheme(theme === 'dark' ? 'light' : 'dark', { x: e.clientX, y: e.clientY })}>{theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />} <span className="flex-1 text-left">{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span></button>
+            <button className="navlink w-full sm:hidden" onClick={() => { setOpen(false); setPalette(true) }}><Search size={15} /> <span className="flex-1 text-left">Search and commands</span></button>
           </Pop>
         )}
       </AnimatePresence>
@@ -292,6 +358,7 @@ function UserMenu() {
             </div>
             <div className="hairline my-1" />
             <button className="navlink w-full" onClick={() => { nav('/settings'); setOpen(false) }}><Settings size={15} /> Settings</button>
+            <InstallAppItem onDone={() => setOpen(false)} />
             <button className="navlink w-full" onClick={() => { void leave() }}><LogOut size={15} /> {mode === 'demo' ? 'Leave the demo' : 'Sign out'}</button>
           </Pop>
         )}
@@ -339,6 +406,14 @@ export function Shell({ children }: { children: ReactNode }) {
   }, [api, touch])
 
   useEffect(() => { setMobile(false) }, [loc.pathname])
+  // the "Ask NUMI" shortcut of the installed app opens with ?numi=1
+  useEffect(() => {
+    const u = new URL(window.location.href)
+    if (u.searchParams.get('numi') !== '1') return
+    u.searchParams.delete('numi')
+    window.history.replaceState(window.history.state, '', u.pathname + u.search + u.hash)
+    if (capOn('numi')) askNumi()
+  }, [askNumi])
 
   // keyboard: power users operate without menus (spec 63, 76)
   useEffect(() => {
@@ -434,7 +509,7 @@ export function Shell({ children }: { children: ReactNode }) {
             <History size={13} /> <span><b className="font-semibold tracking-wide">TIME MACHINE</b> — showing the books as they stood on {fmtDate(asOf)}.</span>
           </div>
         )}
-        <header className="no-print relative z-30 flex h-[64px] flex-none items-center gap-2.5 border-b border-line bg-[color-mix(in_srgb,var(--bg)_70%,transparent)] px-4 backdrop-blur-xl">
+        <header className="no-print relative z-30 flex h-[64px] flex-none items-center gap-1.5 border-b border-line bg-[color-mix(in_srgb,var(--bg)_70%,transparent)] px-2.5 backdrop-blur-xl sm:gap-2.5 sm:px-4">
           <button className="btn icon ghost lg:hidden" onClick={() => setMobile(true)} aria-label="Open menu"><BookOpen size={17} /></button>
           <CompanySwitcher />
           <div className="hidden md:block"><PeriodPicker /></div>
@@ -442,9 +517,10 @@ export function Shell({ children }: { children: ReactNode }) {
             <Search size={15} /> <span className="flex-1 text-left">Search NUMERO or type a command…</span> <KeyHint>Ctrl K</KeyHint>
           </button>
           <div className="min-w-0 flex-1 min-[1720px]:hidden" />
-          <button className="btn icon ghost flex-none min-[1720px]:hidden" onClick={() => setPalette(true)} aria-label="Search" title="Search and commands (Ctrl K)"><Search size={16} /></button>
+          <button className="btn icon ghost hidden flex-none sm:inline-flex min-[1720px]:hidden" onClick={() => setPalette(true)} aria-label="Search" title="Search and commands (Ctrl K)"><Search size={16} /></button>
+          <HeaderMore />
 
-          <div className="hidden flex-none items-center rounded-[11px] border border-line bg-surface p-[3px] md:flex" role="group" aria-label="Interface mode">
+          <div className="hidden flex-none items-center rounded-[11px] border border-line bg-surface p-[3px] xl:flex" role="group" aria-label="Interface mode">
             {(['command', 'accounting'] as const).map((m) => (
               <button key={m} onClick={() => setUiMode(m)} className={cx('relative h-[28px] rounded-lg px-3 text-[11.5px] font-medium uppercase tracking-[0.08em] transition-colors', uiMode === m ? 'text-ink' : 'text-muted hover:text-ink2')} aria-pressed={uiMode === m}
                 title={m === 'command' ? 'Command mode — the owner\'s view' : 'Accounting mode — dense tables and fast entry'}>
@@ -454,10 +530,10 @@ export function Shell({ children }: { children: ReactNode }) {
             ))}
           </div>
 
-          <button className={cx('btn icon', privacy ? 'primary' : 'ghost')} onClick={() => setPrivacy(!privacy)} aria-pressed={privacy} aria-label="Privacy mode" title={privacy ? 'Privacy mode is ON — figures are hidden' : 'Hide all figures (privacy mode)'}>
+          <button className={cx('btn icon hidden xl:inline-flex', privacy ? 'primary' : 'ghost')} onClick={() => setPrivacy(!privacy)} aria-pressed={privacy} aria-label="Privacy mode" title={privacy ? 'Privacy mode is ON — figures are hidden' : 'Hide all figures (privacy mode)'}>
             {privacy ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
-          <button className="btn icon ghost" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
+          <button className="btn icon ghost hidden xl:inline-flex" aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}
             onClick={(e) => setTheme(theme === 'dark' ? 'light' : 'dark', { x: e.clientX, y: e.clientY })}>
             <AnimatePresence mode="wait" initial={false}>
               <motion.span key={theme} initial={{ rotate: -80, opacity: 0, scale: 0.6 }} animate={{ rotate: 0, opacity: 1, scale: 1 }} exit={{ rotate: 80, opacity: 0, scale: 0.6 }} transition={{ duration: 0.22 }} className="grid place-items-center">
@@ -467,14 +543,14 @@ export function Shell({ children }: { children: ReactNode }) {
           </button>
           <NoticeBell unread={counts.data?.unread ?? []} />
           {capOn('voice') && <VoiceOrb />}
-          {capOn('numi') && <button className="btn primary flex-none" onClick={() => askNumi()} title="Ask NUMI (Ctrl + /)"><Sparkles size={15} /> <span className="hidden sm:inline">Ask NUMI</span></button>}
+          {capOn('numi') && <button className="btn primary flex-none max-[1439px]:w-9 max-[1439px]:px-0" onClick={() => askNumi()} title="Ask NUMI (Ctrl + /)" aria-label="Ask NUMI"><Sparkles size={15} /> <span className="hidden min-[1440px]:inline">Ask NUMI</span></button>}
           <UserMenu />
         </header>
 
         <main className="relative min-h-0 flex-1 overflow-auto" id="main">
           {/* The page enters with a CSS animation. A JavaScript transition that waited for the old page to leave never
               finished when the new page was still loading, and left the screen empty until a refresh. */}
-          <div key={loc.pathname} className={cx('page-in mx-auto w-full px-5 py-6', uiMode === 'accounting' ? 'max-w-none' : 'max-w-[1560px]')}>
+          <div key={loc.pathname} className={cx('page-in mx-auto w-full px-3.5 pt-5 pb-[calc(24px+env(safe-area-inset-bottom))] sm:px-5 sm:pt-6', uiMode === 'accounting' ? 'max-w-none' : 'max-w-[1560px]')}>
             {children}
           </div>
         </main>

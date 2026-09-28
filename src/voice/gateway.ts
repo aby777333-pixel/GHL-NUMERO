@@ -43,7 +43,7 @@ class BrowserSpeechProvider implements VoiceProvider {
     return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
   }
   unavailableReason() {
-    if (!this.ctor()) return 'This browser has no speech recognition. Use Chrome or Edge on desktop or Android.'
+    if (!this.ctor()) return 'This browser has no speech recognition. Use Chrome or Edge on a computer or Android, or Safari on an iPhone or iPad.'
     if (!window.isSecureContext) return 'Voice needs a secure (https) connection.'
     return null
   }

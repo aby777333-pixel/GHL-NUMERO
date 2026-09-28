@@ -518,6 +518,8 @@ export interface CustomFieldDef {
 
 export interface Role { id: ID; key: string; name: string; is_system: boolean; permissions: string[] }
 export interface Member { id: ID; user_id: ID; email: string; full_name: string; company_id: ID; role_key: string; valid_from?: string | null; valid_to?: string | null }
+/** A person who holds, or has been named to, the authority of Group Super Admin. `pending`: named, not yet signed up and confirmed. */
+export interface SuperAdmin { email: string; full_name: string | null; status: 'active' | 'pending'; since: string; is_owner: boolean }
 
 export interface Requirement {
   id: string

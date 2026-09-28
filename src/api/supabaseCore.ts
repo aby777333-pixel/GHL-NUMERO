@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import type {
   Account, Alert, ApprovalRequest, ApprovalRule, AuditEntry, BankAccount, BankSuggestion, BankTxn, BankTxnStatus, Budget, BudgetLine,
   Company, CompanyCreatePayload, CustomFieldDef, DocType, FiscalPeriod, Group, ID, IntegrityReport, Invoice, InvoiceInput, Journal,
-  JournalDetail, JournalInput, LedgerBalanceRow, LedgerFilter, LedgerLinesResult, LedgerMonthlyRow, Member, NumiRule, OrgUnit, Party,
+  JournalDetail, JournalInput, LedgerBalanceRow, LedgerFilter, LedgerLinesResult, LedgerMonthlyRow, Member, NumiRule, SuperAdmin, OrgUnit, Party,
   PartyBalanceRow, PartyBank, Payment, PaymentInput, Requirement, Role, SessionInfo, TaxCode, TypeDef,
 } from '@/engine/types'
 import { NumeroError } from '@/engine/types'
@@ -381,6 +381,11 @@ export class SupabaseCore implements CoreApi {
     await rpc('grant_membership', { p_email: email, p_company: companyId, p_role_key: roleKey, p_valid_from: validFrom ?? null, p_valid_to: validTo ?? null })
   }
   async revokeMembership(id: ID) { await q(sb().from('memberships').delete().eq('id', id).select('id')) }
+  async listSuperAdmins() {
+    return (await rpc<SuperAdmin[] | null>('list_group_super_admins', {})) ?? []
+  }
+  async grantSuperAdmin(email: string) { return await rpc<'active' | 'pending'>('grant_group_super_admin', { p_email: email }) }
+  async revokeSuperAdmin(email: string) { await rpc('revoke_group_super_admin', { p_email: email }) }
 
   // ------------------------------------------------------------ requirement ledger
   async listRequirements() {

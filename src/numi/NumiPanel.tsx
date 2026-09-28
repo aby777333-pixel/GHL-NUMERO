@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ArrowUpRight, CornerDownLeft, Link2, ShieldCheck, Sparkles, X } from 'lucide-react'
+import { ArrowUpRight, CornerDownLeft, Link2, Mic, MicOff, ShieldCheck, Sparkles, Square, X } from 'lucide-react'
 import { can, useApp, useCurrency, usePeriod, useScopeIds, capOn } from '@/store/app'
 import { fmtMoney } from '@/lib/money'
 import { cx, Money, Portal, Spinner, Truth } from '@/ui/kit'
 import { askNumi, contextualPrompts, type NumiAnswer } from './engine'
+import { resolveProvider } from '@/voice/gateway'
 
 interface Turn { id: number; question: string; answer?: NumiAnswer; error?: string }
 
@@ -34,8 +35,12 @@ export function NumiPanel() {
   const input = useRef<HTMLTextAreaElement>(null)
   const seq = useRef(0)
   const lastSeed = useRef<string | null>(null)
+  // a question can be spoken: the words appear in the box as they are heard, and the question is asked when the speaker stops
+  const voice = useRef(resolveProvider('browser'))
+  const [listening, setListening] = useState(false)
+  const [voiceError, setVoiceError] = useState('')
 
-  const ask = useCallback(async (q: string) => {
+  const ask = useCallback(async (q: string, channel: 'text' | 'voice' = 'text') => {
     const question = q.trim()
     if (!question || !api) return
     const id = ++seq.current
@@ -49,8 +54,8 @@ export function NumiPanel() {
         can,
       })
       setTurns((t) => t.map((x) => (x.id === id ? { ...x, answer } : x)))
-      void api.logNumi({ channel: 'text', question, intent: answer.intent, answer: answer.headline, evidence: answer.evidence, screen: loc.pathname }).catch(() => undefined)
-      if (replies && lastSeed.current === question && 'speechSynthesis' in window && !privacy) {
+      void api.logNumi({ channel, question, intent: answer.intent, answer: answer.headline, evidence: answer.evidence, screen: loc.pathname }).catch(() => undefined)
+      if (replies && (channel === 'voice' || lastSeed.current === question) && 'speechSynthesis' in window && !privacy) {
         const u = new SpeechSynthesisUtterance(answer.speak); u.lang = lang
         window.speechSynthesis.cancel(); window.speechSynthesis.speak(u)
       }
@@ -67,6 +72,25 @@ export function NumiPanel() {
     if (open) setTimeout(() => input.current?.focus(), 120)
   }, [open, seed, ask])
   useEffect(() => { end.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }) }, [turns, busy])
+
+  const stopListening = useCallback(() => { voice.current.provider?.stop(); setListening(false) }, [])
+  const listen = useCallback(() => {
+    const p = voice.current.provider
+    setVoiceError('')
+    if (!p) { setVoiceError(voice.current.reason ?? 'Voice is not available in this browser.'); return }
+    if (listening) { stopListening(); return }
+    p.cancelSpeech()
+    setListening(true)
+    p.listen(lang, {
+      onInterim: (t) => setText(t),
+      onFinal: (t) => { setText(t); setListening(false); if (t.trim()) void ask(t, 'voice') },
+      onError: (m) => { setVoiceError(m); setListening(false) },
+      onEnd: () => setListening(false),
+    })
+  }, [lang, listening, ask, stopListening])
+  // closing NUMI stops the microphone
+  useEffect(() => { if (!open) stopListening() }, [open, stopListening])
+  useEffect(() => () => { voice.current.provider?.stop() }, [])
   useEffect(() => {
     if (!open) return
     const k = (e: KeyboardEvent) => { if (e.key === 'Escape') close() }
@@ -84,7 +108,7 @@ export function NumiPanel() {
         <motion.div className="no-print fixed inset-0 z-[65]" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.18 }}>
           <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" onClick={close} />
           <motion.aside role="dialog" aria-label="Ask NUMI" className="absolute bottom-0 right-0 top-0 flex w-[520px] max-w-full flex-col border-l border-line"
-            style={{ background: 'var(--surface-solid)', boxShadow: '-40px 0 90px -50px var(--gold)' }}
+            style={{ background: 'var(--surface-solid)', boxShadow: '-40px 0 90px -50px var(--gold)', paddingTop: 'env(safe-area-inset-top)' }}
             initial={{ x: 60, opacity: 0.4 }} animate={{ x: 0, opacity: 1 }} exit={{ x: 60, opacity: 0 }} transition={{ type: 'spring', stiffness: 340, damping: 34 }}>
             <div className="flex items-center gap-3 border-b border-line px-5 py-4">
               <div className="grid h-9 w-9 place-items-center rounded-xl border border-gold/30 bg-goldsoft text-gold"><Sparkles size={17} /></div>
@@ -127,10 +151,20 @@ export function NumiPanel() {
               <div ref={end} />
             </div>
 
-            <form className="border-t border-line p-3.5" onSubmit={(e) => { e.preventDefault(); void ask(text) }}>
+            <form className="border-t border-line p-3.5" style={{ paddingBottom: 'calc(14px + env(safe-area-inset-bottom))' }} onSubmit={(e) => { e.preventDefault(); if (listening) stopListening(); void ask(text) }}>
+              {(listening || voiceError) && (
+                <div role="status" aria-live="polite" className={cx('mb-2 flex items-center gap-2 text-[12px]', voiceError ? 'text-warn' : 'text-cyan')}>
+                  {listening ? <><span className="wave" aria-hidden="true"><i /><i /><i /><i /><i /></span> Listening… ask your question, NUMI answers when you stop.</> : voiceError}
+                </div>
+              )}
               <div className="relative">
-                <textarea ref={input} className="field pr-12" rows={2} value={text} placeholder="Ask anything about your financial universe…" aria-label="Your question"
+                <textarea ref={input} className="field pr-[84px]" rows={2} value={text} placeholder={listening ? 'Listening…' : 'Ask anything, or tap the microphone and speak…'} aria-label="Your question"
                   onChange={(e) => setText(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); void ask(text) } }} />
+                <button type="button" className={cx('btn icon sm absolute bottom-2.5 right-[46px]', listening ? 'primary' : 'ghost')} onClick={listen} disabled={busy}
+                  aria-label={listening ? 'Stop listening' : 'Ask by voice'} aria-pressed={listening}
+                  title={!voice.current.provider ? voice.current.reason ?? 'Voice is not available in this browser' : listening ? 'Stop listening' : 'Ask by voice'}>
+                  {listening ? <Square size={12} /> : voice.current.provider ? <Mic size={15} /> : <MicOff size={15} className="text-muted" />}
+                </button>
                 <button type="submit" className="btn primary icon sm absolute bottom-2.5 right-2.5" disabled={busy || !text.trim()} aria-label="Ask">{busy ? <Spinner size={14} /> : <CornerDownLeft size={14} />}</button>
               </div>
             </form>

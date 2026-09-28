@@ -1,7 +1,7 @@
 import type {
   Account, Alert, ApprovalRequest, ApprovalRule, AuditEntry, BankAccount, BankSuggestion, BankTxn, BankTxnStatus, Budget, BudgetLine,
   Company, CompanyCreatePayload, CustomFieldDef, DocType, FiscalPeriod, Group, ID, IntegrityReport, Invoice, InvoiceInput, Journal,
-  JournalDetail, JournalInput, JournalStatus, LedgerBalanceRow, LedgerFilter, LedgerLinesResult, LedgerMonthlyRow, Member, NumiRule,
+  JournalDetail, JournalInput, JournalStatus, LedgerBalanceRow, LedgerFilter, LedgerLinesResult, LedgerMonthlyRow, Member, NumiRule, SuperAdmin,
   OrgUnit, Party, PartyBalanceRow, PartyBank, Payment, PaymentInput, Requirement, Role, SessionInfo, TaxCode, TypeDef,
 } from '@/engine/types'
 import type { OpsApi } from './opsApi'
@@ -157,6 +157,11 @@ export interface CoreApi {
   listMembers(): Promise<Member[]>
   grantMembership(email: string, companyId: ID, roleKey: string, validFrom?: string, validTo?: string): Promise<void>
   revokeMembership(id: ID): Promise<void>
+  /** Group Super Admins, and the people named to become one once their email address is confirmed. Empty for anyone who is not one. */
+  listSuperAdmins(): Promise<SuperAdmin[]>
+  /** `active` when the person has a confirmed account and holds the authority now; `pending` until they sign up and confirm. */
+  grantSuperAdmin(email: string): Promise<'active' | 'pending'>
+  revokeSuperAdmin(email: string): Promise<void>
 
   // requirement ledger
   listRequirements(): Promise<{ requirements: Requirement[]; source: string }>

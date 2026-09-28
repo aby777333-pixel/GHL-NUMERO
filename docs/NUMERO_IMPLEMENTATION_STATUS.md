@@ -348,7 +348,7 @@ One list for all three phases, in the order in which they are taken. Nothing in 
 **To enter the live system**
 
 1. **Supabase → Authentication → URL Configuration.** Set *Site URL* to `https://ghlnumero.netlify.app`, and add `https://ghlnumero.netlify.app/**` and `http://localhost:5177/**` to *Redirect URLs*. Without it the confirmation and password e-mails lead nowhere. The e-mail sender built into Supabase sends only a few e-mails an hour; for more people, set your own SMTP under Authentication → Emails.
-2. **Create your account** on the welcome screen of the application, with the owner e-mail recorded in the database, confirm it from the e-mail, sign in, and initialise the group. That account becomes Group Super Admin. Only one group can be initialised.
+2. **Create your account** on the welcome screen of the application, with the owner e-mail recorded in the database, confirm it from the e-mail, sign in, and initialise the group. That account becomes Group Super Admin. Only one group can be initialised. Further Group Super Admins are named under Team & Access → Group Super Admins; each becomes one on signing up with that address and confirming it, so their confirmation e-mails must be deliverable (with Resend, verify your domain first: its test sender reaches only the address of the Resend account).
 3. **Supabase → Authentication.** Enable multi-factor authentication and leaked-password protection, and set the password rules you want.
 4. **Supabase → Settings → API.** Leave *Max rows* as it is. The application measures it in every session and reads lists in pages of that size, so any value works; a very small one makes every list slow.
 

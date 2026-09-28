@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react'
-import { ShieldAlert, ShieldCheck, UserMinus, UserPlus, Users } from 'lucide-react'
+import { Crown, ShieldAlert, ShieldCheck, UserMinus, UserPlus, Users } from 'lucide-react'
 import { useApp } from '@/store/app'
 import { useAction, useAsync } from '@/hooks/useAsync'
 import { fmtDate, today } from '@/lib/dates'
-import type { ID, Member, Role } from '@/engine/types'
+import type { ID, Member, Role, SuperAdmin } from '@/engine/types'
 import { cx, Empty, ErrorBox, Field, Loading, Modal, Note, PageHeader, Panel, ReasonDialog, Tabs } from '@/ui/kit'
 import { DataTable, type Column } from '@/ui/DataTable'
 
-type TabKey = 'members' | 'roles' | 'sod'
+type TabKey = 'members' | 'roles' | 'sod' | 'admins'
 const MODULES = ['company', 'account', 'journal', 'invoice', 'bill', 'payment', 'party', 'bank', 'budget', 'period', 'report', 'audit', 'sentinel', 'vault', 'numi', 'tax', 'approval', 'field']
 const BY_DESIGN = ['owner', 'group_cfo']
 const words = (s: string) => s.replace(/[._]/g, ' ')
@@ -118,7 +118,10 @@ export default function Team() {
             { key: 'members', label: 'Members', count: d.members.length },
             { key: 'roles', label: 'Roles & permissions', count: roles.length },
             { key: 'sod', label: 'Segregation of duties', count: conflicts.length },
+            ...(isAdmin ? [{ key: 'admins' as const, label: 'Group Super Admins' }] : []),
           ]} />
+
+          {tab === 'admins' && isAdmin && <SuperAdmins />}
 
           {tab === 'members' && (
             <Panel lit={false} className="overflow-hidden">
@@ -276,5 +279,67 @@ function GrantModal({ roles, onClose }: { roles: Role[]; onClose: () => void }) 
       </div>
       {role && BY_DESIGN.includes(role.key) && <Note kind="warn" className="mt-3.5">The {role.name} role holds every permission in the company, including approval, posting, period locking and configuration.</Note>}
     </Modal>
+  )
+}
+
+// ------------------------------------------------------------------ group super admins
+function SuperAdmins() {
+  const api = useApp((s) => s.api)!
+  const me = useApp((s) => s.session?.user.email?.toLowerCase())
+  const { act, busy } = useAction()
+  const list = useAsync(() => api.listSuperAdmins(), [api])
+  const [email, setEmail] = useState('')
+  const [withdrawing, setWithdrawing] = useState<SuperAdmin | null>(null)
+  const mail = email.trim().toLowerCase()
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)
+  const rows = list.data ?? []
+  const active = rows.filter((r) => r.status === 'active').length
+
+  const name = async () => {
+    if (!valid) return
+    const r = await act(() => api.grantSuperAdmin(mail), (st) => st === 'active' ? `${mail} is now a Group Super Admin` : `${mail} becomes a Group Super Admin on confirming their email`)
+    if (r) setEmail('')
+  }
+  const columns: Column<SuperAdmin>[] = [
+    { key: 'email', header: 'Email', sort: (a) => a.email, csv: (a) => a.email, render: (a) => <span className="text-ink">{a.email}{a.email === me && <span className="ml-1.5 text-[11.5px] text-muted">(you)</span>}</span> },
+    { key: 'name', header: 'Name', sort: (a) => a.full_name ?? '', csv: (a) => a.full_name, render: (a) => <span className="text-ink2">{a.full_name || '—'}</span> },
+    { key: 'status', header: 'Status', sort: (a) => a.status, csv: (a) => a.status, render: (a) => (
+      <div className="flex flex-wrap gap-1">
+        {a.is_owner && <span className="chip gold"><Crown size={11} /> Owner</span>}
+        <span className={cx('chip', a.status === 'active' ? 'pos' : 'warn')} title={a.status === 'pending' ? 'Named; becomes Group Super Admin when this address signs up and confirms its email' : undefined}>{a.status === 'active' ? 'Active' : 'Waiting for sign-up'}</span>
+      </div>) },
+    { key: 'since', header: 'Since', sort: (a) => a.since, csv: (a) => a.since, render: (a) => <span className="num text-[12px] text-ink2">{fmtDate(a.since)}</span> },
+    { key: 'actions', header: '', align: 'right', render: (a) => (
+      <button className="btn sm ghost" disabled={busy || a.is_owner || (a.status === 'active' && active <= 1)}
+        title={a.is_owner ? 'The owner\'s authority cannot be withdrawn' : a.status === 'active' && active <= 1 ? 'The group cannot be left without a Group Super Admin' : 'Withdraw the authority of Group Super Admin'}
+        onClick={() => setWithdrawing(a)}><UserMinus size={13} /> Withdraw</button>) },
+  ]
+  return (
+    <>
+      <Note className="mb-4">A Group Super Admin holds the same authority as the owner: every company, every permission, and the right to name or withdraw other Group Super Admins. A person named here before they have an account becomes one the moment they sign up with this address and confirm it. Every naming and withdrawal is recorded in the audit trail.</Note>
+      <Panel className="mb-4 p-4">
+        <form className="flex flex-col gap-2.5 sm:flex-row sm:items-end" onSubmit={(e) => { e.preventDefault(); void name() }}>
+          <Field label="Name a Group Super Admin" className="min-w-0 flex-1"><input className="field" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@company.com" autoComplete="off" /></Field>
+          <button className="btn primary" disabled={!valid || busy}><UserPlus size={15} /> Name Group Super Admin</button>
+        </form>
+      </Panel>
+      {list.error && <ErrorBox message={list.error} retry={list.reload} />}
+      {list.loading && !list.data ? <Panel><Loading rows={3} /></Panel> : (
+        <Panel lit={false} className="overflow-hidden">
+          <DataTable<SuperAdmin> columns={columns} rows={rows} rowKey={(a) => a.email} exportName="group-super-admins"
+            empty={{ title: 'No Group Super Admin is listed', body: 'Name one above.', icon: <Crown size={20} /> }} />
+        </Panel>
+      )}
+      <ReasonDialog open={!!withdrawing} required={false} danger title="Withdraw Group Super Admin" confirm="Withdraw"
+        body={withdrawing ? <>{withdrawing.email} will no longer hold the authority of Group Super Admin{withdrawing.status === 'pending' ? ', and will not receive it on signing up' : ''}. Any role they hold in a company stays until it is revoked under Members.</> : undefined}
+        extra={<Note kind="warn" className="mb-4">The withdrawal is recorded in the audit trail. Text entered below is not stored with it.</Note>}
+        onCancel={() => setWithdrawing(null)}
+        onConfirm={() => {
+          const a = withdrawing
+          if (!a) return
+          setWithdrawing(null)
+          void act(() => api.revokeSuperAdmin(a.email), `${a.email} is no longer a Group Super Admin`)
+        }} />
+    </>
   )
 }
