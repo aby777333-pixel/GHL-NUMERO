@@ -1,7 +1,7 @@
 import { useMemo, useState, type ChangeEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Decimal from 'decimal.js'
-import { ArrowUpRight, Check, CopyX, Download, FileUp, Flag, Landmark, Link2, Link2Off, Plus, RotateCcw, Upload, Wallet } from 'lucide-react'
+import { ArrowUpRight, Building2, Check, CopyX, Download, FileUp, Flag, Landmark, Link2, Link2Off, Plus, RotateCcw, Upload, Wallet } from 'lucide-react'
 import { can, useApp, useScopeIds } from '@/store/app'
 import { useAction, useAsync } from '@/hooks/useAsync'
 import { downloadCsv, ledgerLink, parseCsv } from '@/lib/data'
@@ -37,6 +37,7 @@ const maskNumber = (raw: string) => {
 const signedOf = (l: LedgerLine) => D(l.debit).minus(D(l.credit))
 
 export default function Banking() {
+  const nav = useNavigate()
   const api = useApp((s) => s.api)!
   const companies = useApp((s) => s.companies)
   const ids = useScopeIds()
@@ -65,7 +66,7 @@ export default function Banking() {
 
   const addBtn = (
     <button className="btn primary" disabled={!configurable.length} onClick={() => setAdding(true)}
-      title={configurable.length ? 'Link a bank or cash ledger so that statements can be reconciled' : 'You need the "account.configure" permission to add a bank or cash account'}>
+      title={configurable.length ? 'Link a bank or cash ledger so that statements can be reconciled' : !scoped.length ? 'A bank or cash account belongs to a company: create a company first' : 'You need the "account.configure" permission to add a bank or cash account'}>
       <Plus size={15} /> Add bank / cash account
     </button>
   )
@@ -79,7 +80,15 @@ export default function Banking() {
       {list.error && <ErrorBox message={list.error} retry={list.reload} />}
       {list.loading && !list.data && <Panel><Loading rows={6} /></Panel>}
 
-      {list.data && banks.length === 0 && (
+      {list.data && banks.length === 0 && !companies.length && (
+        <Panel>
+          <Empty icon={<Building2 size={20} />} title="No company has been created yet"
+            body="A bank or cash account belongs to a company and is linked to a bank or cash ledger in its chart of accounts. Create a company first: its recommended chart already has Cash in Hand, Petty Cash and a Primary Bank Account ledger, ready to link here."
+            action={<button className="btn primary" onClick={() => nav('/companies?new=1')}>Create the first company</button>} />
+        </Panel>
+      )}
+
+      {list.data && banks.length === 0 && companies.length > 0 && (
         <Panel>
           <Empty icon={<Landmark size={20} />} title="No bank or cash accounts yet"
             body="Link a bank or cash ledger from the chart of accounts. Statements can then be imported and reconciled against the books."
