@@ -1,21 +1,35 @@
 # NUMERO IMPLEMENTATION STATUS
 
-Release 0.2.0 — Phase 1 (foundation) and Phase 2 (operations). 27 September 2026.
+Release 0.3.0 — Phase 1 (foundation), Phase 2 (operations) and Phase 3 (stock, investments, reality, simulation, platform). 28 September 2026.
+
+Phase 3 is the last phase in the requirement ledger. That does not make NUMERO complete: read the number below.
 
 This report follows the rule of the specification: *do not claim something is complete when it is not*. A placeholder does not count. A screen without an engine does not count.
 
 ## The honest number
 
-| Status | Requirements | Share | After Phase 1 |
-|---|---:|---:|---:|
-| **TESTED** — built, and covered by an automated test | {TESTED} | {TESTED_PCT} | 74 |
-| **IMPLEMENTED** — built and exercised end to end | {IMPLEMENTED} | {IMPLEMENTED_PCT} | 159 |
-| **PARTIAL** — part works; the ledger note says what does not | {PARTIAL} | {PARTIAL_PCT} | 127 |
-| **BLOCKED** — needs something only the owner can supply | {BLOCKED} | {BLOCKED_PCT} | 1 |
-| **PLANNED** — not built | {PLANNED} | {PLANNED_PCT} | 1,555 |
-| **Total indexed** | **1,916** | | |
+| Status | Requirements | Share | After Phase 2 | After Phase 1 |
+|---|---:|---:|---:|---:|
+| **TESTED** — built, and covered by an automated test | {TESTED} | {TESTED_PCT} | 111 | 74 |
+| **IMPLEMENTED** — built and exercised end to end | {IMPLEMENTED} | {IMPLEMENTED_PCT} | 182 | 159 |
+| **PARTIAL** — part works; the ledger note says what does not | {PARTIAL} | {PARTIAL_PCT} | 417 | 127 |
+| **BLOCKED** — needs something only the owner can supply | {BLOCKED} | {BLOCKED_PCT} | 1 | 1 |
+| **PLANNED** — not built | {PLANNED} | {PLANNED_PCT} | 1,205 | 1,555 |
+| **Total indexed** | **1,916** | | | |
+
+**All three phases have been worked through, and {PLANNED} of the 1,916 requirements are still not built; of those that are, {PARTIAL} are built in part.** The phases of the ledger say in which release a requirement was taken up, not that it was finished there. What is missing is named requirement by requirement in the ledger, and by theme under "Known limitations" and "Not built" below.
+
+### By phase
+
+{PHASES_TABLE}
 
 Nothing has been dropped. Every requirement keeps its number, its text and its status in the requirement ledger (Build → Requirement Ledger in the application, or `docs/NUMERO_REQUIREMENTS.md`).
+
+### Phase 3 by module
+
+{PHASE3_TABLE}
+
+Each of the 98 Phase 3 requirements was assessed on its own text against the code by one of three reviewers, each instructed to choose the lower status when in doubt, and the records were read again after the corrections listed below. In addition, 545 requirements of Phases 1 and 2 that mention something Phase 3 built were read again; {UPDATED_P3} of their records changed (`docs/requirement-updated-in-phase3.json`), and the others stand as they were. Five of those records were lowered, not raised, because they had been recorded as implemented although parts of what they ask were never built: 53 (financial health indicators), 504 (the owner's control tower), 1579 (fraud is not an expense category — nothing refuses a ledger so named), 1640 and 1641 (investment and business calculators — IRR, XIRR, NPV, payback, yield, working capital, unit economics and pricing are missing). All five are now PARTIAL, with what is missing named.
 
 ### Phase 2 by module
 
@@ -24,6 +38,129 @@ Nothing has been dropped. Every requirement keeps its number, its text and its s
 Each of the 446 Phase 2 requirements was assessed on its own text against the code, by a reviewer instructed to choose the lower status when in doubt. A requirement that lists several capabilities is PARTIAL unless all of them exist. {UPDATED} Phase 1 records were corrected because Phase 2 built something their note said was missing. The reason each PLANNED Phase 2 requirement is not built is recorded in `docs/requirement-planned-notes.json`.
 
 **Read the number with care.** Phase 2 built the engines the specification asks for in these modules. Many requirements in the same modules describe things that were deliberately not attempted — reading documents automatically, notifications, statutory calculation, scenario modelling, builders — and they remain PLANNED or PARTIAL.
+
+## Implemented in Phase 3
+
+**The rule of Phase 2 holds throughout: an operation never writes to the ledger.** A stock document, a purchase or sale of an investment, money received on a capital call, a distribution and its payment, a management fee, a reclassification and an allocation each *propose* an entry, which passes approval like any other. Eight new sources of proposed entries were added; capital calls and distributions are approved in the same inbox.
+
+**Inventory**
+- Items, categories, locations of six kinds, lots with manufacture and expiry dates, serial-numbered units.
+- Stock documents: receipt, issue, transfer, return in, return out, adjustment, landed cost. Weighted average or first in, first out, by category. Stock awaiting approval on one document cannot be used on another.
+- Stock counts: the location is frozen or a snapshot is taken; counted by one person, reviewed by another; a difference reaches the books only through an approved adjustment that states its reason.
+- Landed cost shared by value, quantity or weight; the share of goods that have left is a cost at once.
+- Exposure to loss — expired, near expiry, damaged, obsolete, in quarantine, missing, slow-moving — marked EXPOSURE, beside the loss actually posted, never inside it.
+- The page of a unit: supplier, import details, costs, sale, warranty, service contract, service history.
+- The stock ledger is set against the general ledger on the Inventory screen, in Reality and in System Health.
+
+**Investments and funds**
+- Corporate structure: who owns what, with ownership and voting percentages and the percentage held through every level; shareholders by class.
+- Holdings: purchase, sale with the gain or loss shown before it is proposed, income with tax deducted, valuation by a stated method, recorded by one person and approved by another. A holding carried at cost keeps its valuation beside the books.
+- Funds: investors and commitments, capital calls (a call makes an amount owed and posts nothing), units issued when the money is posted, net asset value from the books of the fund, management fee by formula, distributions by units held on the record date, investor statements, the three multiples with their formulas.
+- Funds and holdings are confidential by default.
+
+**NUMERO Reality**
+- Five realities — document, operation, accounting, cash, physical — set against each other along eight fixed chains. Five separate counts, never one score. What was never checked is listed as never checked.
+- A difference is a fact with its readings side by side; what it means is decided by a person in a case, whose history can only be added to. Nothing is called fraud.
+- Physical verification of assets, stock, cash and documents; confirmations from outside (bank, customer, vendor, loan, deposit, investment, between companies of the group).
+- Materiality threshold by company, with its basis.
+- Reports show the reconciliation status of the records they rest on.
+- Reclassification that leaves the original entry as it was; allocation of a shared cost by a stated driver.
+
+**Digital Twin and simulations**
+- A model built from the books: monthly rates averaged over complete months, cash, receivables, payables, debt with its schedule, open orders for assets, headcount.
+- Sixteen kinds of assumption, combined freely; five adverse cases; softer and harder cases; comparison of up to four scenarios; valuation by three methods, always a range.
+- Drivers proposed by one person and approved by another before a simulation may use them.
+- Everything is marked SIMULATION. A saved result cannot be relabelled. Nothing is posted.
+- Rules tried on history: an approval rule against past requests, a Sentinel threshold against past alerts.
+
+**Scenario Studio**
+- Ways of working designed step by step — request, evidence, approval, release, settlement, accounting and others — with a form, required documents per step and the role each step is for; versions; cloning.
+- Cases follow a workflow step by step. A step that releases or settles money is complete only when it points to the record that does. A workflow posts nothing and releases nothing.
+
+**Sandbox**
+- A copy of the configuration and the figures in the memory of the browser, on which every screen works. Entries, rules, mappings, imports and workflows can be tried; nothing reaches the books or the database.
+
+**Platform**
+- Notices in the application, by class of attention; rules of attention by kind and amount; preferences by kind, with governance notices that cannot be switched off.
+- Communications prepared from versioned templates; a person sends them by their own means and records that they did.
+- Register of integrations (intent, risk, test in a sandbox); capability switches by group, company and role; recorded backups and restore tests; system health in sections, without a score.
+- Imports of journals and opening balances from a file, with validation of every row, as drafts; the trial balance of the earlier system kept beside the books (parallel run).
+- Analysis: year on year, burn and runway, entries unusual for their ledger, deadlines across companies, what needs the owner.
+- Travel bookings on a claim line (air, train, bus, cab, hotel) with their parts.
+
+**NUMI and voice**
+- Fourteen new kinds of question (what-if, stock, exposure, reorder, funds, investments, reality, cases, confirmations, burn, year on year, system health, notices), each from the engines, each saying what it could not read.
+- 45 new destinations for spoken or typed navigation. Changing stock, declaring or paying a distribution, calling capital, committing an import, reclassifying, sending a message and switching a capability are never executed from a command.
+
+## Defects found by the assessment of Phase 3, and corrected
+
+Assessing each requirement against the code found defects as well as statuses. They were corrected the same day. The full list, with the place and the test of each, is `scripts/_assess/P3_CORRECTIONS.md`.
+
+| Found | Corrected |
+|---|---|
+| The live data layer cut lists at fixed numbers, and the API hands over at most a page of rows to one request; a screen said no list is shortened in silence | Every list is read to its end page by page, or refused above its ceiling; the size of a page is measured in every session; lists shown in part say how many |
+| Stock moved to another place of the company looked newly received, so slow-moving stock was hidden by moving it | The age of stock is that of its receipt by the company |
+| A stock document could be dated in the future | Refused |
+| The page of a unit looked for its movements among the newest of its item | Movements are asked for by lot |
+| A fund counted commitments that had ended on one side of a subtraction only | A commitment that has ended counts for what was called of it |
+| System health skipped a stock ledger that held no item | It compares every stock ledger |
+| Three screens allowed what the database refuses, or refused what it allows (communications, a link of the corporate structure, starting a workflow case) | Screens follow the rules of the database |
+| A person could not state their own request in a workflow | The person who started a case completes its own request and evidence steps |
+| Paying suppliers later was treated as harmful in the standard cases | It helps cash |
+| A driver was used whatever its unit | Only in its own unit; otherwise the value typed is used and the model says why |
+| The trial of an approval rule added amounts of different currencies | Shown currency by currency |
+| The sandbox listed the entries of its own build as the work of the person, and gave the twin no history | The build is set apart; a year of monthly movement is brought in |
+| A scenario built on some companies was kept as "the group" without a word | The dialog says so and names the companies |
+| Physical reality counted orders as differing but not as checked | Counted on both sides |
+| The key of a difference changed when another reality began to differ, so its case was lost from sight | The key is that of the record |
+| A sale in a foreign currency was stated as it stands | Stated in the currency of the company |
+| Verifications of stock, cash and documents never reached Reality | The last sheet of each place is a check |
+| A verification opened by mistake could not be cancelled | It can, with a reason |
+| The class of an alert was worked out in two ways | One way: the amount, or else the difference, by its size |
+| A Group Super Admin was sent a notice of every approval that waits | Only of what the rules class for the owner, or when nobody else could approve |
+| Cases of two kinds were offered to people the database would refuse | The form offers the kinds a person may open |
+| The list of capabilities marked Inventory and Reality as working | Partial, with their limits |
+| Reports showed no reconciliation status (recorded as not built) | Built, for the period of the report |
+| NUMI took a figure for a subject of another clause, read "sooner" as "later", and read a rate of exchange as interest | Read clause by clause, in its own direction; what cannot be read is named |
+| A capability switched off still opened by address, command or voice; the switches of NUMI and voice did nothing | Every screen honours its switch however it is reached; System Health, where switches are set, always opens for a Group Super Admin |
+| A verification sheet with items left unchecked counted as agreeing; what a sheet found was measured by the value of the items, not the size of the difference | Neither any more |
+| Where no materiality threshold was set, screens said "above the threshold" | They say that no threshold is set and that every difference counts |
+
+The records were then read a second time against the corrected code, which found a further round of small defects, corrected the same way; `scripts/_assess/P3_CORRECTIONS.md` lists them (R1–R25).
+
+**A fault made while correcting.** The correction of the notices was written from the text of a migration file that a later correction had superseded. For the time between two migration pieces, no notice was written at all, silently. The database suite found it at once and the next piece corrected it. The database held no company and no user at the time.
+
+## Migration changes in release 0.3.0
+
+Every change to the database is a new migration; nothing earlier was dropped or rewritten, and no record was changed.
+
+| File | What it adds |
+|---|---|
+| `0014_inventory.sql` | permissions and roles of Phase 3; categories, locations, items, lots, stock documents, the stock ledger, counts, conditions noted on stock |
+| `0015_investments_funds.sql` | corporate structure, shareholders, holdings, valuations, funds, commitments, capital calls, units, net asset value, fees, distributions; later corrections of the fee |
+| `0016_reality_control.sql` | materiality, cases, verification, confirmations, reclassification, allocation |
+| `0017_scenarios_flows.sql` | saved simulations and drivers; workflows, cases and steps; later corrections of drivers and of who completes a step |
+| `0018_platform.sql` | notices and rules of attention, templates and communications, integrations, capability switches, backups, system health, imports, the analytical store, travel detail |
+| `0019_corrections_after_assessment.sql` | the corrections found by the assessment: age of stock, dates of stock documents, system health, notices to the owner, class of alerts, cancelling a verification, lines matched in part, the measure of a page of the API |
+
+## Security changes in release 0.3.0
+
+- Every new table is under row level security (128 tables, 154 policies); every internal function is closed to signed-in users and all functions to anonymous callers, tested per module.
+- Funds and holdings are confidential by default; their entries carry their level, so they are approved only by people cleared for it.
+- Screens now ask for the permission the database asks for: communications, the corporate structure, workflow cases, cases of incidents.
+- The live data layer reads every list to its end or refuses it; a list is never cut short in silence.
+- The register of integrations refuses anything that looks like a secret; an integration that can move money is high risk and needs a recorded test in a sandbox.
+- A capability switched off is off wherever its screen is reached from.
+- No secret is in the application or its build; only the publishable key is used in the browser.
+
+## Accounting changes in release 0.3.0
+
+- New ledger roles, mapped per company: goods received not invoiced, landed cost clearing, stock loss and gain, gain or loss on investments, unrealised gain or loss, investment income, distributions payable, management fee expense and payable.
+- Eight new sources of proposed entries: stock documents, investment transactions, money received on capital calls, distributions and their payment, management fees, reclassification, allocation. Each passes approval like any journal.
+- Stock is valued at weighted average or first in, first out by category; landed cost joins the stock still on hand.
+- A holding carried at cost keeps its valuation beside the books; a holding at fair value posts the change on approval.
+- A capital call posts nothing; units are issued when the money is posted. Net asset value is computed from the books of the fund.
+- A reclassification never changes the original entry; an allocation leaves the total of the ledger unchanged.
 
 ## Implemented in Phase 2
 
@@ -123,7 +260,27 @@ The corrections were then reviewed in their turn. That second review found eight
 - The approval inbox handles more than journals.
 - Nobody can approve an entry they are not cleared to read.
 
-## Verification performed
+## Verification performed for release 0.3.0
+
+| What | How | Result |
+|---|---|---|
+| Database rules, all phases | eleven scripts in `tests/sql/`, each in one transaction that is rolled back — **all run after the last migration piece ({V_LAST_MIGRATION})** | {V_DB} of {V_DB} checks pass |
+| Database left clean | row counts after the last test | {V_DB_CLEAN} |
+| Row Level Security | catalogue query | {V_TABLES} tables, all with RLS enabled; {V_POLICIES} policies |
+| Supabase security advisor | advisor run after the last migration piece | {V_ADVISOR} |
+| Application engines | `npm test` | {V_APP} of {V_APP} pass, in {V_APP_FILES} files |
+| Type safety | `tsc` strict | no errors |
+| Production build | `npm run build` | {V_BUILD} |
+| Every Phase 3 screen | the 24 screens of Phase 3, lists and the detail and entry screens behind them, loaded in the browser on the sample data | no load error, no error in the console |
+| Stock receipt, end to end | driven through the screens: receipt prepared → entry proposed → approved in the inbox → quantity in stock 305 → 345; the stock ledger still equals the books | works |
+| Sandbox | entered, an entry prepared and approved as a second person, left; the books were as before | works |
+| Cancelling a verification | driven through the screen: reason required, sheet cancelled, actions withdrawn | works |
+| A capability switch | Payroll switched off for the group under System Health › Capabilities, with its reason; then Payroll opened by its address and a payroll run by its address | the menu entry is gone, both addresses show "switched off", System Health still opens |
+| Reconciliation status on reports | balance sheet, profit and loss, cash book, ageing | shown, with the differences of the sample data; absent on a report that rests on no record |
+| Phone width (375 px) | 24 screens measured in a desktop browser | no screen wider than the display; wide tables scroll inside their panel |
+| Light theme | Inventory, Reality, Digital Twin: colours of the background and of 366 pieces of text measured | light background, dark text, nothing pale on pale |
+
+## Verification performed for release 0.2.0
 
 | What | How | Result |
 |---|---|---|
@@ -149,23 +306,68 @@ The corrections were then reviewed in their turn. That second review found eight
 | Item | Why it could not be verified here |
 |---|---|
 | **Signing in to the live system through the interface** | Creating an account or typing a password into a cloud service is something only you should do. The database behind it is tested; the sign-in screens have not been exercised with a real account. |
-| **The Phase 2 screens against the live database** | They were exercised in demo mode. The live data layer (`src/api/supabase.ts`) is type-checked and calls database functions that are tested, but no screen has been driven against the live database, because no account exists yet. Expect small mismatches to surface on first use; report them. |
+| **Every screen against the live database** | The screens of all three phases were exercised on the sample data. The live data layer (`src/api/supabase*.ts`) is type-checked and calls database functions that are tested, and its paged readers are tested, but no screen has been driven against the live database, because no account exists yet. Expect small mismatches to surface on first use; report them. |
+| **Reading long lists from the live database** | The readers are tested against a query that answers as the API does. That each list of the live data layer reads the right table in the right order is type-checked only. |
 | **Uploading a file to live storage** | Same reason. The bucket, its policies and the registration function exist and are tested at the database level. |
 | **Permission refusals in the screens** | In the demo every user holds every permission. Refusals are tested against the database (for example T59–T61, T117–T119); the screens that depend on them are type-checked only. |
 | **Microphone capture** | The build environment has no microphone. |
 | **Email confirmation** | Depends on the Site URL configured in your Supabase project. |
-| **Behaviour on a phone** | One screen was checked at phone width. Wide tables scroll sideways inside their panel. |
+| **Behaviour on a phone** | Widths were measured in a desktop browser set to 375 px. No screen was used on a telephone. |
+| **Load** | No load test was run. No figure exists for large volumes, and none is claimed. |
 
 ## Set-up steps only the owner can take
 
-1. **Supabase → Authentication → URL Configuration**: set *Site URL* to where the application runs (for local use `http://localhost:5177`) and add the same address to *Redirect URLs*.
-2. **Create your account** on the welcome screen with the owner email, confirm it, sign in, and initialise the group. That account becomes Group Super Admin.
-3. **Supabase → Authentication**: enable multi-factor authentication and leaked-password protection.
-4. **Chart of Accounts → Account mapping**, for each company: confirm the ledger for each role before the first advance, payroll run or disposal. Companies created from a template arrive with the roles mapped.
-5. **Team & Access**: decide who holds the payroll roles, and who is cleared for confidential entries. Until someone other than you is cleared, payroll entries can be approved only by a Group Super Admin.
-6. **Load the requirement ledger** into the database from Build → Requirement Ledger (live mode, Group Super Admin).
+One list for all three phases, in the order in which they are taken. Nothing in it can be done for you: each step needs your account, your decision, or a key that is yours.
+
+**To enter the live system**
+
+1. **Supabase → Authentication → URL Configuration.** Set *Site URL* to the address where the application runs (for use on this computer, `http://localhost:5177`) and add the same address to *Redirect URLs*. Without it the confirmation e-mail leads nowhere.
+2. **Create your account** on the welcome screen of the application, with the owner e-mail recorded in the database, confirm it from the e-mail, sign in, and initialise the group. That account becomes Group Super Admin. Only one group can be initialised.
+3. **Supabase → Authentication.** Enable multi-factor authentication and leaked-password protection, and set the password rules you want.
+4. **Supabase → Settings → API.** Leave *Max rows* as it is. The application measures it in every session and reads lists in pages of that size, so any value works; a very small one makes every list slow.
+
+**To set up the books**
+
+5. **Create the companies** (Companies → New company), from a template or as a copy of the configuration of a company that exists.
+6. **Chart of Accounts → Account mapping**, for each company: confirm the ledger for each role before the first document of its kind. Companies created from a template arrive mapped. The roles added in Phase 3 are: goods received not invoiced, landed cost clearing, stock loss, stock gain, gain or loss on investments, unrealised gain or loss, investment income, distributions payable, management fee expense, management fees payable. A missing role makes the operation refuse with an explanation; it never guesses.
+7. **Inventory → Categories**: for each category, the stock ledger and the ledger of the cost of goods sold. These are chosen by category, not in the account mapping.
+8. **Opening position.** Bring in the opening balances from a file (Imports), which arrive as one draft entry and pass approval; bring in the trial balance of the earlier system beside the books if you want a parallel run. Opening stock is taken on with a stock receipt whose other ledger is the one that carries the opening value, so that the stock ledger and the books agree from the first day.
+9. **Team & Access.** Invite each person and give each a role in each company. Decide in particular: who holds the payroll roles; who is cleared for confidential entries (Black Vault) — funds, holdings and payroll are confidential, and until someone other than you is cleared, their entries can be approved only by a Group Super Admin; who holds the three roles added in Phase 3 (Store Keeper, Investment Manager, IT Administrator); who reviews alerts (`sentinel.review`), since only they open incidents.
+10. **Approvals → Rules.** Decide who approves what, above which amount, in how many steps. Until you do, one approval by a second person is asked for.
+11. **Thresholds, which are your judgement and nobody else's:** materiality for each company (Reality), the thresholds of Sentinel (Genesis Builder), and the rules of attention (Notifications → Rules) — which kind of notice, above which amount, is classed for the owner. Without a rule of attention you are told of no routine approval.
+12. **Load the requirement ledger** into the database from Build → Requirement Ledger (live mode, Group Super Admin).
+
+**To keep the system safe**
+
+13. **Backups.** Backups are made by Supabase, according to the plan of your project; NUMERO makes none and sees none. Check in the Supabase dashboard that backups exist for your plan, restore one into a test project once, and record both under System Health → Backups. Until a restore has been tested, NUMERO reports recovery as unproven.
+14. **Keep the repository private.** It holds the specification. If it is ever to be made public, the specification must first be removed from its history.
+15. **Where the application is hosted**, give it only the address of the project and the publishable key (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`). The service-role key never belongs in the application or in its hosting.
+
+**Only if you want them**
+
+16. **Speech in Indian languages (Sarvam).** Needs your API key, kept as a secret on a server behind a function that is not written yet. Until then speech uses what the browser offers. This is the one requirement recorded as BLOCKED.
+17. **Sending e-mail, SMS or WhatsApp; bank feeds; tax portals; reading documents; a language model for NUMI.** None is connected. Each needs an account with a provider, and keys, that only you can obtain, and then the work of connecting it. An integration that can move money is tried in the sandbox of its provider first, and the register of integrations requires the record of that trial.
 
 ## Known limitations
+
+### Phase 3
+
+- **Nothing leaves the application, and nothing is connected.** Notices are seen on screen. Communications are prepared; a person sends them. The register of integrations records intent.
+- **Nothing runs on a schedule.** A person starts every count, verification, refresh of the monthly totals and health report. What falls due is found when a person opens the application.
+- **Manufacturing is not built**: no bill of material, no work in progress.
+- **Inventory.** Value is kept on the item, not by location. No bar codes, price lists or unit conversions. Landed cost in a foreign currency, and tying a charge to the bill of its vendor, are not built. The windows for near expiry (60 days) and slow-moving stock (180 days, or as set on the item) cannot be changed on a screen. The database accepts a stock document dated one day ahead of its own date, because its day is that of UTC.
+- **Funds.** Net asset value is an accounting figure from the books of the fund. Carried interest, waterfalls, redemption and transfer of units, and reporting to a regulator are not built. Tax on a distribution is one rate for all holders.
+- **Reality** compares records NUMERO holds, along eight fixed chains, as they stand today. Workflows, fields and kinds of register of your own are not read. Cards, wallets, payment gateways and contracts have no readings. The percentage of materiality is recorded and not used; the amount is. Differences are listed by amount, each in the currency of its company.
+- **The reconciliation status on a report** is that of today, not of the date of the report, and is not printed.
+- **The Digital Twin is arithmetic on monthly rates read from the books**, not a forecast learned from data. Budgets, contracts, registers and subscriptions are not in the model. A group twin adds its companies; it does not consolidate them. A scenario belongs to one company or to the group; one built on some companies is kept for the group, and says so.
+- **The Scenario Studio** follows a straight line of steps. No branching, no conditions, no steps in parallel. A case is started by a person; other triggers are recorded as intent and start nothing. What a workflow says about accounting, notices or reports is text: it configures nothing.
+- **The sandbox** runs on the engine NUMERO carries in the browser, not on the database. It brings in balances and monthly movement, not the transactions themselves, and no salary, confidential record or document. In it every person holds every permission.
+- **Imports** read CSV, not Excel; at most 5,000 rows a file; journals and opening balances only.
+- **Analysis.** Unusual entries are measured by ledger, above the usual only, over at most the latest 5,000 lines of the period. Burn is net burn. Deadlines are those people recorded; NUMERO holds no calendar of statutory dates.
+- **Departments** cannot be cloned or configured by a Department Admin: permissions are held by company.
+- **Fields of your own** defined for journals, payments, units and companies are kept and shown on no screen.
+
+### Phases 1 and 2
 
 - **Nothing is read automatically.** Documents are stored, fingerprinted, classified and linked by a person. There is no OCR and no email intake.
 - **Nothing leaves the application.** No email, SMS or push notification. Warnings and follow-ups are seen on screen.
@@ -184,15 +386,22 @@ The corrections were then reviewed in their turn. That second review found eight
 - **In the demo, only one company has its assets registered.** The reconciliation screen therefore shows a difference between register and ledger for the others. That is the screen doing its work.
 - Amounts cross the API as JSON numbers: exact to four decimals up to about ₹100 billion per figure.
 - Consolidation: no ownership percentages, non-controlling interests or currency translation.
-- Lists load up to 500 or 1,000 rows at a time; each screen states the total.
+- Lists of the live books are read to their end, up to 20,000 records (200,000 for ledger totals), and refused above that. Lists of the latest records are read up to a stated number.
 - The interface text is English only.
 - NUMI is rule-based. It answers a fixed set of question kinds and says so when it cannot answer.
 - Sarvam speech is **blocked** until an API key is provided and stored as a server-side secret.
 
-## Deferred to later phases
+## Not built
 
-Still Phase 2 in the ledger, not built in this release — see `docs/requirement-planned-notes.json` for each: document reading and email intake; notifications and reminders; recurring documents and scheduled runs; statutory engines; corporate cards, mileage and per-diem engines; project accounting; incident workflows with postings (write-offs, recoveries, insurance claims); Genesis form, workflow, rule, report and role builders; scenario modelling in Forward.
+No later phase exists in the ledger. What is not built stays in it, each requirement with its number, its text and, where one was recorded, the reason: `docs/NUMERO_REQUIREMENTS.md`, `docs/requirement-planned-notes.json`, and Build → Requirement Ledger in the application. By theme, the largest parts are:
 
-Phase 3 — inventory and landed cost, investment and fund accounting, digital twin and scenarios, reality engine, integrations, mobile application, language-model reasoning for NUMI.
+- reading documents automatically and taking in e-mail;
+- everything that needs a connection to the outside: bank feeds, tax portals, e-mail and messages, payment gateways, a language model for NUMI;
+- statutory engines (tax computation, returns, provident fund and the like);
+- recurring documents and anything that runs on a schedule;
+- project accounting, manufacturing, corporate cards, mileage and per-diem engines;
+- the builders of Genesis for forms, rules, reports and roles; departments as units that can be cloned and configured;
+- consolidation with ownership percentages, non-controlling interests and currency translation;
+- a mobile application.
 
-Each deferred requirement remains in the ledger with its phase.
+Each of these is a piece of work of its own. None is hidden behind a screen that pretends to do it.

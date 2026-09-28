@@ -6,6 +6,7 @@ import { D, ZERO, parseAmount, pctChange, fmtPct } from '@/lib/money'
 import { addDays, fmtDate, previousPeriod, resolvePeriod, today, type Period } from '@/lib/dates'
 import { companyFigures, ledgerLink, openDocuments, statements, sumBase } from '@/lib/data'
 import { askOps, OPS_PROMPTS, opsPrompts } from './ops'
+import { askP3, P3_PROMPTS, p3Prompts } from './p3'
 
 // =====================================================================
 // NUMI — evidence-linked answers from the authorised books.
@@ -125,7 +126,10 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
 
   // ---------------------------------------------------------------- operations: advances, claims, commitments, debt, deposits, assets, payroll, what is coming
   // questions about why a figure changed belong to the comparison below, whatever they mention
-  if (!/^why\b|\bcompar\w+|\b(increase|decrease|chang)\w*\b/.test(t)) {
+  if (!/^why\b|\bcompar\w+|\b(increase|decrease|chang)\w*\b/.test(t) || /^what if\b|\byear[- ]on[- ]year\b/.test(t)) {
+    // stock, investments, reality, simulations and the platform are asked first: "what if" and "burn rate" would otherwise read as looking ahead
+    const p3 = await askP3(q, c, sc)
+    if (p3) return p3
     const ops = await askOps(q, c, sc)
     if (ops) return ops
   }
@@ -398,13 +402,15 @@ export async function askNumi(question: string, c: NumiContext): Promise<NumiAns
     ...base('unknown', sc.label), basis: 'SUGGESTION', truth: 'ACTUAL',
     headline: 'I cannot answer that from the books yet.',
     narrative: 'I only answer from recorded, authorised accounting data and I will not guess. Here is what I can answer today.',
-    followUps: ['How much cash do we have across the group?', 'Which company owes us the most money?', 'What payments are due this week?', 'Show expenses above ₹1 lakh', 'Compare this quarter with last quarter', 'Why did marketing expense increase?', 'Which company is consuming the most cash?', 'Show intercompany balances', 'Show unusual transactions', 'Find duplicate invoices', 'Explain this balance sheet in simple English', 'Are the books balanced?', ...OPS_PROMPTS],
+    followUps: ['How much cash do we have across the group?', 'Which company owes us the most money?', 'What payments are due this week?', 'Show expenses above ₹1 lakh', 'Compare this quarter with last quarter', 'Why did marketing expense increase?', 'Which company is consuming the most cash?', 'Show intercompany balances', 'Show unusual transactions', 'Find duplicate invoices', 'Explain this balance sheet in simple English', 'Are the books balanced?', ...OPS_PROMPTS, ...P3_PROMPTS],
     speak: 'I cannot answer that from the books yet.',
   }
 }
 
 /** Questions that make sense on the current screen (spec 87, 1718). */
 export function contextualPrompts(screen: string): string[] {
+  const p3 = p3Prompts(screen)
+  if (p3) return p3
   const ops = opsPrompts(screen)
   if (ops) return ops
   if (screen.startsWith('/reports/pnl')) return ['Why did expenses increase?', 'What changed in gross margin?', 'Compare this quarter with last quarter']

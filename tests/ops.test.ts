@@ -499,7 +499,8 @@ describe('the sample universe after the operations seed', () => {
   })
   it('every workflow posting was resolved, except those deliberately left in the inbox', () => {
     const pending = e.postings.filter((p) => p.status === 'pending')
-    expect(pending.map((p) => p.source).sort()).toEqual(['fund_transfer', 'fund_transfer_in'])
+    // the transfer between two companies, and from phase 3: an allocation, a distribution to one investor, a valuation, goods returned and an expired lot
+    expect(pending.map((p) => p.source).sort()).toEqual(['allocation', 'distribution_payment', 'fund_transfer', 'fund_transfer_in', 'holding_txn', 'stock_doc', 'stock_doc'])
     expect(e.postings.filter((p) => p.status === 'posted').length).toBeGreaterThan(20)
     for (const p of e.postings.filter((x) => x.status === 'posted')) expect(e.journals.find((j) => j.id === p.journal_id)!.status).toBe('posted')
   })

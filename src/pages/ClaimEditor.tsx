@@ -1,11 +1,12 @@
 import { Fragment, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import Decimal from 'decimal.js'
-import { AlertTriangle, ArrowLeft, BadgeCheck, Ban, Banknote, Check, Plus, RefreshCw, Save, Send, Trash2, XCircle } from 'lucide-react'
+import { AlertTriangle, ArrowLeft, BadgeCheck, Ban, Banknote, Check, Plus, RefreshCw, Save, Send, Ticket, Trash2, XCircle } from 'lucide-react'
 import { can, useApp, useScopeIds } from '@/store/app'
 import { useAction, useAsync } from '@/hooks/useAsync'
 import type { ID } from '@/engine/types'
 import type { ClaimLineDecision, ExpenseClaim, ExpenseClaimInput, ExpenseClaimLine } from '@/engine/opsTypes'
+import { BOOKING_PARTS, type BookingDetail, type BookingKind } from '@/engine/p3Types'
 import { advanceOutstanding } from '@/engine/ops'
 import { D, fmtMoney, round2, sum, ZERO } from '@/lib/money'
 import { fmtDate, fmtDateTime, today } from '@/lib/dates'
@@ -16,12 +17,53 @@ interface Row {
   key: number; expense_date: string; category_id: ID | ''; account_id: ID | ''; description: string; merchant: string; amount: string
   paid_by: 'claimant' | 'company'; paid_from_ledger_id: ID | ''; has_receipt: boolean; document_id: ID | null
   department: ID | ''; project: ID | ''; otherDims: Record<string, ID>; flags: string[]; edited: boolean
+  /** a ticket or a stay: who carried or lodged the person, under which reference, and what the amount is made of */
+  booking: Record<string, string> | null
+}
+
+// ------------------------------------------------------------------ travel bookings (spec 199-202)
+type Part = typeof BOOKING_PARTS[number]
+const BOOKING: Record<BookingKind, { label: string; operator: string; facts: [string, string][]; parts: Part[] }> = {
+  air: { label: 'Flight', operator: 'Airline', facts: [['booking_ref', 'Booking reference (PNR)'], ['origin', 'From'], ['destination', 'To'], ['class', 'Class'], ['travel_date', 'Date of travel'], ['agent', 'Booked through']], parts: ['base_fare', 'taxes', 'booking_charges', 'baggage', 'seat', 'change_fee', 'cancellation_fee'] },
+  train: { label: 'Train', operator: 'Train', facts: [['booking_ref', 'Booking reference (PNR)'], ['origin', 'From'], ['destination', 'To'], ['class', 'Class'], ['travel_date', 'Date of travel'], ['agent', 'Booked through']], parts: ['base_fare', 'taxes', 'booking_charges', 'meals', 'cancellation_fee'] },
+  bus: { label: 'Bus', operator: 'Operator', facts: [['booking_ref', 'Booking reference'], ['origin', 'From'], ['destination', 'To'], ['class', 'Class'], ['travel_date', 'Date of travel'], ['agent', 'Booked through']], parts: ['base_fare', 'taxes', 'booking_charges', 'cancellation_fee'] },
+  cab: { label: 'Cab or taxi', operator: 'Operator or driver', facts: [['booking_ref', 'Trip reference'], ['origin', 'From'], ['destination', 'To'], ['travel_date', 'Date'], ['purpose', 'Purpose']], parts: ['base_fare', 'taxes', 'toll', 'parking', 'tip', 'other_charges'] },
+  hotel: { label: 'Hotel stay', operator: 'Hotel', facts: [['booking_ref', 'Booking reference'], ['city', 'City'], ['check_in', 'Check-in'], ['check_out', 'Check-out'], ['agent', 'Booked through'], ['purpose', 'Purpose']], parts: ['room_charges', 'taxes', 'meals', 'laundry', 'other_charges'] },
+}
+const DATES = ['travel_date', 'check_in', 'check_out']
+const partLabel = (p: string) => p.replace(/_/g, ' ').replace(/^\w/, (m) => m.toUpperCase())
+const partsOf = (b: Record<string, string> | null) => (b ? BOOKING_PARTS.filter((p) => (b[p] ?? '').trim() !== '') : [])
+const partsTotal = (b: Record<string, string> | null) => sum(partsOf(b).map((p) => b![p]))
+/** what is kept: the fields that were filled in, amounts rounded to the paisa */
+const bookingOut = (b: Record<string, string> | null): BookingDetail | undefined => {
+  if (!b || !b.kind) return undefined
+  const out: Record<string, string> = { kind: b.kind }
+  for (const [k, v] of Object.entries(b)) if (k !== 'kind' && (v ?? '').trim() !== '') out[k] = (BOOKING_PARTS as readonly string[]).includes(k) ? round2(v).toString() : v.trim()
+  return out as unknown as BookingDetail
+}
+const bookingIn = (d: ExpenseClaimLine['detail']): Record<string, string> | null => {
+  const x = (d ?? {}) as Record<string, unknown>
+  return x.kind ? Object.fromEntries(Object.entries(x).filter(([, v]) => v !== null && v !== undefined).map(([k, v]) => [k, String(v)])) : null
+}
+function BookingFacts({ detail, currency }: { detail: ExpenseClaimLine['detail']; currency: string }) {
+  const b = bookingIn(detail)
+  if (!b) return null
+  const kind = BOOKING[b.kind as BookingKind]
+  if (!kind) return null
+  const facts = [b.operator && `${kind.operator}: ${b.operator}`, ...kind.facts.map(([k, label]) => b[k] && `${label}: ${DATES.includes(k) ? fmtDate(b[k]) : b[k]}`)].filter(Boolean) as string[]
+  const parts = partsOf(b)
+  return (
+    <span className="mt-1 block text-[11.5px] text-muted">
+      <span className="chip mr-1.5"><Ticket size={11} /> {kind.label}</span>{facts.join(' · ')}
+      {parts.length > 0 && <span className="block">Made of: {parts.map((p) => `${partLabel(p).toLowerCase()} ${fmtMoney(b[p], { currency })}`).join(' + ')}</span>}
+    </span>
+  )
 }
 let k = 0
-const blank = (): Row => ({ key: ++k, expense_date: today(), category_id: '', account_id: '', description: '', merchant: '', amount: '', paid_by: 'claimant', paid_from_ledger_id: '', has_receipt: false, document_id: null, department: '', project: '', otherDims: {}, flags: [], edited: false })
+const blank = (): Row => ({ key: ++k, expense_date: today(), category_id: '', account_id: '', description: '', merchant: '', amount: '', paid_by: 'claimant', paid_from_ledger_id: '', has_receipt: false, document_id: null, department: '', project: '', otherDims: {}, flags: [], edited: false, booking: null })
 const fromLine = (l: ExpenseClaimLine): Row => {
   const { department, project, ...otherDims } = l.dims ?? {}
-  return { key: ++k, expense_date: l.expense_date, category_id: l.category_id ?? '', account_id: l.account_id, description: l.description, merchant: l.merchant ?? '', amount: String(D(l.amount)), paid_by: l.paid_by, paid_from_ledger_id: l.paid_from_ledger_id ?? '', has_receipt: l.has_receipt, document_id: l.document_id, department: department ?? '', project: project ?? '', otherDims, flags: l.flags ?? [], edited: false }
+  return { key: ++k, expense_date: l.expense_date, category_id: l.category_id ?? '', account_id: l.account_id, description: l.description, merchant: l.merchant ?? '', amount: String(D(l.amount)), paid_by: l.paid_by, paid_from_ledger_id: l.paid_from_ledger_id ?? '', has_receipt: l.has_receipt, document_id: l.document_id, department: department ?? '', project: project ?? '', otherDims, flags: l.flags ?? [], edited: false, booking: bookingIn(l.detail) }
 }
 
 const STATUS: Record<ExpenseClaim['status'], { label: string; tone: string }> = {
@@ -144,6 +186,8 @@ export default function ClaimEditor() {
     if (!r.description.trim()) problems.push(`Line ${no}: describe the expense.`)
     if (D(r.amount).lte(0)) problems.push(`Line ${no}: enter the amount.`)
     if (r.paid_by === 'company' && !r.paid_from_ledger_id) problems.push(`Line ${no}: the company paid — choose the card, cash or bank ledger it was paid from.`)
+    if (r.booking && partsOf(r.booking).length && !partsTotal(r.booking).eq(round2(r.amount || 0))) problems.push(`Line ${no}: the parts of the booking add up to ${partsTotal(r.booking).toFixed(2)} and the line is ${round2(r.amount || 0).toFixed(2)}. They must agree.`)
+    if (r.booking?.kind === 'hotel' && r.booking.check_in && r.booking.check_out && r.booking.check_out < r.booking.check_in) problems.push(`Line ${no}: the stay ends before it begins.`)
   })
   const touched = Boolean(title || partyId) && rows.some((r) => r.description || r.amount)
 
@@ -157,7 +201,7 @@ export default function ClaimEditor() {
       if (r.project) dims.project = r.project
       return {
         expense_date: r.expense_date, category_id: r.category_id || null, account_id: r.account_id || null, description: r.description.trim(), merchant: r.merchant.trim() || null, amount: round2(r.amount).toString(),
-        paid_by: r.paid_by, paid_from_ledger_id: r.paid_by === 'company' ? r.paid_from_ledger_id || null : null, has_receipt: r.has_receipt, document_id: r.document_id, dims,
+        paid_by: r.paid_by, paid_from_ledger_id: r.paid_by === 'company' ? r.paid_from_ledger_id || null : null, has_receipt: r.has_receipt, document_id: r.document_id, dims, detail: bookingOut(r.booking),
       }
     }),
   })
@@ -362,7 +406,13 @@ export default function ClaimEditor() {
                                 {expenseLedgers.map((a) => <option key={a.id} value={a.id}>{a.code} · {a.name}</option>)}
                               </select>
                             </td>
-                            <td><input className="field sm" value={r.description} onChange={(e) => set(r.key, { description: e.target.value })} aria-label={`Line ${i + 1} description`} /></td>
+                            <td>
+                              <div className="flex items-center gap-1">
+                                <input className="field sm" value={r.description} onChange={(e) => set(r.key, { description: e.target.value })} aria-label={`Line ${i + 1} description`} />
+                                <button className={cx('btn icon sm', r.booking ? 'primary' : 'ghost')} aria-pressed={!!r.booking} aria-label={`Line ${i + 1}: ${r.booking ? 'remove the booking details' : 'add the details of a ticket or a stay'}`}
+                                  title={r.booking ? 'Remove the booking details' : 'Add the details of a ticket or a hotel stay'} onClick={() => set(r.key, { booking: r.booking ? null : { kind: 'air' } })}><Ticket size={13} /></button>
+                              </div>
+                            </td>
                             <td><input className="field sm" value={r.merchant} onChange={(e) => set(r.key, { merchant: e.target.value })} aria-label={`Line ${i + 1} merchant`} /></td>
                             <td><input className="field sm num text-right" inputMode="decimal" value={r.amount} onChange={(e) => set(r.key, { amount: numeric(e.target.value) })} aria-label={`Line ${i + 1} amount`} /></td>
                             <td>
@@ -380,6 +430,45 @@ export default function ClaimEditor() {
                             {projects.length > 0 && <td><select className="field sm" value={r.project} onChange={(e) => set(r.key, { project: e.target.value })} aria-label={`Line ${i + 1} project`}><option value="">—</option>{projects.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}</select></td>}
                             <td><button className="btn ghost icon sm" disabled={rows.length <= 1} onClick={() => setRows((rs) => rs.filter((x) => x.key !== r.key))} aria-label={`Remove line ${i + 1}`}><Trash2 size={13} /></button></td>
                           </tr>
+                          {r.booking && (() => {
+                            const b = r.booking
+                            const kind = BOOKING[b.kind as BookingKind] ?? BOOKING.air
+                            const put = (k: string, v: string) => set(r.key, { booking: { ...b, [k]: v } })
+                            const parts = partsTotal(b)
+                            const given = partsOf(b).length > 0
+                            const agree = parts.eq(round2(r.amount || 0))
+                            return (
+                              <tr>
+                                <td />
+                                <td colSpan={lineCols} className="pb-3 pt-0">
+                                  <div className="rounded-xl border border-line bg-surface p-3">
+                                    <div className="grid gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+                                      <label><span className="label">Booking</span>
+                                        <select className="field sm" value={b.kind} aria-label={`Line ${i + 1} kind of booking`} onChange={(e) => set(r.key, { booking: { ...Object.fromEntries(Object.entries(b).filter(([k]) => !(BOOKING_PARTS as readonly string[]).includes(k) || BOOKING[e.target.value as BookingKind].parts.includes(k as Part))), kind: e.target.value } })}>
+                                          {(Object.keys(BOOKING) as BookingKind[]).map((x) => <option key={x} value={x}>{BOOKING[x].label}</option>)}
+                                        </select>
+                                      </label>
+                                      <label><span className="label">{kind.operator}</span><input className="field sm" value={b.operator ?? ''} onChange={(e) => put('operator', e.target.value)} aria-label={`Line ${i + 1} ${kind.operator}`} /></label>
+                                      {kind.facts.map(([k, label]) => (
+                                        <label key={k}><span className="label">{label}</span><input className="field sm" type={DATES.includes(k) ? 'date' : 'text'} value={b[k] ?? ''} onChange={(e) => put(k, e.target.value)} aria-label={`Line ${i + 1} ${label}`} /></label>
+                                      ))}
+                                    </div>
+                                    <div className="mt-2.5 grid gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7">
+                                      {kind.parts.map((p) => (
+                                        <label key={p}><span className="label">{partLabel(p)}</span><input className="field sm num text-right" inputMode="decimal" value={b[p] ?? ''} onChange={(e) => put(p, numeric(e.target.value))} aria-label={`Line ${i + 1} ${partLabel(p)}`} /></label>
+                                      ))}
+                                    </div>
+                                    <div className="mt-2 flex flex-wrap items-center gap-2 text-[11.5px] text-muted">
+                                      {given ? <>
+                                        <span className={agree ? 'text-pos' : 'text-warn'}>The parts add up to <span className="num">{fmtMoney(parts, { currency })}</span>{agree ? ', the amount of the line.' : <>; the line is <span className="num">{fmtMoney(r.amount || 0, { currency })}</span>.</>}</span>
+                                        {!agree && <button className="btn sm ghost" onClick={() => set(r.key, { amount: parts.toString() })}>Set the amount of the line to the parts</button>}
+                                      </> : <span>The parts are optional. Where they are given, they add up to the amount of the line.</span>}
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )
+                          })()}
                           {(hints.length > 0 || r.flags.length > 0) && (
                             <tr>
                               <td />
@@ -417,7 +506,7 @@ export default function ClaimEditor() {
                             <td className="num text-[12.5px]">{fmtDate(l.expense_date)}</td>
                             <td className="text-ink2">{cats.find((c) => c.id === l.category_id)?.name ?? '—'}</td>
                             <td className="text-[12.5px] text-ink2">{accountName(l.account_id)}</td>
-                            <td><span className="text-ink">{l.description}</span>{l.merchant && <span className="block text-[11.5px] text-muted">{l.merchant}</span>}{dims.length > 0 && <span className="block text-[11.5px] text-muted">{dims.join(' · ')}</span>}</td>
+                            <td><span className="text-ink">{l.description}</span>{l.merchant && <span className="block text-[11.5px] text-muted">{l.merchant}</span>}{dims.length > 0 && <span className="block text-[11.5px] text-muted">{dims.join(' · ')}</span>}<BookingFacts detail={l.detail} currency={currency} /></td>
                             <td className="text-[12.5px] text-ink2">{l.paid_by === 'company' ? <>The company<span className="block text-[11.5px] text-muted">{accountName(l.paid_from_ledger_id)}</span></> : 'The person'}</td>
                             <td>{l.has_receipt ? <span className="chip pos">attached</span> : <span className="chip">none</span>}</td>
                             <td className="r"><Money value={l.amount} currency={currency} /></td>

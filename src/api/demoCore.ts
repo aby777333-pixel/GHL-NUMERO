@@ -44,6 +44,7 @@ export const DEMO_USERS: Record<ID, { name: string; email: string; role: string 
   'demo-owner': { name: 'Demo Owner', email: 'owner@demo.numero', role: 'Group Super Admin' },
   'demo-accountant': { name: 'Priya Raman', email: 'priya@demo.numero', role: 'Accountant' },
   'demo-finance': { name: 'Arun Mehta', email: 'arun@demo.numero', role: 'Finance Head' },
+  'demo-cfo': { name: 'Meera Iyer', email: 'meera@demo.numero', role: 'Group CFO' },
 }
 
 
@@ -58,7 +59,7 @@ export class DemoCore implements CoreApi {
   accounts: Account[] = []
   accountMap = new Map<ID, Record<string, ID>>()
   orgUnits: OrgUnit[] = []
-  orgUnitTypes: TypeDef[] = ['business_unit:Business Unit', 'branch:Branch', 'office:Office', 'department:Department', 'division:Division', 'cost_centre:Cost Centre', 'profit_centre:Profit Centre', 'project:Project', 'property:Property / Site', 'fund:Fund / Scheme', 'portfolio:Portfolio', 'warehouse:Warehouse', 'store:Store', 'team:Team', 'vehicle:Vehicle', 'trip:Trip', 'campaign:Campaign', 'contract:Contract', 'event:Event', 'path:Financial Path']
+  orgUnitTypes: TypeDef[] = ['business_unit:Business Unit', 'branch:Branch', 'office:Office', 'department:Department', 'division:Division', 'cost_centre:Cost Centre', 'profit_centre:Profit Centre', 'project:Project', 'property:Property / Site', 'fund:Fund / Scheme', 'portfolio:Portfolio', 'warehouse:Warehouse', 'store:Store', 'team:Team', 'vehicle:Vehicle', 'equipment:Equipment', 'trip:Trip', 'campaign:Campaign', 'contract:Contract', 'event:Event', 'path:Financial Path']
     .map((s, i) => ({ key: s.split(':')[0], name: s.split(':')[1], sort: (i + 1) * 10 }))
   partyTypes: TypeDef[] = ['customer:Customer:CUS:customer', 'client:Client:CUS:customer', 'vendor:Vendor:VEN:vendor', 'supplier:Supplier:VEN:vendor', 'employee:Employee:EMP:employee', 'director:Director:PER:other', 'shareholder:Shareholder:PER:investor', 'investor:Investor:INV:investor', 'agent:Agent:AGT:agent', 'broker:Broker:BRK:broker', 'sub_broker:Sub-Broker:BRK:broker', 'referral_partner:Referral Partner:AGT:agent', 'channel_partner:Channel Partner:PTN:partner', 'consultant:Consultant:CON:consultant', 'freelancer:Freelancer:FRL:freelancer', 'contractor:Contractor:CTR:contractor', 'subcontractor:Subcontractor:CTR:contractor', 'landlord:Landlord:LND:other', 'tenant:Tenant:TNT:customer', 'transporter:Transporter:LOG:vendor', 'bank:Bank:BNK:bank', 'lender:Lender:BNK:bank', 'government:Government / Regulator:GOV:government', 'insurer:Insurance Company:INS:vendor', 'group_company:Group Company:GRP:group', 'related_party:Related Party:REL:other', 'other:Other:PTY:other']
     .map((s) => { const [key, name, prefix, category] = s.split(':'); return { key, name, prefix, category } })
@@ -103,7 +104,7 @@ export class DemoCore implements CoreApi {
     return this.accountMap.get(companyId)?.[key] ?? fail(`this company has no "${key}" account configured. Set it under Chart of Accounts → Account Mapping.`)
   }
   /** Black Vault grants: the highest level a person other than the Group Super Admin may open */
-  vaultGrants: Record<ID, string> = { 'demo-finance': 'confidential' }
+  vaultGrants: Record<ID, string> = { 'demo-finance': 'confidential', 'demo-cfo': 'confidential' }
   protected canViewLevel(level: string) {
     if (level === 'internal' || this.isAdmin()) return true
     if (level === 'super_admin_only') return false
@@ -1013,6 +1014,11 @@ export class DemoCore implements CoreApi {
       { id: 'r-pm', key: 'project_manager', name: 'Project Manager', is_system: true, permissions: pick(['company.view', 'budget.view', 'report.view', 'numi.use']) },
       { id: 'r-pur', key: 'purchase_manager', name: 'Purchase Manager', is_system: true, permissions: pick(['company.view', 'bill.view', 'bill.create', 'party.view', 'party.create', 'report.view', 'numi.use']) },
       { id: 'r-sal', key: 'sales_manager', name: 'Sales Manager', is_system: true, permissions: pick(['company.view', 'invoice.view', 'invoice.create', 'party.view', 'party.create', 'report.view', 'numi.use']) },
+      { id: 'r-pay', key: 'payroll_officer', name: 'Payroll Officer', is_system: true, permissions: pick(['company.view', 'party.view', 'numi.use', 'document.upload', 'expense.create', 'payroll.view', 'payroll.manage', 'flow.view']) },
+      { id: 'r-hr', key: 'hr_head', name: 'HR Head', is_system: true, permissions: pick(['company.view', 'party.view', 'party.create', 'numi.use', 'document.upload', 'expense.create', 'expense.approve', 'payroll.*', 'flow.view', 'flow.manage']) },
+      { id: 'r-store', key: 'store_keeper', name: 'Store Keeper', is_system: true, permissions: pick(['company.view', 'party.view', 'numi.use', 'document.upload', 'expense.create', 'purchase.view', 'inventory.view', 'inventory.manage', 'inventory.count', 'flow.view']) },
+      { id: 'r-inv', key: 'investment_manager', name: 'Investment Manager', is_system: true, permissions: pick(['company.view', 'account.view', 'party.view', 'party.create', 'report.view', 'numi.use', 'document.view', 'document.upload', 'register.view', 'investment.view', 'investment.manage', 'scenario.view', 'scenario.manage', 'flow.view']) },
+      { id: 'r-it', key: 'it_admin', name: 'IT Administrator', is_system: true, permissions: pick(['company.view', 'numi.use', 'system.health', 'integration.manage']) },
       { id: 'r-emp', key: 'employee', name: 'Employee', is_system: true, permissions: pick(['company.view', 'numi.use']) },
       { id: 'r-ro', key: 'read_only', name: 'Read Only', is_system: true, permissions: ALL_PERMS.filter((p) => p.endsWith('.view')) },
     ]

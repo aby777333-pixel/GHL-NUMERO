@@ -8,6 +8,7 @@ import type {
 import { NumeroError } from '@/engine/types'
 import type { CoreApi, CreatePartyResult, JournalFilter, PartyInput } from './types'
 import { ALL_PERMS } from '@/engine/opsTypes'
+import { readers, type Pageable } from './paging'
 
 // =====================================================================
 // LIVE DATA LAYER — Supabase.
@@ -43,6 +44,28 @@ export async function q<T>(p: PromiseLike<{ data: T | null; error: PgErr | null 
   if (error) raise(error)
   return data as T
 }
+let measured: Promise<number> | null = null
+/**
+ * How many rows the API hands over to one request. It is a setting of the project ("Max rows"), 1,000 unless
+ * someone changed it. It is measured once, not assumed: a page taken for full when the setting is lower would end
+ * a list early, in silence. Where the measure cannot be taken, 1,000 is used.
+ */
+export function apiPage(): Promise<number> {
+  measured ??= (async () => {
+    try {
+      const { data, error } = await sb().rpc('api_row_probe')
+      const n = Array.isArray(data) ? data.length : 0
+      return error || n < 1 ? 1000 : Math.min(1000, n)
+    } catch { return 1000 }
+  })()
+  return measured
+}
+/** every list is read to its end, or to a stated number of its first rows: see ./paging */
+export const { all, first } = readers(apiPage, raise)
+/** A function of the database that returns rows, read to its end in a stated order. */
+export async function rpcAll<T>(fn: string, args: Record<string, unknown>, order: string[], cap = 200000): Promise<T[]> {
+  return all<T>(sb().rpc(fn, args) as unknown as Pageable, cap, order)
+}
 export async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
   const { data, error } = await sb().rpc(fn, args)
   if (error) raise(error)
@@ -73,10 +96,10 @@ export class SupabaseCore implements CoreApi {
     if (profile?.group_id) {
       group = await q<Group | null>(sb().from('groups').select('id,name,base_currency,settings').eq('id', profile.group_id).maybeSingle())
       if (profile.is_group_super_admin) {
-        const cs = await q<{ id: ID }[]>(sb().from('companies').select('id'))
+        const cs = await all<{ id: ID }>(sb().from('companies').select('id'))
         for (const c of cs) permissions[c.id] = ALL_PERMS
       } else {
-        const ms = await q<{ company_id: ID; role: { role_permissions: { permission: string }[] } | null }[]>(
+        const ms = await all<{ company_id: ID; role: { role_permissions: { permission: string }[] } | null }>(
           sb().from('memberships').select('company_id, role:roles(role_permissions(permission))').eq('user_id', user.id) as never)
         for (const m of ms) {
           const set = new Set(permissions[m.company_id] ?? [])
@@ -116,7 +139,7 @@ export class SupabaseCore implements CoreApi {
   }
 
   // ------------------------------------------------------------ master data
-  async listCompanies() { return q<Company[]>(sb().from('companies').select('*').order('name')) }
+  async listCompanies() { return all<Company>(sb().from('companies').select('*').order('name')) }
   async createCompany(p: CompanyCreatePayload) { return rpc<ID>('create_company', { p }) }
   async updateCompany(id: ID, patch: Partial<Company>) {
     const { id: _i, group_id: _g, created_at: _c, ...rest } = patch as Company
@@ -124,7 +147,7 @@ export class SupabaseCore implements CoreApi {
   }
   async listAccounts(companyIds: ID[]) {
     if (!companyIds.length) return []
-    return q<Account[]>(sb().from('accounts').select('*').in('company_id', companyIds).order('code').limit(10000))
+    return all<Account>(sb().from('accounts').select('*').in('company_id', companyIds).order('code'), 20000)
   }
   async createAccount(a: Parameters<CoreApi['createAccount']>[0]) {
     const r = await q<{ id: ID }>(sb().from('accounts').insert({
@@ -139,25 +162,25 @@ export class SupabaseCore implements CoreApi {
   }
   async listAccountMap(companyIds: ID[]) {
     if (!companyIds.length) return []
-    return q<{ company_id: ID; key: string; account_id: ID }[]>(sb().from('company_account_map').select('company_id,key,account_id').in('company_id', companyIds))
+    return all<{ company_id: ID; key: string; account_id: ID }>(sb().from('company_account_map').select('company_id,key,account_id').in('company_id', companyIds), 20000, ['company_id', 'key'])
   }
   async setAccountMap(companyId: ID, key: string, accountId: ID) { await rpc('set_account_map', { p_company: companyId, p_key: key, p_account: accountId }) }
   async listOrgUnits(companyIds: ID[]) {
     if (!companyIds.length) return []
-    return q<OrgUnit[]>(sb().from('org_units').select('*').in('company_id', companyIds).order('name'))
+    return all<OrgUnit>(sb().from('org_units').select('*').in('company_id', companyIds).order('name'))
   }
   async createOrgUnit(u: Parameters<CoreApi['createOrgUnit']>[0]) {
     const r = await q<{ id: ID }>(sb().from('org_units').insert({ company_id: u.company_id, type_key: u.type_key, code: u.code, name: u.name, parent_id: u.parent_id ?? null, confidentiality: u.confidentiality ?? 'internal', meta: u.meta ?? {} }).select('id').single())
     return r.id
   }
-  async listOrgUnitTypes() { return q<TypeDef[]>(sb().from('org_unit_types').select('key,name,sort,group_id').order('sort')) }
+  async listOrgUnitTypes() { return all<TypeDef>(sb().from('org_unit_types').select('key,name,sort,group_id').order('sort')) }
   async createOrgUnitType(t: { key: string; name: string }) { await q(sb().from('org_unit_types').insert({ ...t, group_id: this.groupId(), sort: 500 }).select('key')) }
-  async listPartyTypes() { return q<TypeDef[]>(sb().from('party_types').select('key,name,prefix,category,group_id').order('name')) }
+  async listPartyTypes() { return all<TypeDef>(sb().from('party_types').select('key,name,prefix,category,group_id').order('name')) }
   async createPartyType(t: { key: string; name: string; prefix: string; category: string }) { await q(sb().from('party_types').insert({ ...t, group_id: this.groupId() }).select('key')) }
-  async listVoucherTypes() { return q<TypeDef[]>(sb().from('voucher_types').select('key,name,prefix,group_id').order('name')) }
+  async listVoucherTypes() { return all<TypeDef>(sb().from('voucher_types').select('key,name,prefix,group_id').order('name')) }
   async listTaxCodes(companyIds: ID[]) {
     if (!companyIds.length) return []
-    return q<TaxCode[]>(sb().from('tax_codes').select('*, components:tax_code_components(*)').in('company_id', companyIds).order('code') as never)
+    return all<TaxCode>(sb().from('tax_codes').select('*, components:tax_code_components(*)').in('company_id', companyIds).order('code') as never)
   }
   async saveTaxCode(t: Parameters<CoreApi['saveTaxCode']>[0]) {
     const existing = await q<{ id: ID } | null>(sb().from('tax_codes').select('id').eq('company_id', t.company_id).eq('code', t.code).maybeSingle())
@@ -175,12 +198,12 @@ export class SupabaseCore implements CoreApi {
   }
 
   // ------------------------------------------------------------ parties
-  async listParties() { return q<Party[]>(sb().from('parties').select('*, roles:party_roles(*)').order('display_name').limit(5000) as never) }
+  async listParties() { return all<Party>(sb().from('parties').select('*, roles:party_roles(*)').order('display_name') as never, 20000) }
   async createParty(p: PartyInput) { return rpc<CreatePartyResult>('create_party', { p }) }
   async addPartyRole(partyId: ID, companyId: ID, typeKey: string) { await rpc('add_party_role', { p_party: partyId, p_company: companyId, p_type: typeKey }) }
   async setPartyStatus(partyId: ID, status: Party['status'], reason: string) { await rpc('set_party_status', { p_party: partyId, p_status: status, p_reason: reason }) }
-  async partyLedgerBalances(companyIds: ID[], to: string) { return rpc<PartyBalanceRow[]>('party_ledger_balances', { p_companies: companyIds, p_to: to }) }
-  async listPartyBanks(partyId: ID) { return q<PartyBank[]>(sb().from('party_bank_accounts').select('*').eq('party_id', partyId).order('created_at', { ascending: false })) }
+  async partyLedgerBalances(companyIds: ID[], to: string) { return rpcAll<PartyBalanceRow>('party_ledger_balances', { p_companies: companyIds, p_to: to }, ['company_id', 'party_id', 'control_type']) }
+  async listPartyBanks(partyId: ID) { return all<PartyBank>(sb().from('party_bank_accounts').select('*').eq('party_id', partyId).order('created_at', { ascending: false })) }
   async addPartyBank(p: Parameters<CoreApi['addPartyBank']>[0]) { return rpc<ID>('add_party_bank', { p }) }
   async verifyPartyBank(id: ID, decision: 'verified' | 'rejected', note?: string) { await rpc('verify_party_bank', { p_id: id, p_decision: decision, p_note: note ?? null }) }
 
@@ -209,11 +232,11 @@ export class SupabaseCore implements CoreApi {
   // ------------------------------------------------------------ ledger
   async ledgerBalances(companyIds: ID[], from: string, to: string, opts: { knownAt?: string; dim?: ID } = {}) {
     if (!companyIds.length) return []
-    return rpc<LedgerBalanceRow[]>('ledger_balances', { p_companies: companyIds, p_from: from, p_to: to, p_known_at: opts.knownAt ?? null, p_dim: opts.dim ?? null })
+    return rpcAll<LedgerBalanceRow>('ledger_balances', { p_companies: companyIds, p_from: from, p_to: to, p_known_at: opts.knownAt ?? null, p_dim: opts.dim ?? null }, ['company_id', 'account_id'])
   }
   async ledgerMonthly(companyIds: ID[], from: string, to: string) {
     if (!companyIds.length) return []
-    return rpc<LedgerMonthlyRow[]>('ledger_monthly', { p_companies: companyIds, p_from: from, p_to: to })
+    return rpcAll<LedgerMonthlyRow>('ledger_monthly', { p_companies: companyIds, p_from: from, p_to: to }, ['company_id', 'account_id', 'month'])
   }
   async ledgerLines(f: LedgerFilter) { return rpc<LedgerLinesResult>('ledger_lines', { p: f }) }
   async integrityCheck(companyIds: ID[]) { return rpc<IntegrityReport>('integrity_check', { p_companies: companyIds }) }
@@ -224,7 +247,7 @@ export class SupabaseCore implements CoreApi {
     let s = sb().from('invoices').select('*').in('company_id', f.companyIds)
     if (f.docTypes?.length) s = s.in('doc_type', f.docTypes)
     if (f.partyId) s = s.eq('party_id', f.partyId)
-    return q<Invoice[]>(s.order('doc_date', { ascending: false }).limit(5000))
+    return all<Invoice>(s.order('doc_date', { ascending: false }), 20000)
   }
   async getInvoice(id: ID) { return q<Invoice>(sb().from('invoices').select('*, lines:invoice_lines(*)').eq('id', id).single() as never) }
   async saveInvoice(input: InvoiceInput) { return rpc<ID>('save_invoice', { p: input }) }
@@ -233,7 +256,7 @@ export class SupabaseCore implements CoreApi {
     if (!f.companyIds.length) return []
     let s = sb().from('payments').select('*, allocations:payment_allocations(invoice_id, amount)').in('company_id', f.companyIds)
     if (f.partyId) s = s.eq('party_id', f.partyId)
-    return q<Payment[]>(s.order('pay_date', { ascending: false }).limit(5000) as never)
+    return all<Payment>(s.order('pay_date', { ascending: false }) as never, 20000)
   }
   async savePayment(input: PaymentInput) { return rpc<ID>('save_payment', { p: input }) }
   async approvePayment(id: ID) { return rpc<string>('approve_payment', { p_id: id }) }
@@ -241,10 +264,10 @@ export class SupabaseCore implements CoreApi {
   // ------------------------------------------------------------ banking
   async listBankAccounts(companyIds: ID[]) {
     if (!companyIds.length) return []
-    return q<BankAccount[]>(sb().from('bank_accounts').select('*').in('company_id', companyIds).order('name'))
+    return all<BankAccount>(sb().from('bank_accounts').select('*').in('company_id', companyIds).order('name'))
   }
   async createBankAccount(b: Omit<BankAccount, 'id' | 'is_active'>) { return (await q<{ id: ID }>(sb().from('bank_accounts').insert(b).select('id').single())).id }
-  async listBankTransactions(bankAccountId: ID) { return q<BankTxn[]>(sb().from('bank_transactions').select('*').eq('bank_account_id', bankAccountId).order('txn_date', { ascending: false }).limit(5000)) }
+  async listBankTransactions(bankAccountId: ID) { return all<BankTxn>(sb().from('bank_transactions').select('*').eq('bank_account_id', bankAccountId).order('txn_date', { ascending: false }), 20000) }
   async importBankTransactions(bankAccountId: ID, rows: Parameters<CoreApi['importBankTransactions']>[1]) {
     return rpc<{ imported: number; possible_duplicates: number }>('import_bank_transactions', { p_bank: bankAccountId, p_rows: rows })
   }
@@ -254,7 +277,7 @@ export class SupabaseCore implements CoreApi {
   // ------------------------------------------------------------ periods
   async listPeriods(companyIds: ID[]) {
     if (!companyIds.length) return []
-    return q<FiscalPeriod[]>(sb().from('fiscal_periods').select('*').in('company_id', companyIds).order('period_start', { ascending: false }))
+    return all<FiscalPeriod>(sb().from('fiscal_periods').select('*').in('company_id', companyIds).order('period_start', { ascending: false }))
   }
   async setPeriodStatus(companyId: ID, date: string, status: FiscalPeriod['status'], reason?: string) {
     await rpc('set_period_status', { p_company: companyId, p_date: date, p_status: status, p_reason: reason ?? null })
@@ -263,9 +286,9 @@ export class SupabaseCore implements CoreApi {
   // ------------------------------------------------------------ approvals
   async listApprovalRequests(companyIds: ID[]) {
     if (!companyIds.length) return []
-    return q<ApprovalRequest[]>(sb().from('approval_requests').select('*').in('company_id', companyIds).order('requested_at', { ascending: false }).limit(1000))
+    return all<ApprovalRequest>(sb().from('approval_requests').select('*').in('company_id', companyIds).order('requested_at', { ascending: false }), 20000)
   }
-  async listApprovalRules() { return q<ApprovalRule[]>(sb().from('approval_rules').select('*').order('min_amount')) }
+  async listApprovalRules() { return all<ApprovalRule>(sb().from('approval_rules').select('*').order('min_amount')) }
   async saveApprovalRule(r: Parameters<CoreApi['saveApprovalRule']>[0]) {
     const row = { company_id: r.company_id, entity: r.entity, name: r.name, min_amount: r.min_amount, max_amount: r.max_amount, steps: r.steps, is_active: r.is_active ?? true }
     if (r.id) await q(sb().from('approval_rules').update(row).eq('id', r.id).select('id'))
@@ -275,16 +298,16 @@ export class SupabaseCore implements CoreApi {
   // ------------------------------------------------------------ budgets
   async listBudgets(companyIds: ID[]) {
     if (!companyIds.length) return []
-    return q<Budget[]>(sb().from('budgets').select('*').in('company_id', companyIds).order('fy', { ascending: false }))
+    return all<Budget>(sb().from('budgets').select('*').in('company_id', companyIds).order('fy', { ascending: false }))
   }
-  async getBudgetLines(budgetId: ID) { return q<BudgetLine[]>(sb().from('budget_lines').select('*').eq('budget_id', budgetId).limit(20000)) }
+  async getBudgetLines(budgetId: ID) { return all<BudgetLine>(sb().from('budget_lines').select('*').eq('budget_id', budgetId), 20000) }
   async saveBudget(b: Parameters<CoreApi['saveBudget']>[0]) {
     let id = b.id
     if (id) {
       await q(sb().from('budgets').update({ name: b.name, kind: b.kind, limit_mode: b.limit_mode }).eq('id', id).select('id'))
       await q(sb().from('budget_lines').delete().eq('budget_id', id).select('id'))
     } else {
-      const prior = await q<{ version: number }[]>(sb().from('budgets').select('version').eq('company_id', b.company_id).eq('name', b.name).eq('fy', b.fy))
+      const prior = await all<{ version: number }>(sb().from('budgets').select('version').eq('company_id', b.company_id).eq('name', b.name).eq('fy', b.fy))
       const version = Math.max(0, ...prior.map((x) => x.version)) + 1
       id = (await q<{ id: ID }>(sb().from('budgets').insert({ company_id: b.company_id, name: b.name, fy: b.fy, kind: b.kind, limit_mode: b.limit_mode, version }).select('id').single())).id
     }
@@ -296,7 +319,7 @@ export class SupabaseCore implements CoreApi {
   // ------------------------------------------------------------ sentinel
   async listAlerts(companyIds: ID[]) {
     if (!companyIds.length) return []
-    return q<Alert[]>(sb().from('alerts').select('*').in('company_id', companyIds).order('created_at', { ascending: false }).limit(1000))
+    return all<Alert>(sb().from('alerts').select('*').in('company_id', companyIds).order('created_at', { ascending: false }), 20000)
   }
   async runSentinel(companyId: ID) { return rpc<number>('run_sentinel', { p_company: companyId }) }
   async reviewAlert(id: ID, status: Alert['status'], note?: string) { await rpc('review_alert', { p_id: id, p_status: status, p_note: note ?? null }) }
@@ -304,7 +327,7 @@ export class SupabaseCore implements CoreApi {
   // ------------------------------------------------------------ audit
   protected async loadNames() {
     if (this.names.size) return
-    const ps = await q<{ id: ID; full_name: string | null; email: string | null }[]>(sb().from('profiles').select('id,full_name,email'))
+    const ps = await all<{ id: ID; full_name: string | null; email: string | null }>(sb().from('profiles').select('id,full_name,email'))
     for (const p of ps) this.names.set(p.id, p.full_name ?? p.email ?? p.id)
   }
   async listAudit(f: { companyIds?: ID[]; entity?: string; entityId?: ID; limit?: number }) {
@@ -313,14 +336,14 @@ export class SupabaseCore implements CoreApi {
     if (f.companyIds?.length) s = s.or(`company_id.in.(${f.companyIds.join(',')}),company_id.is.null`)
     if (f.entity) s = s.eq('entity', f.entity)
     if (f.entityId) s = s.eq('entity_id', f.entityId)
-    const rows = await q<AuditEntry[]>(s.order('id', { ascending: false }).limit(f.limit ?? 300))
+    const rows = await first<AuditEntry>(s.order('id', { ascending: false }), f.limit ?? 300)
     return rows.map((r) => ({ ...r, actor_name: r.actor ? this.names.get(r.actor) ?? 'Unknown user' : 'System' }))
   }
 
   // ------------------------------------------------------------ NUMI
   async listNumiRules(companyIds: ID[]) {
     if (!companyIds.length) return []
-    return q<NumiRule[]>(sb().from('numi_rules').select('*').in('company_id', companyIds).order('approved_count', { ascending: false }))
+    return all<NumiRule>(sb().from('numi_rules').select('*').in('company_id', companyIds).order('approved_count', { ascending: false }))
   }
   async numiLearn(companyId: ID, pattern: string, partyId: ID | null, accountId: ID) { await rpc('numi_learn', { p_company: companyId, p_pattern: pattern, p_party: partyId, p_account: accountId }) }
   async setNumiRuleStatus(id: ID, status: 'active' | 'disabled') { await q(sb().from('numi_rules').update({ status }).eq('id', id).select('id')) }
@@ -334,7 +357,7 @@ export class SupabaseCore implements CoreApi {
   }
 
   // ------------------------------------------------------------ genesis
-  async listCustomFields() { return q<CustomFieldDef[]>(sb().from('custom_field_defs').select('*').order('entity')) }
+  async listCustomFields() { return all<CustomFieldDef>(sb().from('custom_field_defs').select('*').order('entity')) }
   async saveCustomField(d: Parameters<CoreApi['saveCustomField']>[0]) {
     const row = { company_id: d.company_id, entity: d.entity, scope_key: d.scope_key ?? null, key: d.key, label: d.label, field_type: d.field_type, options: d.options, rules: d.rules, is_required: d.is_required, status: d.status ?? 'active' }
     if (d.id) {
@@ -343,12 +366,12 @@ export class SupabaseCore implements CoreApi {
     } else await q(sb().from('custom_field_defs').insert({ ...row, group_id: this.groupId() }).select('id'))
   }
   async listRoles() {
-    const rows = await q<{ id: ID; key: string; name: string; is_system: boolean; role_permissions: { permission: string }[] }[]>(
+    const rows = await all<{ id: ID; key: string; name: string; is_system: boolean; role_permissions: { permission: string }[] }>(
       sb().from('roles').select('id,key,name,is_system,role_permissions(permission)').order('name') as never)
     return rows.map<Role>((r) => ({ id: r.id, key: r.key, name: r.name, is_system: r.is_system, permissions: r.role_permissions.map((p) => p.permission) }))
   }
   async listMembers() {
-    const rows = await q<{ id: ID; user_id: ID; company_id: ID; valid_from: string | null; valid_to: string | null; profile: { email: string; full_name: string } | null; role: { key: string } | null }[]>(
+    const rows = await all<{ id: ID; user_id: ID; company_id: ID; valid_from: string | null; valid_to: string | null; profile: { email: string; full_name: string } | null; role: { key: string } | null }>(
       sb().from('memberships').select('id,user_id,company_id,valid_from,valid_to, profile:profiles(email,full_name), role:roles(key)') as never)
     return rows.map<Member>((m) => ({ id: m.id, user_id: m.user_id, company_id: m.company_id, valid_from: m.valid_from, valid_to: m.valid_to, email: m.profile?.email ?? '', full_name: m.profile?.full_name ?? '', role_key: m.role?.key ?? '' }))
   }
@@ -360,8 +383,8 @@ export class SupabaseCore implements CoreApi {
   // ------------------------------------------------------------ requirement ledger
   async listRequirements() {
     if (this.session?.isGroupAdmin) {
-      const rows = await q<{ no: number; prompt: string; module: string; title: string; body: string | null; status: string; phase: number; evidence: string | null; notes: string | null }[]>(
-        sb().from('requirement_ledger').select('*').order('no').limit(5000))
+      const rows = await all<{ no: number; prompt: string; module: string; title: string; body: string | null; status: string; phase: number; evidence: string | null; notes: string | null }>(
+        sb().from('requirement_ledger').select('*').order('no'), 20000, ['group_id'])
       if (rows.length) {
         return { source: 'database', requirements: rows.map<Requirement>((r) => ({ id: 'REQ-' + String(r.no).padStart(4, '0'), no: r.no, prompt: r.prompt, title: r.title, module: r.module, text: r.body ?? '', status: r.status, phase: r.phase, evidence: r.evidence ?? '', notes: r.notes ?? '' })) }
       }

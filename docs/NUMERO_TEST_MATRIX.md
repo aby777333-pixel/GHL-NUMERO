@@ -17,8 +17,15 @@ Two suites cover the two implementations of the engine.
 | `tests/ops.test.ts` | The operations engine in TypeScript and the seeded demo universe | `npm test` |
 | `tests/forward.test.ts` | Forward: events, horizons, warnings, advance memory | `npm test` |
 | `tests/numiOps.test.ts` | NUMI on operations, permission handling, commands on operations | `npm test` |
+| `tests/sql/phase3_inventory.sql` (T160–T189, T272–T274) | The real database: items, lots, stock documents, costing, reservation, counts, landed cost, reversal, the stock ledger against the general ledger | as above |
+| `tests/sql/phase3_investments.sql` (T190–T213) | The real database: corporate structure, holdings, valuations, funds, calls, units, net asset value, fee, distributions | as above |
+| `tests/sql/phase3_control.sql` (T220–T239, T275) | The real database: materiality, cases, verification, confirmations, reclassification, allocation | as above |
+| `tests/sql/phase3_platform.sql` (T240–T279) | The real database: notifications, simulations, drivers, workflows, communications, integrations, capability switches, health, backups, imports, facts, travel detail | as above |
+| `tests/p3.test.ts` | Inventory, investments and funds in the TypeScript engine | `npm test` |
+| `tests/p3control.test.ts` | Control, platform, the digital twin, reality, exposure, analysis in the TypeScript engine | `npm test` |
+| `tests/p3app.test.ts` | The sample books after the Phase 3 seed, the loaders, NUMI and commands on Phase 3, capability switches, the sandbox | `npm test` |
 
-Last run (27 September 2026): database 175 of 175 passed, every run rolled back, database verified empty afterwards · application 262 of 262 passed. All seven database scripts were re-run after the last migration (0013).
+Last run (28 September 2026): database 289 of 289 passed in eleven scripts, all run after the last migration piece (p3_27), every run rolled back, database verified empty afterwards · application 461 of 461 passed in eight files.
 
 The database suites create their own users and companies inside one transaction and end by raising an exception that carries the results, so nothing they do can remain. Posted journals and audit rows cannot be deleted; a test that committed would leave them for ever.
 
@@ -296,6 +303,106 @@ The corrections were reviewed in their turn. What that found was corrected in mi
 | Only the bill itself stands for the period: a debit note or a credit note covers nothing | — | forward: second review |
 | NUMI matches whole words; a question about overspending is a budget question; a named category is still found | — | numiOps: whole words only (three tests) |
 
+## Stock (Phase 3)
+
+| Requirement | Database test | Application test |
+|---|---|---|
+| Inventory cannot be maintained without the permission | T160 | — |
+| An item takes the valuation method of its category | T162 | p3: inventory |
+| A receipt proposes its entry; the proposer cannot approve it; on approval the quantity is in stock | T163, T164, T165 | p3: inventory |
+| Weighted average and first in, first out give the cost they should | T166, T167 | p3: inventory |
+| Stock awaiting approval on one document cannot be issued on another; rejecting releases it | T168, T169 | p3: inventory |
+| A lot is created with its receipt; expiry follows shelf life | T171 | p3: inventory |
+| A transfer changes place, not value, and proposes nothing | T173 | p3: inventory |
+| A condition noted on stock cannot exceed the stock and changes no value | T175 | p3: inventory |
+| A loss is charged only when approved, with its reason | T176 | p3: inventory |
+| A count: counted by one, reviewed by another, the books unchanged by counting; a count that agrees proposes nothing | T177, T178, T180, T181 | p3: inventory |
+| Landed cost joins the stock still on hand; the share of what has left is a cost at once | T182 | p3: inventory |
+| A receipt cannot be reversed once its goods have left; reversing an issue brings the stock back | T183, T184 | p3: inventory |
+| Stock received against a goods receipt takes the vendor and the rate of the order | T185 | — |
+| **The stock ledger and the general ledger agree** | T186 | p3: inventory · p3app: sample books |
+| Exposure is beside the loss posted, never inside it | — | p3control: exposure · p3app: sample books |
+| Internal functions are not callable; every table has row level security | T188, T189 | — |
+
+## Investments and funds (Phase 3)
+
+| Requirement | Database test | Application test |
+|---|---|---|
+| Owners cannot hold more than the whole; a company cannot own its own owner | T190, T191 | p3: investments |
+| A purchase changes the holding only when its entry is approved | T193 | p3: investments |
+| A sale releases the carrying amount and records the gain or loss | T195 | p3: investments |
+| Income with tax deducted | T196 | p3: investments |
+| A valuation of a holding carried at cost posts nothing; at fair value it proposes the change | T198, T199 | p3: investments |
+| A fund is confidential: a person who is not cleared reads nothing | T200 | p3: funds |
+| A call makes the amount owed and posts nothing; units are issued when the money is posted | T201, T203 | p3: funds · p3app: sample books |
+| Net asset value comes from the books and is approved by a second person | T204 | p3: funds |
+| The fee follows its formula; the same days cannot be charged twice; it is owed on a ledger of its own | T205 | p3: funds · p3app: sample books |
+| Entitlement follows the units held on the record date; declaring pays nothing; tax is withheld on payment | T206, T208, T209 | p3: funds |
+| A dividend cannot be declared while no shareholder is on record | T210 | — |
+
+## Reality and control (Phase 3)
+
+| Requirement | Database test | Application test |
+|---|---|---|
+| Materiality is set with its basis, by a person with the permission | T220, T221 | p3control: control |
+| The same difference, found again, is the same case | T223 | p3control: control |
+| A change of status needs its note; closing needs the resolution | T224 | p3control: control |
+| The history of a case cannot be rewritten, even by a privileged role | T225 | — |
+| Verification lists what the books carry; a missing asset raises an alert and stays in the books | T227, T228 | p3control: control |
+| Cash verification, confirmation with a difference | T230, T231, T232 | p3control: control |
+| Between companies the other side is read from its own books, only by a person who may read them | T233, T234 | p3control: control |
+| A reclassification leaves the original line as it was | T235 | p3control: control |
+| A shared cost divided by its driver | T237 | p3control: control |
+| Five realities, five counts; nothing is called fraud; what cannot be read is named | — | p3control: reality · p3app: loaders |
+
+## Simulations, the studio and the platform (Phase 3)
+
+| Requirement | Database test | Application test |
+|---|---|---|
+| A person is told of an entry that waits for them, and reads only their own notices | T240, T241 | p3control: platform |
+| A simulation belongs to the person who built it; a saved result is labelled SIMULATION and cannot be changed | T242, T243, T244 | p3control: twin · p3app: sample books |
+| An assumption is used only after a second person approves it | T246 | p3control: twin |
+| A simulation leaves the books as they were | — | p3app: loaders, NUMI |
+| A workflow is checked when designed; its form is enforced; a step that releases money points to the record that does | T247, T248, T250 | p3control: platform |
+| The person who started a case cannot approve it | T249 | p3control: platform |
+| Evidence is required where the step asks for it; a workflow in use is changed by a new version | T251, T252 | p3control: platform |
+| NUMERO prepares, a person sends; what was prepared cannot be rewritten | T255, T256 | p3control: platform |
+| The register holds no secret; an integration that can move money is high risk | T257 | p3control: platform |
+| A capability is switched by a Group Super Admin only; the most specific switch decides; core capabilities cannot be switched off | T258 | p3app: capability switches |
+| With nothing on record, backups are "not recorded" | T259, T260 | p3control: platform |
+| A file that fails its checks cannot be committed; staging adds nothing to the books | T261, T262 | p3control: platform |
+| The earlier system's trial balance is kept beside the books | T263 | p3control: analysis |
+| Monthly totals agree with posted entries | T264 | p3control: platform |
+| A booking's parts add up to its line | T265 | ops |
+| Every function a read rule relies on can be run by a signed-in user | T266, T267, T268 | — |
+| The sandbox reads the books and writes nothing to them; balances are those of the books; salaries and history stay behind | — | p3app: the sandbox |
+| A command never issues stock, pays a distribution, commits an import or sends a message | — | p3app: commands |
+
+## Found by the assessment of Phase 3, and corrected
+
+Every correction, with its place and its test, is listed in `scripts/_assess/P3_CORRECTIONS.md`.
+
+| Requirement | Database test | Application test |
+|---|---|---|
+| A fee is charged only for days that have passed | T213 | p3: funds |
+| A driver in use stays until its successor is approved; a driver supplies an assumption only in its own unit | T269 | p3control: a driver supplies an assumption only in its own unit |
+| Owner override is the owner's alone | T270 | p3control: platform |
+| The person who started a case states their own request and goes no further | T271 | — |
+| Stock moved to another place keeps the age of its receipt | T272 | p3: stock moved to another place… |
+| A stock document is not dated in the future | T273 | p3: a stock document is not dated… |
+| A stock ledger with no item is compared with the books | T274 | p3: system health compares… |
+| A verification opened by mistake is cancelled with its reason | T275 | p3control: a verification opened by mistake… |
+| The owner is told of what the rules class for the owner, not of every approval | T276 | p3control: the owner is not told of every approval… |
+| The class of an alert follows its amount or its difference | T277 | p3control: the class of an alert… |
+| The size of a page of the API is measured, not assumed; lists are read to their end or refused | T278 | p3app: a list of the live books is read to its end (six tests) |
+| A statement line matched in part is not reconciled, everywhere | T279 | p3control: a statement line matched in part… |
+| A difference keeps its key; a sale in another currency is stated in the currency of the company; verification sheets reach Reality, measured by the size of the difference; a sheet with unchecked items does not agree | — | p3control: what the assessment found · what the second reading found |
+| A report states the reconciliation of the records it rests on, for its period | — | p3control: a report states the reconciliation… · the reconciliation of a report is that of its period |
+| NUMI reads a figure in its own clause and in its own direction; a rate of exchange or of tax is not interest | — | p3app: which way a figure points… (five tests) |
+| A capability switch governs its screens however they are reached | — | p3app: a switch governs its screens… |
+| A commitment that has ended counts for what was called of it | — | p3control: a commitment that has ended… · an investor whose commitment has ended… |
+| A rule tried on history does not add currencies | — | p3control: a rule tried on history… |
+
 ## Not yet covered by automated tests
 
-Interface behaviour in the browser · concurrency under load · migration and import · consolidation with minority interests · currency translation · file upload to live storage · impairment and loans given (engine exists, no dedicated test) · permission refusals in the application (the demo gives every user every permission; refusals are tested against the database). These are verified manually or not yet built; none is marked TESTED.
+Interface behaviour in the browser (the screens of Phase 3 were opened and used by hand in the demo; no automated browser test exists) · concurrency under load · import of large files · consolidation with minority interests · currency translation · file upload to live storage · impairment and loans given (engine exists, no dedicated test) · permission refusals in the application (the demo gives every user every permission; refusals are tested against the database). These are verified manually or not yet built; none is marked TESTED.

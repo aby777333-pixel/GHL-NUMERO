@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { BadgeCheck, ChevronDown, ChevronRight, ExternalLink, Inbox, Plus, Send, ShieldCheck, X } from 'lucide-react'
 import type { ApprovalRequest, ApprovalRule, ID, JournalDetail, JournalLineView, Member } from '@/engine/types'
 import type { Advance, ExpenseClaim, PurchaseDoc } from '@/engine/opsTypes'
+import type { CapitalCall, Distribution, Fund } from '@/engine/p3Types'
 import { advanceMemory, type MemoryFact } from '@/engine/ops'
 import { APPROVAL_ENTITIES, workflowSource } from '@/lib/workflow'
 import { can, useApp, useScopeIds } from '@/store/app'
@@ -183,6 +184,8 @@ type OtherRecord =
   | { kind: 'advance'; advance: Advance; memory: MemoryFact[] }
   | { kind: 'claim'; claim: ExpenseClaim }
   | { kind: 'purchase'; doc: PurchaseDoc }
+  | { kind: 'call'; call: CapitalCall; fund: Fund | null }
+  | { kind: 'distribution'; dist: Distribution; fund: Fund | null }
   | { kind: 'hidden' }
 
 function Facts({ rows }: { rows: [string, ReactNode][] }) {
@@ -267,6 +270,17 @@ function RequestDrawer({ request, onClose, who, onOpen }: { request: ApprovalReq
       return { kind: 'advance', advance, memory: advanceMemory(advances, claims, advance.recipient_party_id, today(), advance.id) }
     }
     if (request.entity === 'expense_claim') return { kind: 'claim', claim: await api.getClaim(request.entity_id) }
+    // a fund the person is not cleared for is not returned, and its call or distribution is then not decided from here
+    if (request.entity === 'capital_call') {
+      const call = (await api.listCapitalCalls({ companyIds: [cid] })).find((c) => c.id === request.entity_id)
+      if (!call) return { kind: 'hidden' }
+      return { kind: 'call', call, fund: (await api.listFunds([cid])).find((f) => f.id === call.fund_id) ?? null }
+    }
+    if (request.entity === 'distribution') {
+      const dist = await api.getDistribution(request.entity_id).catch(() => null)
+      if (!dist) return { kind: 'hidden' }
+      return { kind: 'distribution', dist, fund: dist.fund_id ? (await api.listFunds([cid])).find((f) => f.id === dist.fund_id) ?? null : null }
+    }
     return { kind: 'purchase', doc: await api.getPurchaseDoc(request.entity_id) }
   }, [api, request?.id, request?.entity_id])
   const rec = record.data ?? null
@@ -301,9 +315,11 @@ function RequestDrawer({ request, onClose, who, onOpen }: { request: ApprovalReq
     if (!rec || rec.kind === 'hidden') return
     if (amountProblem) return
     setDialog(null)
-    const done = (what: string) => (v: 'approved' | 'pending') => (v === 'approved' ? what : 'Step approved — passed to the next approver')
+    const done = (what: string) => (v: 'approved' | 'pending' | 'rejected') => (v === 'approved' ? what : 'Step approved — passed to the next approver')
     if (rec.kind === 'advance') await act(() => api.approveAdvance(id, amount, note), done('Advance approved. No money has moved: the release is recorded separately.'))
     else if (rec.kind === 'claim') await act(() => api.approveClaim(id, note), done('Claim approved as claimed. Its accounting entry now waits in this inbox.'))
+    else if (rec.kind === 'call') await act(() => api.decideCapitalCall(id, 'approved', note), done('Capital call approved. The investors now owe what was called. No money has moved and nothing is posted.'))
+    else if (rec.kind === 'distribution') await act(() => api.decideDistribution(id, 'approved', note), done('Approved. The entry that declares it now waits in this inbox. Nothing has been paid.'))
     else await act(() => api.approvePurchaseDoc(id, note), done(rec.doc.kind === 'purchase_order' ? 'Order approved. It is now a commitment, not a cost.' : 'Requisition approved'))
   }
   const reject = async (reason: string) => {
@@ -314,6 +330,8 @@ function RequestDrawer({ request, onClose, who, onOpen }: { request: ApprovalReq
     if (!rec || rec.kind === 'hidden') return
     if (rec.kind === 'advance') await act(() => api.rejectAdvance(id, reason), 'Advance request rejected')
     else if (rec.kind === 'claim') await act(() => api.rejectClaim(id, reason), 'Claim rejected and returned to its maker')
+    else if (rec.kind === 'call') await act(() => api.decideCapitalCall(id, 'rejected', reason), 'Capital call rejected and returned to its maker')
+    else if (rec.kind === 'distribution') await act(() => api.decideDistribution(id, 'rejected', reason), 'Rejected and returned to its maker. Nothing was declared.')
     else await act(() => api.rejectPurchaseDoc(id, reason), 'Rejected and returned to its maker')
   }
   const post = async () => {
@@ -474,6 +492,53 @@ function RequestDrawer({ request, onClose, who, onOpen }: { request: ApprovalReq
                   </div>
                   <div className="mt-1.5 text-[11.5px] text-muted">Approving from the inbox approves every line as claimed. To approve a lower amount on a line, open the full record.</div>
                 </div>
+              </>
+            )}
+
+            {rec?.kind === 'call' && (
+              <>
+                <Facts rows={[
+                  ['Capital call', <span key="n" className="num text-gold">{rec.call.call_no}</span>],
+                  ['Fund', rec.fund?.name ?? <span key="f" className="text-muted">Not shown</span>],
+                  ['Called', <span key="p"><span className="num">{D(rec.call.pct ?? 0).toString()}%</span> of each commitment</span>],
+                  ['Amount', <Money key="a" value={rec.call.total_amount} currency={rec.fund?.currency ?? currency} />],
+                  ['Price of a unit', <Money key="u" value={rec.call.unit_price} currency={rec.fund?.currency ?? currency} />],
+                  ['Date of the call', <span key="d" className="num">{fmtDate(rec.call.call_date)}</span>],
+                  ['Due by', <span key="e" className="num">{fmtDate(rec.call.due_date)}</span>],
+                  ['Purpose', rec.call.purpose],
+                ]} />
+                <Note>Approving a capital call makes the amount owed by the investors. It moves no money and posts nothing: each receipt is recorded when the money arrives, and its entry is approved again before it reaches the books.</Note>
+              </>
+            )}
+
+            {rec?.kind === 'distribution' && (
+              <>
+                <Facts rows={[
+                  ['Number', <span key="n" className="num text-gold">{rec.dist.dist_no}</span>],
+                  ['Kind', humanise(rec.dist.kind)],
+                  ['Fund', rec.dist.fund_id ? rec.fund?.name ?? <span key="f" className="text-muted">Not shown</span> : 'None — declared by the company to its shareholders'],
+                  ['Declared on', <span key="d" className="num">{fmtDate(rec.dist.declaration_date)}</span>],
+                  ['Holders on record on', <span key="r" className="num">{fmtDate(rec.dist.record_date)}</span>],
+                  ['Amount', <Money key="a" value={rec.dist.total_amount} currency={currency} />],
+                  ['Tax deducted', <span key="t" className="num">{D(rec.dist.tax_pct).toString()}%</span>],
+                  ['Paid out of', accountName(rec.dist.source_account_id)],
+                ]} />
+                <div>
+                  <div className="eyebrow mb-2">Who is entitled</div>
+                  <div className="rounded-xl border border-line">
+                    {(rec.dist.lines ?? []).map((l) => (
+                      <div key={l.id} className="flex items-start justify-between gap-3 border-b border-line px-3.5 py-2.5 text-[13px] last:border-0">
+                        <div className="min-w-0">
+                          <button className="link" onClick={() => onOpen('/parties/' + l.holder_party_id)}>{partyName(l.holder_party_id)}</button>
+                          <div className="text-[12px] text-muted"><span className="num">{D(l.units).toString()}</span> held · tax deducted <Money value={l.tax_deducted} currency={currency} /> · net <Money value={l.net_amount} currency={currency} /></div>
+                        </div>
+                        <Money value={l.gross_amount} currency={currency} className="flex-none text-ink" />
+                      </div>
+                    ))}
+                    {!(rec.dist.lines ?? []).length && <div className="px-3.5 py-3 text-[12.5px] text-muted">Nobody is entitled.</div>}
+                  </div>
+                </div>
+                <Note>Approving proposes the entry that declares the amount as payable. Declaring pays nothing: each payment is recorded separately, and its entry is approved again.</Note>
               </>
             )}
 

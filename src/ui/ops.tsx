@@ -10,6 +10,7 @@ import { DOCUMENT_KINDS } from '@/engine/opsTypes'
 import { D, fmtMoney } from '@/lib/money'
 import { fmtDate, fmtDateTime, today } from '@/lib/dates'
 import { cx, Field, Modal, Money, Note, Panel, Spinner, StatusChip } from './kit'
+import { workflowSource } from '@/lib/workflow'
 
 // =====================================================================
 // Shared parts of the operations screens.
@@ -72,7 +73,7 @@ export function ProposedEntries({ companyIds, sources, sourceId, title = 'Accoun
             <button key={w.id} className="flex w-full items-start gap-3 rounded-lg px-2.5 py-2 text-left hover:bg-surface2" onClick={() => nav('/journals/' + w.journal_id)}>
               <span className={cx('mt-[2px] flex-none', t.tone)}>{t.icon}</span>
               <span className="min-w-0 flex-1">
-                <span className="block text-[12.5px] text-ink">{w.source.replace(/_/g, ' ')} {j?.voucher_no && <span className="num text-gold">· {j.voucher_no}</span>}</span>
+                <span className="block text-[12.5px] text-ink">{workflowSource(w).label} {j?.voucher_no && <span className="num text-gold">· {j.voucher_no}</span>}</span>
                 <span className="block text-[11.5px] text-muted">{t.text} Proposed {fmtDateTime(w.created_at)}.{!j && w.status !== 'voided' ? ' You are not cleared to open this entry.' : ''}</span>
               </span>
               {j && <Money value={j.total} className="text-[12.5px]" />}

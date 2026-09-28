@@ -5,6 +5,7 @@ import type {
   OrgUnit, Party, PartyBalanceRow, PartyBank, Payment, PaymentInput, Requirement, Role, SessionInfo, TaxCode, TypeDef,
 } from '@/engine/types'
 import type { OpsApi } from './opsApi'
+import type { Phase3Api } from './p3Api'
 
 export type CreatePartyResult =
   | { status: 'created'; id: ID; party_no: string }
@@ -161,5 +162,5 @@ export interface CoreApi {
   syncRequirements(reqs: Requirement[]): Promise<number>
 }
 
-/** The complete contract: the accounting core plus the operations that surround it. */
-export interface NumeroApi extends CoreApi, OpsApi {}
+/** The complete contract: the accounting core, the operations that surround it, and Phase 3 (inventory, investments, control, simulation, platform). */
+export interface NumeroApi extends CoreApi, OpsApi, Phase3Api {}

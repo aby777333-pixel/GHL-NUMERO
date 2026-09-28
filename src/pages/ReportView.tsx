@@ -12,6 +12,7 @@ import { daysBetween, fmtDate, previousPeriod, today } from '@/lib/dates'
 import { cx, Delta, Empty, ErrorBox, Explain, Loading, Money, Note, PageHeader, Panel, Section, StatusChip, Tabs, Truth } from '@/ui/kit'
 import { DataTable, type Column } from '@/ui/DataTable'
 import { BarChart, Donut, colorAt } from '@/ui/charts'
+import { RealityNote } from '@/ui/RealityNote'
 
 const TITLES: Record<string, [string, string]> = {
   pnl: ['Profit & Loss', 'Financial statement'], 'balance-sheet': ['Balance Sheet', 'Financial statement'], 'cash-flow': ['Cash Flow Statement', 'Financial statement'],
@@ -53,6 +54,7 @@ export default function ReportView() {
           <button className="btn" onClick={() => askNumi(key === 'pnl' ? 'Why did expenses increase?' : key === 'balance-sheet' ? 'Explain this balance sheet in simple English' : key === 'cash-flow' ? 'Which company is consuming the most cash?' : 'Are the books balanced?')}><Sparkles size={15} className="text-gold" /> Explain with NUMI</button>
           <button className="btn" onClick={() => window.print()}><Printer size={15} /> Print</button>
         </>} />
+      <RealityNote report={key} from={pointInTime ? undefined : r.from} to={r.to} />
       {key === 'pnl' && <PnL />}
       {key === 'balance-sheet' && <BalanceSheetView />}
       {key === 'cash-flow' && <CashFlowView />}

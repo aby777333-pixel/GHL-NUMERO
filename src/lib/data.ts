@@ -96,7 +96,13 @@ export function ledgerLink(o: { accounts?: ID[]; party?: ID; from?: string; to?:
   return '/ledger?' + p.toString()
 }
 
+/** the mark a file carries when it was exported from the sandbox: it never looks like an export of the books */
+let exportMark = ''
+export const setExportMark = (mark: string) => { exportMark = mark }
+
 export function downloadCsv(name: string, header: string[], rows: (string | number | null | undefined)[][]) {
+  const base = name.replace(/\.csv$/i, '')
+  const file = base + (exportMark && !base.includes(exportMark) ? '-' + exportMark : '') + '.csv'
   const esc = (v: unknown) => {
     const s = v === null || v === undefined ? '' : String(v)
     return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s
@@ -104,7 +110,7 @@ export function downloadCsv(name: string, header: string[], rows: (string | numb
   const csv = '﻿' + [header, ...rows].map((r) => r.map(esc).join(',')).join('\r\n')
   const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }))
   const a = document.createElement('a')
-  a.href = url; a.download = name.endsWith('.csv') ? name : name + '.csv'
+  a.href = url; a.download = file
   document.body.appendChild(a); a.click(); a.remove()
   setTimeout(() => URL.revokeObjectURL(url), 1000)
 }

@@ -14,6 +14,7 @@ import { addMonths, fmtDate, fmtMonth, previousPeriod, startOfMonth, today } fro
 import { CountUp, cx, Delta, ErrorBox, Explain, Loading, Money, PageHeader, Panel, Section, Truth } from '@/ui/kit'
 import { Donut, Sparkline, TrendChart, colorAt } from '@/ui/charts'
 import { contextualPrompts } from '@/numi/engine'
+import { HomeBeyond } from '@/ui/HomeBeyond'
 
 interface Tile { key: string; label: string; simple: string; value: Decimal; icon: ReactNode; to: string; delta?: Decimal | null; invert?: boolean; spark?: number[]; explain: string; formula?: string; tone?: string }
 
@@ -182,6 +183,8 @@ export default function Home() {
               </div>
             </Panel>
           </div>
+
+          {!asOf && <HomeBeyond />}
 
           <Section title={scope.length === 1 ? 'Company' : 'Companies — click to enter a financial universe'} className="mb-5"
             right={scope.length > 0 ? <button className="btn sm ghost" onClick={() => setScope([])}>Show whole group</button> : undefined}>

@@ -202,6 +202,20 @@
       { "key": "property_tax_due", "label": "Property tax due", "type": "date", "alert": true }
     ] },
 
+  { "key": "generator", "name": "Generator / Backup Power", "category": "asset", "direction": "none", "certainty": "scheduled", "prefix": "GEN", "dimension_type": "equipment", "sort": 520,
+    "fields": [
+      { "key": "located_at", "label": "Office or site it serves", "type": "text", "required": true },
+      { "key": "make_model", "label": "Make and model", "type": "text" },
+      { "key": "capacity_kva", "label": "Capacity (kVA)", "type": "number" },
+      { "key": "fuel_type", "label": "Fuel", "type": "select", "options": ["Diesel", "Petrol", "Gas", "Battery / inverter", "Solar hybrid"] },
+      { "key": "ownership", "label": "Ownership", "type": "select", "options": ["Owned", "Hired", "Landlord's"] },
+      { "key": "operating_hours", "label": "Operating hours (as last read)", "type": "number" },
+      { "key": "hours_read_on", "label": "Hours read on", "type": "date" },
+      { "key": "fuel_stock_litres", "label": "Fuel in the tank (litres, as last read)", "type": "number" },
+      { "key": "last_service", "label": "Last serviced", "type": "date" },
+      { "key": "next_service", "label": "Next service due", "type": "date", "alert": true },
+      { "key": "amc_expiry", "label": "Maintenance contract expires", "type": "date", "alert": true }
+    ] },
   { "key": "incident", "name": "Incident", "category": "incident", "direction": "none", "certainty": "possible", "prefix": "INC", "dimension_type": "event", "sort": 600,
     "fields": [
       { "key": "incident_type", "label": "Type", "type": "select", "options": ["Accident", "Damage", "Theft", "Loss", "Emergency", "Disaster", "Cyber", "Extortion / coercion reported", "Improper payment reported", "Off-book transaction reported", "Whistleblower report", "Other"], "required": true },

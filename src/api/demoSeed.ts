@@ -4,6 +4,7 @@ import { buildCompanyPayload } from '@/engine/templates'
 import type { ID, JournalLineInput } from '@/engine/types'
 import { DemoEngine } from './demo'
 import { seedDemoOps } from './demoSeedOps'
+import { finishDemoP3, seedDemoP3, type StockEvent } from './demoSeedP3'
 
 // =====================================================================
 // SAMPLE DATA for the demo universe. Everything generated here is
@@ -49,6 +50,8 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
     ['GMED', 'GHL Medical Equipment', 'medical_equipment', { industry: 'Medical machinery', business_type: 'Import & distribution' }],
     ['GCON', 'GHL Constructions', 'construction', { industry: 'Construction', business_type: 'Contracting' }],
     ['GWELL', 'GHL Wellness', 'wellness', { industry: 'Wellness products', business_type: 'Trading' }],
+    // a fund keeps books of its own: its net asset value is worked out from them
+    ['GGF', 'GHL Growth Fund I', 'aif', { industry: 'Alternative investment fund', business_type: 'Category II AIF', legal_name: 'GHL Growth Fund I — a scheme of GHL Investment Trust' }],
   ]
   for (const [code, name, template, extra] of defs) {
     e.clock = at(START, '09:00:00')
@@ -64,7 +67,7 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
   for (const co of Object.keys(C)) {
     const primary = e.accounts.find((a) => a.company_id === C[co] && a.code === '1121')!
     primary.name = 'HDFC Current Account'
-    e.bankAccounts.push({ id: 'bank-' + co, company_id: C[co], ledger_account_id: primary.id, name: 'HDFC Current Account', bank_name: 'HDFC Bank', account_no_masked: '••••' + String(1000 + Math.floor(rand() * 8999)), ifsc: 'HDFC0000' + String(100 + Math.floor(rand() * 899)), currency: 'INR', kind: 'bank', is_active: true })
+    e.bankAccounts.push({ id: 'bank-' + co, company_id: C[co], ledger_account_id: primary.id, name: 'HDFC Current Account', bank_name: 'HDFC Bank', account_no_masked: '••••' + (co === 'GGF' ? '6120' : String(1000 + Math.floor(rand() * 8999))), ifsc: 'HDFC0000' + (co === 'GGF' ? '417' : String(100 + Math.floor(rand() * 899))), currency: 'INR', kind: 'bank', is_active: true })
     e.bankAccounts.push({ id: 'cash-' + co, company_id: C[co], ledger_account_id: acc(co, '1115'), name: 'Head Office Petty Cash', bank_name: null, account_no_masked: null, currency: 'INR', kind: 'petty_cash', is_active: true })
   }
   const addAcc = (co: string, code: string, name: string, type: 'asset' | 'liability', subtype: string, parent: string, counterparty?: string) => {
@@ -228,6 +231,10 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
   for (let m = START; m <= TODAY; m = addMonths(m, 1)) months.push(m)
   const day = (m: string, d: number) => { const x = addDays(m, d - 1); return x > endOfMonth(m) ? endOfMonth(m) : x }
   const ok = (d: string) => d <= TODAY
+  // The day the stock ledger begins. Until then the two trading companies kept their stock in the general ledger only;
+  // from this day goods reach the books through stock documents, and what happened is handed to the inventory sample data.
+  const CUT = addDays(TODAY, -35)
+  const stockEvents: StockEvent[] = []
 
   const expense = async (co: string, date: string, code: string, amount: number, narration: string, o: { dept?: string; project?: string; partyId?: ID; from?: ID } = {}) => {
     if (!ok(date)) return
@@ -309,19 +316,28 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
       if (!ok(d)) continue
       const cust = pick([P.apollo, P.cityDiag, P.kovai])
       const amount = Math.round(between(3800000, 8600000, 50000) * growth)
-      await invoice('GMED', 'sales_invoice', cust, d, [
+      const sold = await invoice('GMED', 'sales_invoice', cust, d, [
         { account: '4170', amount, tax: 'GST12', desc: 'Diagnostic imaging equipment', dims: dim('GMED', 'department', 'SAL') },
         { account: '4120', amount: Math.round(amount * 0.03), tax: 'GST18', desc: 'Installation and commissioning', dims: dim('GMED', 'department', 'SVC') },
       ], { dueDays: 45, payAfter: cust === P.kovai ? 110 : days(30, 60) })
-      await post('GMED', d, 'Cost of equipment sold', [dr(acc('GMED', '5010'), Math.round(amount * 0.62)), cr(acc('GMED', '1140'), Math.round(amount * 0.62))], { vtype: 'adjustment', source: 'system' })
+      if (d >= CUT) stockEvents.push({ kind: 'sale', co: 'GMED', date: d, invoice: sold, party: cust, cost: Math.round(amount * 0.62) })
+      else await post('GMED', d, 'Cost of equipment sold', [dr(acc('GMED', '5010'), Math.round(amount * 0.62)), cr(acc('GMED', '1140'), Math.round(amount * 0.62))], { vtype: 'adjustment', source: 'system' })
     }
     if (ok(day(m, 5))) await invoice('GMED', 'sales_invoice', pick([P.apollo, P.cityDiag]), day(m, 5), [{ account: '4180', amount: between(480000, 820000), tax: 'GST18', desc: 'Annual maintenance contract — monthly billing', dims: dim('GMED', 'department', 'SVC') }], { dueDays: 30, payAfter: days(20, 40) })
     if (ok(day(m, 4))) {
       const usd = between(42000, 78000, 500)
       const fx = Number((84.2 + mi * 0.12).toFixed(2))
-      await invoice('GMED', 'purchase_bill', P.shenzhen, day(m, 4), [{ account: '1140', amount: usd, desc: 'Imported equipment — CIF Chennai' }], { reference: 'SZM-' + Math.floor(1e5 + rand() * 9e5), currency: 'USD', fx, payAfter: 45, dueDays: 60 })
-      await expense('GMED', day(m, 9), '5100', Math.round(usd * fx * 0.075), 'Customs duty on import consignment')
-      if (ok(day(m, 9))) await invoice('GMED', 'purchase_bill', P.abcLog, day(m, 9), [{ account: '5030', amount: between(85000, 190000), tax: 'GST18', desc: 'Port clearance and inland freight' }], { reference: 'ABCL/' + Math.floor(1e4 + rand() * 9e4), payAfter: 25 })
+      // with the stock ledger in place the bill clears what the receipt recorded, and duty and freight join the cost of the goods
+      const stocked = day(m, 4) >= CUT
+      const duty = Math.round(usd * fx * 0.075)
+      const bill = await invoice('GMED', 'purchase_bill', P.shenzhen, day(m, 4), [{ account: stocked ? '2125' : '1140', amount: usd, desc: 'Imported equipment — CIF Chennai' }], { reference: 'SZM-' + Math.floor(1e5 + rand() * 9e5), currency: 'USD', fx, payAfter: 45, dueDays: 60 })
+      await expense('GMED', day(m, 9), stocked ? '2127' : '5100', duty, 'Customs duty on import consignment')
+      let freight = 0
+      if (ok(day(m, 9))) {
+        freight = between(85000, 190000)
+        await invoice('GMED', 'purchase_bill', P.abcLog, day(m, 9), [{ account: stocked ? '2127' : '5030', amount: freight, tax: 'GST18', desc: 'Port clearance and inland freight' }], { reference: 'ABCL/' + Math.floor(1e4 + rand() * 9e4), payAfter: 25 })
+      }
+      if (stocked) stockEvents.push({ kind: 'purchase', co: 'GMED', date: day(m, 4), bill, party: P.shenzhen, charges: ok(day(m, 9)) ? { date: day(m, 9), duty, freight, carrier: P.abcLog } : undefined })
     }
     await expense('GMED', day(m, 28), '6110', 1240370 + mi * 10000, 'Salaries for the month', { dept: 'ADM' })
     await expense('GMED', day(m, 3), '6210', 142370, 'Office and warehouse rent', { dept: 'ADM' })
@@ -333,10 +349,15 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
       const d = day(m, dd)
       if (!ok(d)) continue
       const amount = Math.round(between(980000, 1860000, 10000) * growth)
-      await invoice('GWELL', 'sales_invoice', cust, d, [{ account: '4110', amount, tax: 'GST12', desc: 'Wellness products — monthly supply', dims: dim('GWELL', 'department', 'SAL') }], { dueDays: 30, payAfter: days(22, 45) })
-      await post('GWELL', d, 'Cost of goods sold', [dr(acc('GWELL', '5010'), Math.round(amount * 0.58)), cr(acc('GWELL', '1140'), Math.round(amount * 0.58))], { vtype: 'adjustment', source: 'system' })
+      const sold = await invoice('GWELL', 'sales_invoice', cust, d, [{ account: '4110', amount, tax: 'GST12', desc: 'Wellness products — monthly supply', dims: dim('GWELL', 'department', 'SAL') }], { dueDays: 30, payAfter: days(22, 45) })
+      if (d >= CUT) stockEvents.push({ kind: 'sale', co: 'GWELL', date: d, invoice: sold, party: cust, cost: Math.round(amount * 0.58) })
+      else await post('GWELL', d, 'Cost of goods sold', [dr(acc('GWELL', '5010'), Math.round(amount * 0.58)), cr(acc('GWELL', '1140'), Math.round(amount * 0.58))], { vtype: 'adjustment', source: 'system' })
     }
-    if (ok(day(m, 3))) await invoice('GWELL', 'purchase_bill', P.herbals, day(m, 3), [{ account: '1140', amount: Math.round(between(1500000, 2350000, 10000) * growth), tax: 'GST12', desc: 'Herbal formulations — batch purchase' }], { reference: 'HHS/' + Math.floor(1e4 + rand() * 9e4), payAfter: 30 })
+    if (ok(day(m, 3))) {
+      const stocked = day(m, 3) >= CUT
+      const bill = await invoice('GWELL', 'purchase_bill', P.herbals, day(m, 3), [{ account: stocked ? '2125' : '1140', amount: Math.round(between(1500000, 2350000, 10000) * growth), tax: 'GST12', desc: 'Herbal formulations — batch purchase' }], { reference: 'HHS/' + Math.floor(1e4 + rand() * 9e4), payAfter: 30 })
+      if (stocked) stockEvents.push({ kind: 'purchase', co: 'GWELL', date: day(m, 3), bill, party: P.herbals })
+    }
     if (ok(day(m, 12))) await invoice('GWELL', 'purchase_bill', P.pack, day(m, 12), [{ account: '5020', amount: between(120000, 260000), tax: 'GST18', desc: 'Packaging material' }], { reference: 'PRP/' + Math.floor(1e3 + rand() * 9e3), payAfter: 30 })
     await expense('GWELL', day(m, 28), '6110', 640370 + mi * 6000, 'Salaries for the month', { dept: 'ADM' })
     await expense('GWELL', day(m, 3), '6210', 78370, 'Store rent', { dept: 'ADM' })
@@ -370,7 +391,6 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
   await pending('JB', 'Accrual — electricity for the month (bill awaited)', [dr(acc('JB', '6220'), 46200, { dims: dim('JB', 'department', 'ADM') }), cr(acc('JB', '2120'), 46200)])
   await pending('GCON', 'Mobilisation advance to labour contractor', [dr(acc('GCON', '1156'), 1850000, { party_id: P.labour }), cr(bank('GCON'), 1850000)])
   await pending('GMED', 'Warranty provision for equipment sold this quarter', [dr(acc('GMED', '5020'), 384000), cr(acc('GMED', '2196'), 384000)])
-  await pending('GWELL', 'Write-off of expired stock — batch HW-2291', [dr(acc('GWELL', '7315'), 92400), cr(acc('GWELL', '1140'), 92400)])
   await pending('JB', 'Prepaid insurance — annual premium (draft)', [dr(acc('JB', '1170'), 318000), cr(bank('JB'), 318000)], false)
 
   // ---------------------------------------------------------------- bank statement (Jamin Bazaar · HDFC)
@@ -415,6 +435,7 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
       const monthly = Math.round(((v / months.length) * (0.88 + rand() * 0.3)) / 1000) * 1000
       return Array.from({ length: 12 }, (_, i) => ({ account_id, period_month: addMonths(fyFrom, i), amount: String(monthly) }))
     })
+    if (!lines.length) continue
     const bid = await as(CHECKER, budgetDate, () => e.saveBudget({ company_id: C[co], name: 'Operating budget', fy, kind: 'opex', limit_mode: 'soft', lines }))
     await as(OWNER, budgetDate, () => e.setBudgetStatus(bid, 'approved'))
   }
@@ -438,7 +459,11 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
   )
 
   // ---------------------------------------------------------------- operations: assets, payroll, advances, purchasing, treasury, registers
-  await seedDemoOps({ e, C, P, START, TODAY, MAKER, CHECKER, OWNER, payrollMonth, rand, as, acc, bank, dim, party, tax })
+  const ctx = { e, C, P, START, TODAY, MAKER, CHECKER, OWNER, payrollMonth, rand, as, acc, bank, dim, party, tax }
+  await seedDemoOps(ctx)
+
+  // ---------------------------------------------------------------- stock, investments and funds, reality and control, the platform
+  await seedDemoP3(ctx, stockEvents, CUT)
 
   // ---------------------------------------------------------------- sentinel run + period close state
   for (const co of Object.keys(C)) await as(OWNER, TODAY, () => e.runSentinel(C[co]))
@@ -450,6 +475,7 @@ export async function seedDemo(e: DemoEngine): Promise<void> {
       else if (m === lockBefore) await as(CHECKER, TODAY, () => e.setPeriodStatus(C[co], m, 'soft_closed', 'Provisional close — pending final review'))
     }
   }
+  await finishDemoP3(ctx)
   e.actor = OWNER
   e.clock = null
 }

@@ -87,6 +87,31 @@ Rules specific to these answers:
 * **Periods a person says.** Today, yesterday, this week and last week are understood, as well as months, quarters and years.
 * **A question about why a figure changed** ("why did salary expense increase?") is answered by the comparison engine, not by these.
 
+### Stock, investments, reality, simulations, the platform (Phase 3) — `src/numi/p3.ts`
+
+| Question | Answer comes from | Label |
+|---|---|---|
+| What is the value of our stock? | the stock ledger; compared with the books where the person may read the ledger | ACTUAL. A difference between the stock ledger and the books is shown |
+| How many of *a named item* are in stock? | the item and the stock ledger | ACTUAL; what is reserved by documents awaiting approval is said |
+| How much stock is at risk? What is expiring? | lots, conditions noted on stock, last movement | **EXPOSURE**, an estimate. States that it is not a loss |
+| Which items need to be reordered? | reorder levels recorded on the items | SUGGESTION. A person places the order |
+| What are our investments worth? | holdings: cost, carrying amount, last approved valuation | ACTUAL; a valuation of a holding carried at cost is beside the books |
+| How are our funds doing? | commitments, calls, contributions, distributions, approved net asset value | ACTUAL; net asset value is "an accounting figure, not a regulatory valuation" |
+| Do the records agree with each other? | the five realities | FACT. Five separate counts; what was never checked and what could not be read are listed |
+| Which cases are open? Show the confirmations | cases; confirmations | FACT |
+| What if revenue falls by 20%? What if customers pay 30 days later? What if we lose *a customer*? | the digital twin, from the monthly rates of the books | **SIMULATION**, INFERENCE. The actual starting point is marked ACTUAL beside it; every assumption and its formula is listed |
+| What is our burn rate? | month-end cash of complete months | INFERENCE. "An average of what happened, not a forecast" |
+| Show year on year | monthly totals by financial year | ACTUAL; a year that is not complete is said to be incomplete and is not scaled up |
+| Is the system healthy? | system health | FACT; what is not recorded or not connected is not counted as in order |
+| What is waiting for me? | the person's unread notices | FACT |
+
+Rules specific to these answers:
+
+* **A what-if reads its assumptions from the words** — a percentage for revenue, payroll or expenses; days for collections; points for interest rates; a number of people and their monthly cost; a customer named in the books. What it cannot read it does not guess: it says so and points to the Digital Twin.
+* **A simulation writes nothing.** The model runs in memory. The test suite compares the books before and after.
+* **Funds and holdings above the person's clearance** are not shown and are not counted, and NUMI does not say whether they exist.
+* **A transfer of funds is not a question about a fund.**
+
 ## Natural-language transactions
 
 `src/engine/nlp.ts` turns a sentence into a **proposal**:
@@ -105,11 +130,11 @@ NUMI's memory is never the accounting record. The books are the books.
 
 ## Voice
 
-Voice is an input method. It can navigate, change appearance, switch company and period, ask NUMI, and open a draft. It cannot approve, post, reverse, lock or pay. Voice identity is not treated as authentication. Each command is logged with transcript, intent, action and result.
+Voice is an input method. It can navigate, change appearance, switch company and period, ask NUMI, and open a draft. It cannot approve, post, reverse, lock or pay; it cannot issue, transfer or write off stock, declare or pay a distribution, buy or sell an investment, call capital, commit an import, reclassify, allocate, send a message, or switch a capability. Voice identity is not treated as authentication. Each command is logged with transcript, intent, action and result.
 
 ## Not built yet
 
-Reading documents (extraction, OCR) · forecasting by statistical or learned models · scenario simulation · proactive messages (NUMI speaks only when asked) · memory of earlier conversations · any action: NUMI cannot create, approve, release, pay or post.
+Reading documents (extraction, OCR) · forecasting by statistical or learned models · simulations of more than the assumptions listed above (they are built in the Digital Twin) · proactive messages (NUMI speaks only when asked) · memory of earlier conversations · any action: NUMI cannot create, approve, release, pay or post.
 
 
-Language-model reasoning · document reading (OCR) · proactive briefs · memory of decisions, promises and goals · scenario simulation · multi-agent verification · Sarvam speech. All are tracked in the requirement ledger.
+Language-model reasoning · document reading (OCR) · proactive briefs · memory of decisions, promises and goals · multi-agent verification · Sarvam speech. All are tracked in the requirement ledger.

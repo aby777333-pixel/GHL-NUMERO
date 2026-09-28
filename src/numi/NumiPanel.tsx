@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ArrowUpRight, CornerDownLeft, Link2, ShieldCheck, Sparkles, X } from 'lucide-react'
-import { can, useApp, useCurrency, usePeriod, useScopeIds } from '@/store/app'
+import { can, useApp, useCurrency, usePeriod, useScopeIds, capOn } from '@/store/app'
 import { fmtMoney } from '@/lib/money'
 import { cx, Money, Portal, Spinner, Truth } from '@/ui/kit'
 import { askNumi, contextualPrompts, type NumiAnswer } from './engine'
@@ -10,7 +10,9 @@ import { askNumi, contextualPrompts, type NumiAnswer } from './engine'
 interface Turn { id: number; question: string; answer?: NumiAnswer; error?: string }
 
 export function NumiPanel() {
-  const open = useApp((s) => s.numiOpen)
+  useApp((s) => s.flags)
+  // a capability switched off is off wherever it is reached from: a report's "ask NUMI" button included
+  const open = useApp((s) => s.numiOpen) && capOn('numi')
   const seed = useApp((s) => s.numiSeed)
   const close = useApp((s) => s.closeNumi)
   const api = useApp((s) => s.api)

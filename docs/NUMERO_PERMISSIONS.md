@@ -68,6 +68,15 @@ purchase.view   purchase.create   purchase.approve
 expense.view    expense.create    expense.approve
 treasury.view   treasury.manage
 payroll.view    payroll.manage    payroll.approve
+
+# Phase 3
+inventory.view    inventory.manage    inventory.count    inventory.approve
+investment.view   investment.manage   investment.approve
+reality.view      reality.manage
+scenario.view     scenario.manage
+flow.view         flow.manage         flow.configure
+allocation.manage import.manage
+system.health     integration.manage  communication.send
 ```
 
 ### Who holds the Phase 2 permissions by default
@@ -90,6 +99,52 @@ payroll.view    payroll.manage    payroll.approve
 | Employee | — | upload | — | — | create | — | none |
 
 **Salary data is restricted by default.** A Finance Head does not see employees, salaries or payroll runs unless the Owner grants a payroll role. The payroll journal is confidential: it is approved by a person who is cleared to read it (a Group Super Admin, or a person with a Black Vault grant for the confidential level).
+
+### Who holds the Phase 3 permissions by default
+
+Three roles were added: **Store Keeper**, **Investment Manager**, **IT Administrator**.
+
+| Role | Inventory | Investments | Reality | Simulations | Scenario Studio | Allocation, imports | Platform |
+|---|---|---|---|---|---|---|---|
+| Owner, Group CFO | all | all | all | all | all | both | health, integrations, communications |
+| Finance Head | all | all | all | all | all | both | health, communications |
+| Company Director | view, approve | view, approve | view | view, manage | view, manage | — | — |
+| Accountant | view, manage, count | view, manage | view, manage | view | view, manage | both | communications |
+| Junior Accountant | view, count | — | view | — | view, manage | — | — |
+| Auditor | view | view | view, manage | view | view | — | health |
+| Read Only | view | view | view | view | view | — | — |
+| Tax Consultant | view | — | — | — | — | — | — |
+| Department Head, Project Manager | view | — | — | view | view, manage | — | — |
+| Purchase Manager | view, manage, count | — | — | — | view, manage | — | — |
+| Sales Manager | view | — | — | — | view, manage | — | communications |
+| Store Keeper | view, manage, count | — | — | — | view | — | — |
+| Investment Manager | — | view, manage | — | view, manage | view | — | — |
+| IT Administrator | — | — | — | — | — | — | health, integrations |
+| Payroll Officer, Employee | — | — | — | — | view | — | — |
+| HR Head | — | — | — | — | view, manage | — | — |
+
+What these permissions do not grant:
+
+| Control | Rule |
+|---|---|
+| Counting and reviewing stock | The person who counted cannot review the count. A difference is adjusted only with its reason, and the adjustment is an entry that a second person approves. |
+| An accountant and a simulation | An accountant reads simulations and cannot build or save them (`scenario.manage`). |
+| A fund, a holding | Confidential by default. A person without clearance is not shown the record and is not told that it exists. The entries it proposes carry its level, so they are approved by people cleared for it. |
+| A valuation | Recorded by one person, approved by another. For a holding carried at cost it posts nothing. |
+| A driver of the digital twin | Used by a simulation only after a second person approved it. |
+| A workflow for the whole group | Designed by a Group Super Admin. A company's own workflow needs `flow.configure` in that company. |
+| Starting a workflow case | Anyone who reads workflows (`flow.view`) may start a case: an employee raises their own request. The person who started a case completes its own `request` and `evidence` steps; every other step, and cancelling the case, needs `flow.manage`. |
+| Approving inside a workflow case | The person who started the case cannot complete its approval step. Where the group allows an owner override, the override is the Group Super Admin's alone. |
+| A case | Its history is append-only. A change of status needs a note; closing needs a resolution. A case raised from an alert, and an incident, are opened and worked with `sentinel.review`; every other kind with `reality.manage`. The form offers a person the kinds they may open. |
+| A verification sheet | Opened, filled in, completed and cancelled with `reality.manage`. Only an open sheet is cancelled, with a reason; a completed sheet stays as it was found. |
+| A link of the corporate structure | Saved by a person who holds `investment.manage` in the company that owns or in the company that is owned. A link between two outside parties is saved by a Group Super Admin. |
+| Communications | Read with `communication.send` or `party.view`; prepared and marked as sent with `communication.send`. |
+| A notice of an approval that waits | Written for the people who hold the permission to approve, never for the person who asked. A Group Super Admin is told only when the rules of the group class the request as owner action or critical, or when nobody else could approve it. |
+| A reclassification | Bank, cash, party, tax and intercompany ledgers cannot be reclassified. The original entry is never changed. |
+| Capability switches, attention rules | Changed by a Group Super Admin only. |
+| An integration that can move money | High risk. A recorded test in a sandbox is required before production, and only a Group Super Admin makes it active. No secret is ever stored. |
+| A backup record, a saved simulation, a prepared communication | Cannot be changed after it is recorded. |
+| The sandbox | Every person of the sandbox holds every permission, so that every screen can be tried. Maker-checker and periods apply as configured. Nothing done there reaches the books. |
 
 ### What a person who may only create can see
 

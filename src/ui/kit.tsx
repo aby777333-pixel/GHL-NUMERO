@@ -153,9 +153,9 @@ const TRUTH: Record<TruthState, { cls: string; tip: string }> = {
   UNRECONCILED: { cls: 'warn', tip: 'Recorded in the books but not yet matched to independent evidence.' },
   COMMITTED: { cls: 'cyan', tip: 'Not yet paid or received, but contractually committed.' },
   EXPECTED: { cls: 'cyan', tip: 'Expected from recorded documents such as invoices and bills, based on their due dates.' },
-  BUDGET: { cls: 'violet', tip: 'A planned figure from an approved budget. Not an accounting fact.' },
-  FORECAST: { cls: 'violet', tip: 'A projection based on stated assumptions. Not an accounting fact.' },
-  'AI ESTIMATE': { cls: 'violet', tip: 'A model-derived estimate. Review the evidence before relying on it.' },
+  BUDGET: { cls: 'budget', tip: 'A planned figure from an approved budget. Not an accounting fact.' },
+  FORECAST: { cls: 'forecast', tip: 'A projection based on stated assumptions. Not an accounting fact.' },
+  'AI ESTIMATE': { cls: 'estimate', tip: 'A model-derived estimate. Review the evidence before relying on it.' },
   SIMULATION: { cls: 'violet', tip: 'A hypothetical scenario. It does not change or represent the real books.' },
   CONTINGENT: { cls: 'warn', tip: 'A possible obligation that depends on a future event.' },
   DISPUTED: { cls: 'neg', tip: 'The amount is under dispute.' },
@@ -180,6 +180,13 @@ const STATUS_CLS: Record<string, string> = {
   partially_received: 'warn', fully_received: 'cyan', billed: 'pos', confirmed: 'pos', closed: '', ended: '', paused: 'warn',
   classified: 'cyan', linked: 'pos', processed: 'pos', due: 'warn', disposed: '', written_off: 'neg', recorded: '', in_progress: 'cyan', done: 'pos',
   kept: 'pos', partly_kept: 'warn', broken: 'neg', planned: '', notice: 'warn', exited: '',
+  // stock, investments, reality, simulations, the studio and the platform (phase 3)
+  counted: 'cyan', reviewed: 'cyan', released_hold: '', drafted: '', agreed: 'pos', difference: 'warn', explained: 'cyan', no_reply: 'warn',
+  triage: 'warn', investigating: 'warn', substantiated: 'neg', unsubstantiated: '', remediated: 'pos',
+  declared: 'cyan', part_paid: 'warn', entitled: '', payment_proposed: 'warn', part_received: 'warn', forming: '', winding_up: 'warn', wound_up: '',
+  staged: 'warn', committed: 'pos', discarded: '', prepared: 'warn', sent_by_person: 'pos', not_sent: '', configured: 'cyan', testing: 'warn', retired: '',
+  saved: '', archived: '', completed: 'pos', skipped: '', succeeded: 'pos', failed: 'neg', not_checked: '', located: 'pos', transferred: 'cyan', damaged: 'warn', missing: 'neg',
+  ok: 'pos', attention: 'warn', failure: 'neg', not_recorded: '', not_connected: '', transferred_out: '', withdrawn: '',
 }
 export function StatusChip({ status, label }: { status: string; label?: string }) {
   return <span className={cx('chip', STATUS_CLS[status] ?? '')}>{label ?? status.replace(/_/g, ' ')}</span>
@@ -411,7 +418,7 @@ export function Toasts() {
 export function Section({ title, right, children, className }: { title: string; right?: ReactNode; children: ReactNode; className?: string }) {
   return (
     <section className={className}>
-      <div className="mb-2.5 flex items-center justify-between gap-3">
+      <div className="mb-2.5 flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <h2 className="eyebrow m-0">{title}</h2>
         {right}
       </div>

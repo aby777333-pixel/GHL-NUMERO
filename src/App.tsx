@@ -1,7 +1,8 @@
 import { Component, lazy, Suspense, useEffect, type ReactNode } from 'react'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { Lock } from 'lucide-react'
-import { can, useApp } from '@/store/app'
+import { can, capOn, useApp } from '@/store/app'
+import { capability, capabilityOfPath } from '@/engine/features'
 import { Background } from '@/ui/Background'
 import { Shell } from '@/ui/Shell'
 import { CommandPalette } from '@/ui/CommandPalette'
@@ -60,6 +61,31 @@ const Loan360 = lazy(() => import('@/pages/Loan360'))
 const Payroll = lazy(() => import('@/pages/Payroll'))
 const PayrollRun = lazy(() => import('@/pages/PayrollRun'))
 const PeopleCost = lazy(() => import('@/pages/PeopleCost'))
+// inventory, investments, reality, simulations, the studio and the platform (Phase 3)
+const Inventory = lazy(() => import('@/pages/Inventory'))
+const InvItem360 = lazy(() => import('@/pages/InvItem360'))
+const StockDocEditor = lazy(() => import('@/pages/StockDocEditor'))
+const StockCount = lazy(() => import('@/pages/StockCount'))
+const InvUnit360 = lazy(() => import('@/pages/InvUnit360'))
+const Investments = lazy(() => import('@/pages/Investments'))
+const Holding360 = lazy(() => import('@/pages/Holding360'))
+const Fund360 = lazy(() => import('@/pages/Fund360'))
+const Distribution360 = lazy(() => import('@/pages/Distribution360'))
+const Reality = lazy(() => import('@/pages/Reality'))
+const Case360 = lazy(() => import('@/pages/Case360'))
+const Verification360 = lazy(() => import('@/pages/Verification360'))
+const Control = lazy(() => import('@/pages/Control'))
+const Twin = lazy(() => import('@/pages/Twin'))
+const Sandbox = lazy(() => import('@/pages/Sandbox'))
+const Studio = lazy(() => import('@/pages/Studio'))
+const FlowDesigner = lazy(() => import('@/pages/FlowDesigner'))
+const FlowCase360 = lazy(() => import('@/pages/FlowCase360'))
+const Notifications = lazy(() => import('@/pages/Notifications'))
+const Communications = lazy(() => import('@/pages/Communications'))
+const SystemHealth = lazy(() => import('@/pages/SystemHealth'))
+const Imports = lazy(() => import('@/pages/Imports'))
+const Analysis = lazy(() => import('@/pages/Analysis'))
+const Features = lazy(() => import('@/pages/Features'))
 
 class Boundary extends Component<{ children: ReactNode }, { error: string | null }> {
   state = { error: null as string | null }
@@ -75,12 +101,40 @@ class Boundary extends Component<{ children: ReactNode }, { error: string | null
  * and an empty screen would read as "there are none" — so the screen says what is true instead.
  * The permissions named on each route are the ones the database accepts for reading that data; a person who may
  * only create (an employee entering a claim) reaches the screen and sees the records they entered themselves.
+ *
+ * `cap` names the capability a Group Super Admin can switch off (System Health, Capabilities). A capability that is
+ * switched off is said to be switched off: its records are still there, and nobody's permission has changed.
  */
-function Need({ perm, what, children }: { perm: string | string[]; what: string; children: ReactNode }) {
+/** Every screen honours its switch, whether it is reached from the menu, by its address, by a command or by voice. */
+function CapGate({ children }: { children: ReactNode }) {
+  useApp((s) => s.flags)
+  useApp((s) => s.scope)
+  const { pathname } = useLocation()
+  const admin = useApp((s) => !!s.session?.isGroupAdmin)
+  const key = capabilityOfPath(pathname)
+  // System Health holds the switches: a Group Super Admin can always reach it to switch a capability back on
+  if (key === 'system' && admin) return <>{children}</>
+  if (key && !capOn(key)) return <Need what={capability(key)?.label ?? 'This screen'} cap={key}>{children}</Need>
+  return <>{children}</>
+}
+
+function Need({ perm, what, cap, children }: { perm?: string | string[]; what: string; cap?: string; children: ReactNode }) {
   useApp((s) => s.session)
   useApp((s) => s.scope)
-  const perms = Array.isArray(perm) ? perm : [perm]
-  if (perms.some((p) => can(p))) return <>{children}</>
+  useApp((s) => s.flags)
+  if (cap && !capOn(cap)) {
+    return (
+      <div>
+        <PageHeader eyebrow="Switched off" title={what} />
+        <Panel>
+          <Empty icon={<Lock size={20} />} title={`${capability(cap)?.label ?? what} is switched off`}
+            body="A Group Super Admin has switched this capability off for the group, for the companies selected, or for your role. Its records are kept and are still part of the books. It is switched on again under System Health, Capabilities." />
+        </Panel>
+      </div>
+    )
+  }
+  const perms = perm === undefined ? [] : Array.isArray(perm) ? perm : [perm]
+  if (!perms.length || perms.some((p) => can(p))) return <>{children}</>
   return (
     <div>
       <PageHeader eyebrow="Restricted" title={what} />
@@ -131,6 +185,7 @@ export default function App() {
     <Shell>
       <Boundary>
         <Suspense fallback={<Loading rows={7} />}>
+          <CapGate>
           <Routes>
             <Route path="/" element={uiMode === 'accounting' ? <Navigate to="/journals" replace /> : <Home />} />
             <Route path="/home" element={<Home />} />
@@ -180,6 +235,34 @@ export default function App() {
             <Route path="/payroll/runs/:id" element={<Need perm="payroll.view" what="Payroll"><PayrollRun /></Need>} />
             <Route path="/payroll/people-cost" element={<Need perm="payroll.view" what="People cost"><PeopleCost /></Need>} />
             <Route path="/people-cost" element={<Need perm="payroll.view" what="People cost"><PeopleCost /></Need>} />
+            <Route path="/inventory" element={<Need perm="inventory.view" what="Inventory" cap="inventory"><Inventory /></Need>} />
+            <Route path="/inventory/items/:id" element={<Need perm="inventory.view" what="Inventory" cap="inventory"><InvItem360 /></Need>} />
+            <Route path="/inventory/docs/new" element={<Need perm="inventory.view" what="Inventory" cap="inventory"><StockDocEditor /></Need>} />
+            <Route path="/inventory/docs/:id" element={<Need perm="inventory.view" what="Inventory" cap="inventory"><StockDocEditor /></Need>} />
+            <Route path="/inventory/counts/:id" element={<Need perm="inventory.view" what="Inventory" cap="inventory"><StockCount /></Need>} />
+            <Route path="/inventory/units/:id" element={<Need perm="inventory.view" what="Inventory" cap="inventory"><InvUnit360 /></Need>} />
+            <Route path="/investments" element={<Need perm="investment.view" what="Investments and funds" cap="investments"><Investments /></Need>} />
+            <Route path="/investments/holdings/:id" element={<Need perm="investment.view" what="Investments and funds" cap="investments"><Holding360 /></Need>} />
+            <Route path="/investments/funds/:id" element={<Need perm="investment.view" what="Investments and funds" cap="investments"><Fund360 /></Need>} />
+            <Route path="/investments/calls/:id" element={<Need perm="investment.view" what="Investments and funds" cap="investments"><Fund360 /></Need>} />
+            <Route path="/investments/distributions/:id" element={<Need perm="investment.view" what="Investments and funds" cap="investments"><Distribution360 /></Need>} />
+            <Route path="/reality" element={<Need perm="reality.view" what="Reality" cap="reality"><Reality /></Need>} />
+            <Route path="/reality/cases/:id" element={<Need perm="reality.view" what="Reality" cap="reality"><Case360 /></Need>} />
+            <Route path="/reality/verifications/:id" element={<Need perm="reality.view" what="Reality" cap="reality"><Verification360 /></Need>} />
+            <Route path="/control" element={<Need perm={['allocation.manage', 'journal.view', 'reality.view']} what="Allocations and reclassification" cap="control"><Control /></Need>} />
+            <Route path="/twin" element={<Need perm="scenario.view" what="The digital twin" cap="twin"><Twin /></Need>} />
+            <Route path="/sandbox" element={<Need perm="scenario.manage" what="The sandbox" cap="sandbox"><Sandbox /></Need>} />
+            <Route path="/studio" element={<Need perm="flow.view" what="The scenario studio" cap="studio"><Studio /></Need>} />
+            <Route path="/studio/flows/new" element={<Need perm="flow.configure" what="The scenario studio" cap="studio"><FlowDesigner /></Need>} />
+            <Route path="/studio/flows/:id" element={<Need perm="flow.view" what="The scenario studio" cap="studio"><FlowDesigner /></Need>} />
+            <Route path="/studio/cases/:id" element={<Need perm="flow.view" what="The scenario studio" cap="studio"><FlowCase360 /></Need>} />
+            <Route path="/notifications" element={<Need what="Notifications" cap="notifications"><Notifications /></Need>} />
+            <Route path="/communications" element={<Need perm={['communication.send', 'party.view']} what="Communications" cap="communications"><Communications /></Need>} />
+            <Route path="/system" element={<Need perm={['system.health', 'integration.manage']} what="System health" cap="system"><SystemHealth /></Need>} />
+            <Route path="/imports" element={<Need perm="import.manage" what="Imports and the parallel run" cap="imports"><Imports /></Need>} />
+            <Route path="/imports/:id" element={<Need perm="import.manage" what="Imports and the parallel run" cap="imports"><Imports /></Need>} />
+            <Route path="/analysis" element={<Need perm={['report.view', 'register.view', 'sentinel.view']} what="Analysis" cap="analysis"><Analysis /></Need>} />
+            <Route path="/features" element={<Features />} />
             <Route path="/approvals" element={<Approvals />} />
             <Route path="/sentinel" element={<Sentinel />} />
             <Route path="/audit" element={<Audit />} />
@@ -192,6 +275,7 @@ export default function App() {
             <Route path="/settings" element={<Settings />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </CapGate>
         </Suspense>
       </Boundary>
       <NumiPanel />

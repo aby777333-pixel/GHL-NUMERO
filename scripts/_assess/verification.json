@@ -1,0 +1,11 @@
+{
+  "LAST_MIGRATION": "p3_27",
+  "DB": 289,
+  "DB_CLEAN": "0 groups, 0 companies, 0 journals, 0 users, 0 alerts, 0 follow-ups, 0 documents, 0 notices, 0 stock movements; 1 audit row, written when migration p3_15 added a register kind; owner email setting intact",
+  "TABLES": 128,
+  "POLICIES": 154,
+  "ADVISOR": "no warnings; 5 informational notes for internal tables that intentionally have no client policy",
+  "APP": 461,
+  "APP_FILES": 8,
+  "BUILD": "succeeds; neither the specification nor the requirement ledger is in the output; no secret key; the sample-data engine and the sandbox are separate files, loaded only when used"
+}

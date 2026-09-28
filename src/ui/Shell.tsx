@@ -2,66 +2,84 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  Activity, ArrowLeftRight, BadgeCheck, Banknote, BookOpen, BookText, Boxes, Building2, Calculator, CalendarClock, ChevronDown, ChevronsLeft, ClipboardList, Coins, Compass, Eye, EyeOff,
-  FileBarChart2, FileInput, FileOutput, FolderKanban, Gauge, HandCoins, History, Inbox, Landmark, LayoutDashboard, ListChecks, ListTree, Lock, LogOut, Moon, Network, PenLine, PiggyBank, Radar, Receipt,
-  ScrollText, Search, Settings, ShieldAlert, ShoppingCart, Sparkles, Sun, Users, UsersRound, Vault, Wallet, Wand2, X,
+  Activity, ArrowLeftRight, BadgeCheck, Banknote, BarChart3, Bell, BookOpen, BookText, Boxes, Building2, Calculator, CalendarClock, ChevronDown, ChevronsLeft, ClipboardList, Coins, Compass, Eye, EyeOff,
+  FileBarChart2, FileInput, FileOutput, FileUp, FlaskConical, FolderKanban, Gauge, HandCoins, HeartPulse, History, Inbox, Landmark, LayoutDashboard, LayoutList, ListChecks, ListTree, Lock, LogOut, Mail, Moon, Network,
+  Orbit, Package, PenLine, PiggyBank, Radar, Receipt, ScanSearch, ScrollText, Search, Settings, ShieldAlert, ShoppingCart, Sparkles, Split, Sun, TrendingUp, Users, UsersRound, Vault, Wallet, Wand2, Workflow, X,
 } from 'lucide-react'
-import { can, useApp, usePeriod, useScopeIds } from '@/store/app'
+import { can, capOn, useApp, usePeriod, useScopeIds } from '@/store/app'
+import { SANDBOX_PEOPLE } from '@/lib/sandboxPeople'
+import type { Notification } from '@/engine/p3Types'
 import { useAsync } from '@/hooks/useAsync'
 import { fmtDate, today, type PeriodKey } from '@/lib/dates'
 import { cx, KeyHint, Logo, Wordmark } from './kit'
 import { VoiceOrb } from '@/voice/VoiceControl'
 
 // `perm`: the entry is shown only to people who hold that permission in a company they can see.
-interface Item { to: string; label: string; icon: ReactNode; badge?: 'approvals' | 'alerts' | 'tasks'; end?: boolean; perm?: string | string[] }
+// `cap`: the capability a Group Super Admin can switch off for the group, a company or a role (System Health → Capabilities).
+interface Item { to: string; label: string; icon: ReactNode; badge?: 'approvals' | 'alerts' | 'tasks' | 'notices'; end?: boolean; perm?: string | string[]; cap?: string }
 const NAV: { group: string; items: Item[] }[] = [
   { group: 'Command', items: [
     { to: '/', label: 'Command Centre', icon: <LayoutDashboard size={16} />, end: true },
-    { to: '/cockpit', label: 'Cockpit', icon: <Gauge size={16} /> },
-    { to: '/money-map', label: 'Money Map', icon: <Network size={16} /> },
-    { to: '/forward', label: 'Forward', icon: <Compass size={16} /> },
-    { to: '/registers', label: 'Registers', icon: <FolderKanban size={16} />, perm: 'register.view' },
+    { to: '/cockpit', label: 'Cockpit', icon: <Gauge size={16} />, cap: 'cockpit' },
+    { to: '/money-map', label: 'Money Map', icon: <Network size={16} />, cap: 'money_map' },
+    { to: '/forward', label: 'Forward', icon: <Compass size={16} />, cap: 'forward' },
+    { to: '/analysis', label: 'Analysis', icon: <BarChart3 size={16} />, perm: ['report.view', 'register.view', 'sentinel.view'], cap: 'analysis' },
+    { to: '/registers', label: 'Registers', icon: <FolderKanban size={16} />, perm: 'register.view', cap: 'registers' },
   ] },
   { group: 'Transact', items: [
-    { to: '/entry', label: 'Transaction Centre', icon: <Wand2 size={16} /> },
+    { to: '/entry', label: 'Transaction Centre', icon: <Wand2 size={16} />, cap: 'entry' },
     { to: '/journals', label: 'Journals', icon: <PenLine size={16} /> },
-    { to: '/invoices', label: 'Sales & Billing', icon: <FileOutput size={16} /> },
-    { to: '/bills', label: 'Purchase Bills', icon: <FileInput size={16} /> },
-    { to: '/payments', label: 'Payments & Receipts', icon: <Banknote size={16} /> },
-    { to: '/banking', label: 'Banking', icon: <Landmark size={16} /> },
+    { to: '/invoices', label: 'Sales & Billing', icon: <FileOutput size={16} />, cap: 'invoices' },
+    { to: '/bills', label: 'Purchase Bills', icon: <FileInput size={16} />, cap: 'bills' },
+    { to: '/payments', label: 'Payments & Receipts', icon: <Banknote size={16} />, cap: 'payments' },
+    { to: '/banking', label: 'Banking', icon: <Landmark size={16} />, cap: 'banking' },
   ] },
   { group: 'Operate', items: [
-    { to: '/expenses', label: 'Expenses & Advances', icon: <HandCoins size={16} />, perm: ['expense.view', 'expense.approve', 'expense.create'] },
-    { to: '/purchasing', label: 'Purchasing', icon: <ShoppingCart size={16} />, perm: ['purchase.view', 'purchase.create'] },
-    { to: '/cash', label: 'Cash & Transfers', icon: <ArrowLeftRight size={16} />, perm: ['treasury.view', 'expense.approve'] },
-    { to: '/treasury', label: 'Treasury', icon: <PiggyBank size={16} />, perm: 'treasury.view' },
-    { to: '/assets', label: 'Fixed Assets', icon: <Boxes size={16} />, perm: 'asset.view' },
-    { to: '/payroll', label: 'Payroll', icon: <Coins size={16} />, perm: 'payroll.view' },
-    { to: '/people-cost', label: 'People Cost', icon: <UsersRound size={16} />, perm: 'payroll.view' },
+    { to: '/expenses', label: 'Expenses & Advances', icon: <HandCoins size={16} />, perm: ['expense.view', 'expense.approve', 'expense.create'], cap: 'expenses' },
+    { to: '/purchasing', label: 'Purchasing', icon: <ShoppingCart size={16} />, perm: ['purchase.view', 'purchase.create'], cap: 'purchasing' },
+    { to: '/inventory', label: 'Inventory', icon: <Package size={16} />, perm: 'inventory.view', cap: 'inventory' },
+    { to: '/cash', label: 'Cash & Transfers', icon: <ArrowLeftRight size={16} />, perm: ['treasury.view', 'expense.approve'], cap: 'cash' },
+    { to: '/treasury', label: 'Treasury', icon: <PiggyBank size={16} />, perm: 'treasury.view', cap: 'treasury' },
+    { to: '/investments', label: 'Investments & Funds', icon: <TrendingUp size={16} />, perm: 'investment.view', cap: 'investments' },
+    { to: '/assets', label: 'Fixed Assets', icon: <Boxes size={16} />, perm: 'asset.view', cap: 'assets' },
+    { to: '/payroll', label: 'Payroll', icon: <Coins size={16} />, perm: 'payroll.view', cap: 'payroll' },
+    { to: '/people-cost', label: 'People Cost', icon: <UsersRound size={16} />, perm: 'payroll.view', cap: 'people_cost' },
   ] },
   { group: 'Books', items: [
     { to: '/ledger', label: 'General Ledger', icon: <BookText size={16} /> },
     { to: '/accounts', label: 'Chart of Accounts', icon: <ListTree size={16} /> },
-    { to: '/reports', label: 'Reports', icon: <FileBarChart2 size={16} /> },
-    { to: '/budgets', label: 'Budgets', icon: <Wallet size={16} /> },
-    { to: '/close', label: 'Period Close', icon: <Lock size={16} /> },
+    { to: '/reports', label: 'Reports', icon: <FileBarChart2 size={16} />, cap: 'reports' },
+    { to: '/budgets', label: 'Budgets', icon: <Wallet size={16} />, cap: 'budgets' },
+    { to: '/control', label: 'Allocations & Reclass', icon: <Split size={16} />, perm: ['allocation.manage', 'journal.view'], cap: 'control' },
+    { to: '/imports', label: 'Imports & Parallel Run', icon: <FileUp size={16} />, perm: 'import.manage', cap: 'imports' },
+    { to: '/close', label: 'Period Close', icon: <Lock size={16} />, cap: 'close' },
   ] },
   { group: 'People', items: [
     { to: '/parties', label: 'People & Parties', icon: <Users size={16} /> },
+    { to: '/communications', label: 'Communications', icon: <Mail size={16} />, perm: ['communication.send', 'party.view'], cap: 'communications' },
   ] },
   { group: 'Control', items: [
     { to: '/approvals', label: 'Approvals', icon: <BadgeCheck size={16} />, badge: 'approvals' },
-    { to: '/tasks', label: 'Follow-ups', icon: <ListChecks size={16} />, badge: 'tasks' },
-    { to: '/inbox', label: 'Document Inbox', icon: <Inbox size={16} />, perm: ['document.view', 'document.upload'] },
-    { to: '/sentinel', label: 'Sentinel', icon: <Radar size={16} />, badge: 'alerts' },
+    { to: '/notifications', label: 'Notifications', icon: <Bell size={16} />, badge: 'notices', cap: 'notifications' },
+    { to: '/tasks', label: 'Follow-ups', icon: <ListChecks size={16} />, badge: 'tasks', cap: 'tasks' },
+    { to: '/inbox', label: 'Document Inbox', icon: <Inbox size={16} />, perm: ['document.view', 'document.upload'], cap: 'inbox' },
+    { to: '/sentinel', label: 'Sentinel', icon: <Radar size={16} />, badge: 'alerts', cap: 'sentinel' },
+    { to: '/reality', label: 'Reality', icon: <ScanSearch size={16} />, perm: 'reality.view', cap: 'reality' },
     { to: '/audit', label: 'Audit Trail', icon: <ScrollText size={16} /> },
-    { to: '/vault', label: 'Black Vault', icon: <Vault size={16} /> },
+    { to: '/vault', label: 'Black Vault', icon: <Vault size={16} />, cap: 'vault' },
+  ] },
+  { group: 'Simulate', items: [
+    { to: '/twin', label: 'Digital Twin', icon: <Orbit size={16} />, perm: 'scenario.view', cap: 'twin' },
+    { to: '/studio', label: 'Scenario Studio', icon: <Workflow size={16} />, perm: 'flow.view', cap: 'studio' },
+    { to: '/sandbox', label: 'Sandbox', icon: <FlaskConical size={16} />, perm: 'scenario.manage', cap: 'sandbox' },
   ] },
   { group: 'Build', items: [
     { to: '/companies', label: 'Companies', icon: <Building2 size={16} /> },
-    { to: '/genesis', label: 'Genesis Builder', icon: <Activity size={16} /> },
+    { to: '/genesis', label: 'Genesis Builder', icon: <Activity size={16} />, cap: 'genesis' },
     { to: '/team', label: 'Team & Access', icon: <ShieldAlert size={16} /> },
-    { to: '/calculators', label: 'Calculators', icon: <Calculator size={16} /> },
+    { to: '/system', label: 'System Health', icon: <HeartPulse size={16} />, perm: ['system.health', 'integration.manage'], cap: 'system' },
+    { to: '/calculators', label: 'Calculators', icon: <Calculator size={16} />, cap: 'calculators' },
+    { to: '/features', label: 'Capabilities', icon: <LayoutList size={16} /> },
     { to: '/requirements', label: 'Requirement Ledger', icon: <ClipboardList size={16} /> },
     { to: '/settings', label: 'Settings', icon: <Settings size={16} /> },
   ] },
@@ -181,9 +199,79 @@ function PeriodPicker() {
   )
 }
 
+const NOTICE_TO: Record<string, (id: string) => string> = {
+  journal: (id) => '/journals/' + id, advance: (id) => '/expenses/advances/' + id, expense_claim: (id) => '/expenses/claims/' + id, requisition: (id) => '/purchasing/' + id, purchase_order: (id) => '/purchasing/' + id,
+  capital_call: (id) => '/investments/calls/' + id, distribution: (id) => '/investments/distributions/' + id, cases: (id) => '/reality/cases/' + id, register_items: (id) => '/registers/' + id,
+  alerts: () => '/sentinel', tasks: () => '/tasks',
+}
+/** Where a notice leads: to its record where the record has a screen, otherwise to the inbox. */
+export const noticeLink = (n: Pick<Notification, 'entity' | 'entity_id' | 'kind'>) =>
+  (n.entity && n.entity_id && NOTICE_TO[n.entity] ? NOTICE_TO[n.entity](n.entity_id) : n.kind.startsWith('approval') ? '/approvals' : '/notifications')
+
+function NoticeBell({ unread }: { unread: Notification[] }) {
+  const nav = useNavigate()
+  const { open, setOpen, ref } = usePopover()
+  const n = unread.length
+  return (
+    <div className="relative" ref={ref}>
+      <button className="btn icon ghost relative" onClick={() => setOpen(!open)} aria-label={n ? `${n} unread notification${n === 1 ? '' : 's'}` : 'Notifications'} title="Notifications" aria-haspopup="menu" aria-expanded={open}>
+        <Bell size={16} />
+        {n > 0 && <span className="num absolute -right-1 -top-1 grid h-[16px] min-w-[16px] place-items-center rounded-full bg-gold px-[3px] text-[9.5px] font-bold text-[var(--bg)]">{n > 99 ? '99+' : n}</span>}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <Pop align="right" width={360}>
+            <div className="flex items-center justify-between px-2.5 py-1.5">
+              <span className="eyebrow">Waiting for you</span>
+              <span className="text-[11px] text-muted">{n ? `${n} unread` : 'Nothing unread'}</span>
+            </div>
+            <div className="max-h-[340px] overflow-auto">
+              {unread.slice(0, 8).map((x) => (
+                <button key={x.id} className="flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left hover:bg-surface2" onClick={() => { setOpen(false); nav(noticeLink(x)) }}>
+                  <span className={cx('lamp mt-[5px] flex-none', x.class === 'critical' ? 'neg' : x.class === 'owner_action' ? 'gold' : x.class === 'management_action' ? 'warn' : 'cyan')} />
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate text-[12.5px] text-ink">{x.title}</span>
+                    {x.body && <span className="block truncate text-[11.5px] text-muted">{x.body}</span>}
+                  </span>
+                </button>
+              ))}
+              {!n && <div className="px-3 py-5 text-center text-[12.5px] text-muted">Nothing is waiting for you.</div>}
+            </div>
+            <div className="hairline my-1" />
+            <button className="navlink w-full" onClick={() => { setOpen(false); nav('/notifications') }}><Bell size={15} /> Open all notifications</button>
+          </Pop>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+/** Shown for as long as the person works in the sandbox, on every screen. */
+function SandboxBar() {
+  const sandbox = useApp((s) => s.sandbox)
+  const session = useApp((s) => s.session)
+  const leaveSandbox = useApp((s) => s.leaveSandbox)
+  const actAs = useApp((s) => s.sandboxActAs)
+  const nav = useNavigate()
+  if (!sandbox) return null
+  return (
+    <div className="no-print flex flex-none flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b px-4 py-[6px] text-[11.5px] text-cyan" style={{ borderColor: 'color-mix(in srgb, var(--cyan) 35%, transparent)', background: 'color-mix(in srgb, var(--cyan) 11%, transparent)' }}>
+      <span className="flex items-center gap-2"><FlaskConical size={13} /> <span><b className="font-semibold tracking-wide">SANDBOX</b> — a copy held in the memory of this browser. Nothing done here reaches the books. It is discarded when you leave or reload.</span></span>
+      <label className="flex items-center gap-1.5 text-ink2">
+        <span>Acting as</span>
+        <select className="field sm" style={{ width: 210, height: 26 }} value={session?.user.id ?? ''} onChange={(e) => void actAs(e.target.value)} aria-label="The person of the sandbox you act as">
+          {SANDBOX_PEOPLE.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+        </select>
+      </label>
+      <button className="btn sm" onClick={() => { nav('/sandbox'); void leaveSandbox() }}><LogOut size={13} /> Leave the sandbox</button>
+    </div>
+  )
+}
+
 function UserMenu() {
   const session = useApp((s) => s.session)
   const mode = useApp((s) => s.mode)
+  const sandbox = useApp((s) => s.sandbox)
   const leave = useApp((s) => s.leave)
   const nav = useNavigate()
   const { open, setOpen, ref } = usePopover()
@@ -199,7 +287,7 @@ function UserMenu() {
               <div className="truncate text-[12px] text-muted">{session?.user.email}</div>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {session?.isGroupAdmin && <span className="chip gold">Group Super Admin</span>}
-                <span className={cx('chip', mode === 'demo' ? 'gold' : 'pos')}>{mode === 'demo' ? 'Demo universe' : 'Live books'}</span>
+                <span className={cx('chip', sandbox ? 'cyan' : mode === 'demo' ? 'gold' : 'pos')}>{sandbox ? 'Sandbox' : mode === 'demo' ? 'Demo universe' : 'Live books'}</span>
               </div>
             </div>
             <div className="hairline my-1" />
@@ -231,14 +319,24 @@ export function Shell({ children }: { children: ReactNode }) {
   const [mobile, setMobile] = useState(false)
 
   const counts = useAsync(async () => {
-    if (!api || !ids.length) return { approvals: 0, alerts: 0, tasks: 0 }
-    const [a, b, t] = await Promise.all([api.listApprovalRequests(ids), api.listAlerts(ids), api.listTasks({ companyIds: ids }).catch(() => [])])
+    if (!api || !ids.length) return { approvals: 0, alerts: 0, tasks: 0, notices: 0, unread: [] as Notification[] }
+    const [a, b, t, n] = await Promise.all([api.listApprovalRequests(ids), api.listAlerts(ids), api.listTasks({ companyIds: ids }).catch(() => []), api.listNotifications({ unreadOnly: true, limit: 200 }).catch(() => [])])
     return {
       approvals: a.filter((x) => x.status === 'pending').length,
       alerts: b.filter((x) => x.status === 'open' || x.status === 'reviewing').length,
       tasks: t.filter((x) => (x.status === 'open' || x.status === 'in_progress') && !!x.due_date && x.due_date < today()).length,
+      notices: n.length, unread: n,
     }
   }, [api, ids.join(',')])
+
+  // what has fallen due since the person was last here is looked for once, when they arrive
+  const looked = useRef<unknown>(null)
+  const touch = useApp((s) => s.touch)
+  useEffect(() => {
+    if (!api || looked.current === api) return
+    looked.current = api
+    api.refreshNotifications().then((added) => { if (added > 0) touch() }).catch(() => undefined)
+  }, [api, touch])
 
   useEffect(() => { setMobile(false) }, [loc.pathname])
 
@@ -249,13 +347,13 @@ export function Shell({ children }: { children: ReactNode }) {
       const el = e.target as HTMLElement
       const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName) || el.isContentEditable
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); setPalette(true); return }
-      if ((e.ctrlKey || e.metaKey) && e.key === '/') { e.preventDefault(); askNumi(); return }
+      if ((e.ctrlKey || e.metaKey) && e.key === '/') { e.preventDefault(); if (capOn('numi')) askNumi(); return }
       if (typing || e.ctrlKey || e.metaKey || e.altKey) return
       if (e.key === '/') { e.preventDefault(); setPalette(true); return }
       const now = Date.now()
       if (e.key === 'g') { g = now; return }
       if (now - g < 900) {
-        const map: Record<string, string> = { h: '/', j: '/journals', l: '/ledger', r: '/reports', p: '/parties', b: '/banking', a: '/approvals', s: '/sentinel', e: '/entry', c: '/cockpit', i: '/invoices' }
+        const map: Record<string, string> = { h: '/', j: '/journals', l: '/ledger', r: '/reports', p: '/parties', b: '/banking', a: '/approvals', s: '/sentinel', e: '/entry', c: '/cockpit', i: '/invoices', k: '/inventory', t: '/twin', y: '/reality', v: '/investments' }
         if (map[e.key]) { e.preventDefault(); nav(map[e.key]) }
         g = 0
       }
@@ -266,14 +364,16 @@ export function Shell({ children }: { children: ReactNode }) {
   }, [nav, setPalette, askNumi])
 
   const session = useApp((s) => s.session)
+  const flags = useApp((s) => s.flags)
+  const sandbox = useApp((s) => s.sandbox)
   const groups = useMemo(() => {
-    const order = uiMode === 'accounting' ? ['Transact', 'Books', 'Operate', 'People', 'Control', 'Command', 'Build'] : NAV.map((g) => g.group)
+    const order = uiMode === 'accounting' ? ['Transact', 'Books', 'Operate', 'People', 'Control', 'Command', 'Simulate', 'Build'] : NAV.map((g) => g.group)
     return order
       .map((name) => NAV.find((g) => g.group === name)!)
-      .map((g) => ({ ...g, items: g.items.filter((i) => !i.perm || [i.perm].flat().some((p) => can(p))) }))
+      .map((g) => ({ ...g, items: g.items.filter((i) => (!i.perm || [i.perm].flat().some((p) => can(p))) && (!i.cap || capOn(i.cap))) }))
       .filter((g) => g.items.length)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [uiMode, session, ids.join(',')])
+  }, [uiMode, session, flags, ids.join(',')])
 
   const side = (
     <aside className={cx('no-print relative z-20 flex h-full flex-none flex-col border-r border-line bg-[color-mix(in_srgb,var(--bg)_72%,transparent)] backdrop-blur-xl transition-[width] duration-300', collapsed ? 'w-[68px]' : 'w-[244px]')}>
@@ -293,7 +393,7 @@ export function Shell({ children }: { children: ReactNode }) {
                 <NavLink key={i.to} to={i.to} end={i.end} title={collapsed ? i.label : undefined} className={({ isActive }) => cx('navlink', isActive && 'active', collapsed && 'justify-center px-0')}>
                   <span className="relative">{i.icon}{collapsed && n > 0 && <span className="lamp warn pulse absolute -right-1 -top-1" style={{ width: 6, height: 6 }} />}</span>
                   {!collapsed && <span className="flex-1 truncate">{i.label}</span>}
-                  {!collapsed && n > 0 && <span title={i.badge === 'tasks' ? 'Follow-ups past their due date' : undefined} className={cx('num rounded-full px-1.5 text-[10.5px] font-semibold', i.badge === 'approvals' ? 'bg-goldsoft text-gold' : 'bg-warnsoft text-warn')}>{n}</span>}
+                  {!collapsed && n > 0 && <span title={i.badge === 'tasks' ? 'Follow-ups past their due date' : i.badge === 'notices' ? 'Notifications you have not read' : undefined} className={cx('num rounded-full px-1.5 text-[10.5px] font-semibold', i.badge === 'approvals' || i.badge === 'notices' ? 'bg-goldsoft text-gold' : 'bg-warnsoft text-warn')}>{n}</span>}
                 </NavLink>
               )
             })}
@@ -322,7 +422,8 @@ export function Shell({ children }: { children: ReactNode }) {
       </AnimatePresence>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        {mode === 'demo' && (
+        <SandboxBar />
+        {mode === 'demo' && !sandbox && (
           <div className="no-print flex flex-none items-center justify-center gap-2 border-b border-gold/25 bg-goldsoft px-4 py-[5px] text-center text-[11.5px] text-gold">
             <Sparkles size={13} />
             <span><b className="font-semibold tracking-wide">DEMO UNIVERSE</b> — every figure here is sample data held in this browser only. Nothing is saved to your real books.</span>
@@ -364,8 +465,9 @@ export function Shell({ children }: { children: ReactNode }) {
               </motion.span>
             </AnimatePresence>
           </button>
-          <VoiceOrb />
-          <button className="btn primary flex-none" onClick={() => askNumi()} title="Ask NUMI (Ctrl + /)"><Sparkles size={15} /> <span className="hidden sm:inline">Ask NUMI</span></button>
+          <NoticeBell unread={counts.data?.unread ?? []} />
+          {capOn('voice') && <VoiceOrb />}
+          {capOn('numi') && <button className="btn primary flex-none" onClick={() => askNumi()} title="Ask NUMI (Ctrl + /)"><Sparkles size={15} /> <span className="hidden sm:inline">Ask NUMI</span></button>}
           <UserMenu />
         </header>
 

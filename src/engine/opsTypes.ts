@@ -3,6 +3,8 @@
 // journal that passes through the same approval control as any other journal.
 
 import type { Confidentiality, ID, Num } from './types'
+import { P3_ACCOUNT_MAP_KEYS, P3_PERMS } from './p3Types'
+import type { BookingDetail } from './p3Types'
 
 // ------------------------------------------------------------------ permissions
 export const BASE_PERMS = [
@@ -19,7 +21,7 @@ export const OPS_PERMS = [
   'treasury.view', 'treasury.manage',
 ]
 export const PAYROLL_PERMS = ['payroll.view', 'payroll.manage', 'payroll.approve']
-export const ALL_PERMS = [...BASE_PERMS, ...OPS_PERMS, ...PAYROLL_PERMS]
+export const ALL_PERMS = [...BASE_PERMS, ...OPS_PERMS, ...PAYROLL_PERMS, ...P3_PERMS]
 
 /** Ledger roles the operational engines need. Configured per company under Chart of Accounts → Account mapping. */
 export const ACCOUNT_MAP_KEYS: { key: string; label: string; usedBy: string }[] = [
@@ -43,6 +45,7 @@ export const ACCOUNT_MAP_KEYS: { key: string; label: string; usedBy: string }[] 
   { key: 'tds_receivable', label: 'Tax deducted — receivable', usedBy: 'Fixed deposit interest' },
   { key: 'asset_disposal', label: 'Gain or loss on disposal of assets', usedBy: 'Asset disposal' },
   { key: 'asset_impairment', label: 'Impairment loss', usedBy: 'Asset impairment' },
+  ...P3_ACCOUNT_MAP_KEYS,
 ]
 
 // ------------------------------------------------------------------ workflow postings
@@ -485,6 +488,8 @@ export interface ExpenseClaimLine {
   flags: string[]
   approver_note: string | null
   dims: Record<string, ID>
+  /** what is known about a journey or a stay: operator, reference, route, class, and how the amount is made up */
+  detail?: BookingDetail | Record<string, never>
 }
 export interface ExpenseClaimLineInput {
   expense_date: string
@@ -498,6 +503,7 @@ export interface ExpenseClaimLineInput {
   has_receipt?: boolean
   document_id?: ID | null
   dims?: Record<string, ID>
+  detail?: BookingDetail
 }
 export interface ExpenseClaim {
   id: ID

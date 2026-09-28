@@ -93,8 +93,8 @@ Every table below carries `company_id`, has Row Level Security enabled, and has 
 | Table | Purpose |
 |---|---|
 | `workflow_postings` | Ties a proposed journal to the operational record that proposed it: `source`, `source_id`, `payload`, status `pending`, `posted`, `voided`, `reversed`. One pending proposal per source record |
-| `approval_requests`, `approval_actions` | Now serve journals, advances, expense claims, requisitions and purchase orders |
-| `company_account_map` | Which ledger plays which role for the posting engines (20 roles), per company |
+| `approval_requests`, `approval_actions` | Now serve journals, advances, expense claims, requisitions, purchase orders, capital calls and distributions |
+| `company_account_map` | Which ledger plays which role for the posting engines (30 roles: 20 of Phase 2 and 10 of Phase 3 — goods received not invoiced, landed cost clearing, stock lost, stock found, gain or loss on investments, changes in fair value, income from investments, distributions payable, management fees, management fees owed), per company |
 
 ### Registers, follow-ups, documents
 
@@ -158,6 +158,72 @@ Guarantees, credit facilities, letters of credit and covenants are register item
 
 Payroll tables are readable only with `payroll.view`. Payroll rows of the audit trail are hidden from everyone else.
 
+## Inventory, investments, control, simulations, platform (Phase 3)
+
+The rules of Phase 2 hold: every table carries `company_id` (or `group_id` where it belongs to the group), has Row Level Security enabled, and changes only through functions.
+
+### Inventory
+
+| Table | Purpose |
+|---|---|
+| `inv_categories` | Which stock ledger and which cost-of-sales ledger a category of items uses, and how it is valued (weighted average or first in, first out) |
+| `warehouses` | Places where stock is kept: warehouse, store, site, office, in transit, service van |
+| `inv_items` | The item, how it is tracked (none, lot, serial number), reorder level, shelf life, and its running balance: quantity and value on hand, quantity and value reserved by documents awaiting approval |
+| `inv_lots` | A lot or a serial-numbered unit: dates of manufacture and expiry, supplier, import details, landed cost; and for a unit that was sold — to whom, on which invoice, installed where, warranty until |
+| `inv_unit_events` | Service history of a unit: installation, engineer visit, spare part, warranty claim, service contract, relocation |
+| `stock_docs`, `stock_doc_lines` | Receipt, issue, transfer, return in, return out, adjustment, landed cost. Draft → proposed → posted, rejected, reversed or cancelled |
+| `inv_movements` | **The stock ledger.** One row for every quantity that moved, with its value. A receipt is a layer with what remains of it. Rows are never deleted; a movement whose entry was rejected is kept as rejected |
+| `inv_layer_usage` | Which receipts an outgoing quantity was taken from, so that a rejected document gives back exactly what it took |
+| `inv_holds` | Stock noted as damaged, expired, obsolete, held for inspection or missing. It stays in the books at cost until an adjustment is approved |
+| `stock_counts`, `stock_count_lines` | A count of one place: book quantity at the time, quantity counted, reason for each difference; counted by one person, reviewed by another |
+
+### Investments and funds
+
+| Table | Purpose |
+|---|---|
+| `corporate_links` | Who owns what: a company of the group or an outside party owns a company or an outside party, by how much, from when. No company can own its own owner; owners cannot add up to more than the whole |
+| `equity_holders` | Shareholders of a company, by class |
+| `holdings`, `holding_txns` | An investment carried at cost or at fair value; its purchases, sales, income, write-downs and valuations |
+| `funds`, `fund_commitments` | A fund kept in the books of its own company; what each investor committed, was called for, contributed, holds in units, received |
+| `capital_calls`, `capital_call_lines`, `unit_allotments` | A call of a percentage of every commitment; what each investor owes and has paid; units allotted for money received |
+| `fund_distributions`, `distribution_lines` | A dividend of a company or a distribution of a fund: who is entitled to how much, tax deducted, paid or not |
+| `nav_runs` | Net asset value on a date, worked out from posted entries, with its basis. Approved by a second person. An accounting figure, not a regulatory valuation |
+| `fund_fees` | Management fee of a period: basis × rate × days ÷ 365 |
+
+### Reality and control
+
+| Table | Purpose |
+|---|---|
+| `materiality` | The amount above which a difference is material, per company, with its basis |
+| `cases`, `case_events` | A difference being looked into: status, class of attention, owner, linked records. `case_events` is append-only |
+| `verification_runs`, `verification_lines` | Physical verification of assets, stock, cash or documents: what the books say and what was found |
+| `confirmations` | What the other side says a balance is: bank, customer, vendor, loan, deposit, investment, another company of the group. `difference` is a generated column |
+| `reclassifications` | A posted line moved to another ledger by a new entry; the original is unchanged |
+| `allocations` | A shared cost divided between units by a driver, with every recipient's share |
+
+### Simulations and the scenario studio
+
+| Table | Purpose |
+|---|---|
+| `scenarios` | A named set of assumptions, private or shared |
+| `scenario_runs` | The figures a simulation started from and arrived at. `CHECK (label = 'SIMULATION')`. Never updated |
+| `twin_drivers` | An assumption with its basis, proposed by one person and approved by another |
+| `flow_defs` | A way of working, step by step, with versions. Draft → active → retired |
+| `flow_cases`, `flow_case_steps` | One case following a workflow; each step done by whom and when, and the record it points to |
+
+### Platform
+
+| Table | Purpose |
+|---|---|
+| `notifications`, `notification_prefs`, `attention_rules` | What waits for a person, inside the application; which notices a person wants; who attends to what above which amount |
+| `message_templates`, `communications` | Templates with versions; a message prepared for a person to send, whose text cannot be changed afterwards, and the record that it was sent |
+| `integrations` | The register of what is connected or planned: scope, risk, environment, where the secret is kept. Never the secret |
+| `feature_flags` | A capability switched on or off for the group, a company or a role |
+| `backup_checks` | A backup or a restore test, recorded by a person with its evidence. Never changed |
+| `import_batches`, `legacy_balances` | A file staged with its checks, then committed or discarded; the trial balance of an earlier system, kept beside the books |
+| `fact_ledger_monthly`, `fact_refresh` | Monthly totals by ledger and unit for analysis over years. Derived from posted entries; can always be rebuilt |
+| `expense_claim_lines.detail` | The booking behind a travel expense: operator, reference, route, class, and the parts the amount is made of |
+
 ## Functions callable by the application
 
 `bootstrap_group` · `grant_membership` · `create_company` · `create_party` · `add_party_role` · `set_party_status` · `add_party_bank` · `verify_party_bank` · `save_journal_draft` · `submit_journal` · `approve_journal` · `reject_journal` · `cancel_journal` · `post_journal` · `reverse_journal` · `set_period_status` · `save_invoice` · `approve_invoice` · `save_payment` · `approve_payment` · `import_bank_transactions` · `suggest_bank_matches` · `set_bank_match` · `ledger_balances` · `ledger_monthly` · `ledger_lines` · `party_ledger_balances` · `open_journal` · `integrity_check` · `run_sentinel` · `review_alert` · `numi_learn`
@@ -165,6 +231,10 @@ Payroll tables are readable only with `payroll.view`. Payroll rows of the audit 
 Added in Phase 2:
 
 `set_account_map` · `save_register_kind` · `save_register_item` · `save_task` · `register_document` · `classify_document` · `link_document` · `save_custom_values` · `save_asset_category` · `save_asset` · `record_asset_event` · `create_depreciation_run` · `propose_depreciation_run` · `cancel_depreciation_run` · `propose_asset_disposal` · `propose_asset_impairment` · `save_purchase_doc` · `submit_purchase_doc` · `approve_purchase_doc` · `reject_purchase_doc` · `select_quotation` · `cancel_purchase_doc` · `link_bill_to_po` · `save_expense_category` · `save_advance` · `submit_advance` · `approve_advance` · `reject_advance` · `release_advance` · `return_advance` · `flag_advance` · `save_claim` · `submit_claim` · `approve_claim` · `reject_claim` · `cancel_claim` · `pay_claim` · `save_cash_box` · `record_cash_count` · `propose_fund_transfer` · `save_promise` · `save_loan` · `disburse_loan` · `pay_loan_instalment` · `save_fixed_deposit` · `place_fixed_deposit` · `close_fixed_deposit` · `save_employee` · `save_salary_structure` · `decide_salary_structure` · `create_payroll_run` · `propose_payroll_run` · `cancel_payroll_run` · `pay_payroll_run`
+
+Added in Phase 3:
+
+`save_inv_category` · `save_warehouse` · `save_inv_item` · `save_inv_lot` · `record_unit_event` · `stock_on_hand` · `save_stock_doc` · `propose_stock_doc` · `cancel_stock_doc` · `create_stock_count` · `record_stock_count` · `review_stock_count` · `propose_stock_count` · `cancel_stock_count` · `save_inv_hold` · `release_inv_hold` · `save_corporate_link` · `save_equity_holder` · `save_holding` · `propose_holding_txn` · `record_holding_valuation` · `decide_holding_valuation` · `save_fund` · `save_commitment` · `save_capital_call` · `submit_capital_call` · `decide_capital_call` · `propose_capital_receipt` · `save_distribution` · `submit_distribution` · `decide_distribution` · `propose_distribution_payment` · `prepare_nav` · `decide_nav` · `propose_fund_fee` · `set_materiality` · `open_case` · `update_case` · `open_verification` · `record_verification` · `complete_verification` · `cancel_verification` · `save_confirmation` · `update_confirmation` · `propose_reclassification` · `save_allocation` · `propose_allocation` · `save_scenario` · `save_scenario_run` · `save_twin_driver` · `decide_twin_driver` · `save_flow_def` · `set_flow_status` · `clone_flow_def` · `start_flow_case` · `complete_flow_step` · `cancel_flow_case` · `refresh_notifications` · `mark_notifications` · `set_notification_pref` · `save_attention_rule` · `save_message_template` · `prepare_communication` · `mark_communication` · `save_integration` · `set_feature_flag` · `record_backup_check` · `stage_import` · `commit_import` · `discard_import` · `refresh_facts` · `system_health`
 
 Functions that must never be called by a client — `propose_posting`, `wf_dispatch`, every `wf_<source>` handler, `open_request`, `decide_request`, `apply_loan_recovery`, `advance_account`, `item_dims`, `record_scopes`, `follow_ups_follow_record`, `inherit_item_confidentiality` — are listed in `numero_private.internal_functions`; `lock_internals()` removes execute rights on them at the end of every migration. Tests T78, T79 and T148 verify it.
 

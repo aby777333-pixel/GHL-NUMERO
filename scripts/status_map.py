@@ -442,6 +442,33 @@ for part in ("status_phase2_a.py", "status_phase2_b.py", "status_phase2_c.py"):
         assert str(no) not in S, f"{no} is recorded twice"
         S[str(no)] = {"status": status, "evidence": evidence, "notes": notes, "phase": 2}
     PLANNED_NOTES.update({str(k): v for k, v in m.PLANNED.items()})
+
+# ----------------------------------------------------------------- PHASE 3
+# Assessed the same way, in three parts, after the screens were built; re-read after the corrections listed in
+# scripts/_assess/P3_CORRECTIONS.md.
+for part in ("status_phase3_a.py", "status_phase3_b.py", "status_phase3_c.py"):
+    m = _part(part)
+    for status, no, evidence, notes in m.ENTRIES:
+        assert str(no) not in S, f"{no} is recorded twice"
+        S[str(no)] = {"status": status, "evidence": evidence, "notes": notes, "phase": 3}
+    for k, v in m.PLANNED.items():
+        assert str(k) not in S, f"{k} is recorded with a status and as planned"
+        PLANNED_NOTES[str(k)] = v
+
+# Requirements of phases 1 and 2 whose record changed because of what phase 3 built
+# (scripts/_assess/STATUS_BRIEF_P3_UPDATES.md; each part is checked by scripts/check_status_updates.py)
+_reqs = json.loads((ROOT / "docs" / "requirements.json").read_text(encoding="utf8"))
+_phase = {int(r["no"]): r.get("phase") for r in (_reqs["requirements"] if isinstance(_reqs, dict) else _reqs)}
+P3_UPDATED = []
+for part in sorted((ROOT / "scripts").glob("status_phase3_updates_*.py")):
+    m = _part(part.name)
+    for status, no, evidence, notes in m.UPDATES:
+        assert _phase[int(no)] in (1, 2), f"{no} is not a requirement of phase 1 or 2"
+        assert int(no) not in P3_UPDATED, f"{no} is updated twice"
+        S[str(no)] = {"status": status, "evidence": evidence, "notes": notes, "phase": _phase[int(no)]}
+        PLANNED_NOTES.pop(str(no), None)
+        P3_UPDATED.append(int(no))
+(ROOT / "docs" / "requirement-updated-in-phase3.json").write_text(json.dumps(sorted(P3_UPDATED)), encoding="utf8")
 (ROOT / "docs" / "requirement-planned-notes.json").write_text(json.dumps(dict(sorted(PLANNED_NOTES.items(), key=lambda kv: int(kv[0]))), indent=1, ensure_ascii=False), encoding="utf8")
 
 out = ROOT / "docs" / "requirement-status.json"

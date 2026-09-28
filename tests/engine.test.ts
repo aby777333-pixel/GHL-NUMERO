@@ -26,8 +26,8 @@ const reject = async (p: Promise<unknown>, re: RegExp) => {
 }
 
 describe('seeded universe', () => {
-  it('creates five isolated companies with their own charts of accounts', () => {
-    expect(e.companies).toHaveLength(5)
+  it('creates six isolated companies with their own charts of accounts', () => {
+    expect(e.companies).toHaveLength(6)
     for (const c of e.companies) expect(e.accounts.filter((a) => a.company_id === c.id).length).toBeGreaterThan(100)
   })
 

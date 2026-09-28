@@ -2,7 +2,11 @@ import { create } from 'zustand'
 import type { NumeroApi } from '@/api/types'
 import { SupabaseApi, liveConfigured } from '@/api/supabase'
 import type { Account, Company, ID, OrgUnit, Party, SessionInfo } from '@/engine/types'
+import type { FeatureFlag } from '@/engine/p3Types'
+import { capabilityOn } from '@/engine/features'
 import { resolvePeriod, today, type Period, type PeriodKey } from '@/lib/dates'
+import type { SandboxReport } from '@/lib/sandbox'
+import { setExportMark } from '@/lib/data'
 
 export type Theme = 'dark' | 'light'
 export type UiMode = 'command' | 'accounting'
@@ -22,11 +26,17 @@ interface AppState {
   status: Status
   error: string | null
   session: SessionInfo | null
+  /** set while the person works in the sandbox: the real books wait here, untouched, until they leave */
+  sandbox: { real: NumeroApi; scope: ID[]; report: SandboxReport } | null
 
   companies: Company[]
   accounts: Account[]
   parties: Party[]
   orgUnits: OrgUnit[]
+  /** capabilities switched on or off for the group, a company or a role */
+  flags: FeatureFlag[]
+  /** the roles the person holds, company by company, where they can be read */
+  roles: Record<ID, string[]>
 
   /** selected companies; empty = the whole authorised group */
   scope: ID[]
@@ -54,6 +64,9 @@ interface AppState {
   enterDemo(): Promise<void>
   enterLive(): Promise<void>
   leave(): Promise<void>
+  enterSandbox(): Promise<void>
+  leaveSandbox(): Promise<void>
+  sandboxActAs(person: ID): Promise<void>
   refreshSession(): Promise<void>
   refreshMaster(): Promise<void>
   touch(): void
@@ -77,8 +90,8 @@ let toastId = 0
 let unsub: (() => void) | null = null
 
 export const useApp = create<AppState>((set, get) => ({
-  api: null, mode: null, status: 'boot', error: null, session: null,
-  companies: [], accounts: [], parties: [], orgUnits: [],
+  api: null, mode: null, status: 'boot', error: null, session: null, sandbox: null,
+  companies: [], accounts: [], parties: [], orgUnits: [], flags: [], roles: {},
   scope: [], periodKey: (ls.get('period', 'fy') as PeriodKey), custom: { from: today().slice(0, 8) + '01', to: today() },
   asOf: null, knownAt: null,
   theme: ls.get('theme', 'dark') as Theme,
@@ -128,7 +141,37 @@ export const useApp = create<AppState>((set, get) => ({
     try { await api?.signOut() } catch { /* already signed out */ }
     unsub?.(); unsub = null
     ls.set('mode', '')
-    set({ api: null, mode: null, session: null, status: 'signed_out', companies: [], accounts: [], parties: [], orgUnits: [], scope: [], numiOpen: false })
+    setExportMark('')
+    set({ api: null, mode: null, session: null, sandbox: null, status: 'signed_out', companies: [], accounts: [], parties: [], orgUnits: [], scope: [], numiOpen: false })
+  },
+
+  /**
+   * The sandbox: a copy of the configuration and the balances, in the memory of this browser.
+   * The real books are set aside, not changed; every screen then works on the copy.
+   */
+  async enterSandbox() {
+    const { api, session, companies, sandbox, scope } = get()
+    if (!api || !session || sandbox) return
+    const { buildSandbox } = await import('@/lib/sandbox')
+    const built = await buildSandbox(api, session, companies, can)
+    setExportMark('SANDBOX')
+    set({ api: built.engine, sandbox: { real: api, scope, report: built.report }, scope: [], asOf: null, knownAt: null, numiOpen: false })
+    await get().refreshSession()
+  },
+  async leaveSandbox() {
+    const { sandbox } = get()
+    if (!sandbox) return
+    // the copy is dropped with everything that was tried in it
+    setExportMark('')
+    set({ api: sandbox.real, sandbox: null, scope: sandbox.scope, numiOpen: false })
+    await get().refreshSession()
+  },
+  async sandboxActAs(person) {
+    const { api, sandbox } = get()
+    if (!api || !sandbox) return
+    ;(api as unknown as { actor: ID }).actor = person
+    await get().refreshSession()
+    get().touch()
   },
 
   async refreshSession() {
@@ -151,9 +194,16 @@ export const useApp = create<AppState>((set, get) => ({
     if (!api) return
     const companies = await api.listCompanies()
     const ids = companies.map((c) => c.id)
-    const [accounts, parties, orgUnits] = await Promise.all([api.listAccounts(ids), api.listParties(), api.listOrgUnits(ids)])
+    const [accounts, parties, orgUnits, flags, members] = await Promise.all([
+      api.listAccounts(ids), api.listParties(), api.listOrgUnits(ids),
+      // a person who may not read the switches or the team sees every capability their permissions allow
+      api.listFeatureFlags().catch(() => []), api.listMembers().catch(() => []),
+    ])
+    const me = get().session?.user.id
+    const roles: Record<ID, string[]> = {}
+    for (const m of members) if (m.user_id === me) roles[m.company_id] = [...(roles[m.company_id] ?? []), m.role_key]
     const scope = get().scope.filter((id) => ids.includes(id))
-    set({ companies, accounts, parties, orgUnits, scope, version: get().version + 1 })
+    set({ companies, accounts, parties, orgUnits, flags, roles, scope, version: get().version + 1 })
   },
 
   touch: () => set({ version: get().version + 1 }),
@@ -193,7 +243,11 @@ export const useApp = create<AppState>((set, get) => ({
     setTimeout(() => get().dismiss(id), kind === 'error' ? 9000 : 4500)
   },
   dismiss: (id) => set({ toasts: get().toasts.filter((t) => t.id !== id) }),
-  askNumi: (seed) => set({ numiOpen: true, numiSeed: seed ?? null }),
+  askNumi: (seed) => {
+    // a capability switched off is off wherever it is asked from
+    if (!capOn('numi')) { get().toast('info', 'NUMI is switched off', 'A Group Super Admin can switch it on under System Health, Capabilities.'); return }
+    set({ numiOpen: true, numiSeed: seed ?? null })
+  },
   closeNumi: () => set({ numiOpen: false, numiSeed: null }),
   setPalette: (paletteOpen) => set({ paletteOpen }),
 }))
@@ -224,6 +278,11 @@ export const can = (perm: string, companyId?: ID): boolean => {
   if (session.isGroupAdmin) return true
   const ids = companyId ? [companyId] : scope.length ? scope : companies.map((c) => c.id)
   return ids.some((id) => session.permissions[id]?.includes(perm))
+}
+/** Is the capability switched on for this person, in the companies they are looking at? */
+export const capOn = (key: string): boolean => {
+  const { flags, roles, companies, scope } = useApp.getState()
+  return capabilityOn(flags, key, scope.length ? scope : companies.map((c) => c.id), roles)
 }
 export const getApi = (): NumeroApi => {
   const api = useApp.getState().api
