@@ -472,12 +472,11 @@ export function Shell({ children }: { children: ReactNode }) {
         </header>
 
         <main className="relative min-h-0 flex-1 overflow-auto" id="main">
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={loc.pathname} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.22, ease: [0.2, 0.7, 0.2, 1] }}
-              className={cx('mx-auto w-full px-5 py-6', uiMode === 'accounting' ? 'max-w-none' : 'max-w-[1560px]')}>
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          {/* The page enters with a CSS animation. A JavaScript transition that waited for the old page to leave never
+              finished when the new page was still loading, and left the screen empty until a refresh. */}
+          <div key={loc.pathname} className={cx('page-in mx-auto w-full px-5 py-6', uiMode === 'accounting' ? 'max-w-none' : 'max-w-[1560px]')}>
+            {children}
+          </div>
         </main>
       </div>
     </div>

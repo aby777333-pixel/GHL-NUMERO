@@ -4,8 +4,25 @@
     {
       "name": "numero",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["node_modules/vite/bin/vite.js", "--port", "5177", "--strictPort"],
+      "runtimeArgs": [
+        "node_modules/vite/bin/vite.js",
+        "--port",
+        "5177",
+        "--strictPort"
+      ],
       "port": 5177
+    },
+    {
+      "name": "numero-preview",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "node_modules/vite/bin/vite.js",
+        "preview",
+        "--port",
+        "4177",
+        "--strictPort"
+      ],
+      "port": 4177
     }
   ]
 }

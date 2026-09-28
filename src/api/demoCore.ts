@@ -20,12 +20,40 @@ import { ALL_PERMS } from '@/engine/opsTypes'
 // labelled DEMO everywhere in the interface (spec 1516).
 // =====================================================================
 
+let idSource: (() => ID) | null = null
 export const uid = (): ID =>
+  idSource?.() ??
   globalThis.crypto?.randomUUID?.() ??
   'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0
     return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
   })
+
+/**
+ * Runs `build` with ids taken from a sequence fixed by `seed`, then returns to random ids.
+ * The sample data is built the same way every time on the same day, so with the day as the seed each record keeps
+ * its id when the page is reloaded, and a link to it still leads to it. A link from another day finds nothing, rather
+ * than another record. Records a person creates afterwards take random ids as always.
+ */
+export async function withFixedIds<T>(seed: string, build: () => Promise<T>): Promise<T> {
+  let h = 2166136261
+  for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619) }
+  let a = h >>> 0
+  const next = () => {
+    a = (a + 0x6d2b79f5) | 0
+    let t = Math.imul(a ^ (a >>> 15), 1 | a)
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t
+    return (t ^ (t >>> 14)) >>> 0
+  }
+  const hex = (n: number) => n.toString(16).padStart(8, '0')
+  const previous = idSource
+  idSource = () => {
+    const s = hex(next()) + hex(next()) + hex(next()) + hex(next())
+    // shaped as a version-4 UUID, as the database would give
+    return `${s.slice(0, 8)}-${s.slice(8, 12)}-4${s.slice(13, 16)}-${((parseInt(s[16], 16) & 0x3) | 0x8).toString(16)}${s.slice(17, 20)}-${s.slice(20, 32)}`
+  }
+  try { return await build() } finally { idSource = previous }
+}
 
 export interface StoredLine {
   id: ID; journal_id: ID; company_id: ID; line_no: number; account_id: ID; party_id: ID | null

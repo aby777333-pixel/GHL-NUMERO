@@ -3,6 +3,7 @@ import { addDays, addMonths, endOfMonth, fiscalYearOf, parseISO, startOfMonth, t
 import { buildCompanyPayload } from '@/engine/templates'
 import type { ID, JournalLineInput } from '@/engine/types'
 import { DemoEngine } from './demo'
+import { withFixedIds } from './demoCore'
 import { seedDemoOps } from './demoSeedOps'
 import { finishDemoP3, seedDemoP3, type StockEvent } from './demoSeedP3'
 
@@ -485,7 +486,8 @@ let instance: Promise<DemoEngine> | null = null
 export function getDemoEngine(): Promise<DemoEngine> {
   if (!instance) {
     const e = new DemoEngine()
-    instance = seedDemo(e).then(() => e)
+    // the same day builds the same records under the same ids, so a link survives a reload of the page
+    instance = withFixedIds(`numero-demo:${today()}`, () => seedDemo(e)).then(() => e)
   }
   return instance
 }

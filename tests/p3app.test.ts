@@ -566,3 +566,30 @@ describe('a switch governs its screens wherever they are reached from', () => {
     expect(capabilityOfPath('/system')).toBe('system')
   })
 })
+
+describe('a link to a record of the sample data survives a reload of the page', () => {
+  it('the same day builds the same records under the same ids; afterwards ids are random again', async () => {
+    const { getDemoEngine, resetDemoEngine } = await import('../src/api/demoSeed')
+    const { uid } = await import('../src/api/demoCore')
+    const snapshot = (x: DemoEngine) => ({
+      invoices: x.invoices.map((i) => [i.id, i.doc_no, i.total]),
+      journals: x.journals.map((j) => [j.id, j.voucher_no, j.narration]),
+      parties: x.parties.map((p) => [p.id, p.display_name]),
+      stock: x.stockDocs.map((d) => [d.id, d.doc_no]),
+      cases: x.cases.map((c) => [c.id, c.case_no]),
+    })
+    resetDemoEngine()
+    const first = snapshot(await getDemoEngine())
+    resetDemoEngine()
+    const second = await getDemoEngine()
+    expect(snapshot(second)).toEqual(first)
+    expect(first.invoices.length).toBeGreaterThan(50)
+    expect(new Set(first.journals.map((j) => j[0])).size).toBe(first.journals.length)      // no id is given twice
+    expect(first.invoices[0][0]).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/)
+    // what a person creates afterwards is not taken from the sequence
+    const a = uid(), b = uid()
+    expect(a).not.toBe(b)
+    expect(first.journals.some((j) => j[0] === a)).toBe(false)
+    resetDemoEngine()
+  }, 60000)
+})
